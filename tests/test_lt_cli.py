@@ -23,6 +23,8 @@ class LtCliTests(TestCase):
         self.assertIn("list-graphics", result.stdout)
         self.assertIn("tex2uni", result.stdout)
         self.assertIn("uni2tex", result.stdout)
+        self.assertIn("aligned2baea", result.stdout)
+        self.assertIn("baea2aligned", result.stdout)
 
     def test_unknown_command_exits_nonzero(self) -> None:
         result = subprocess.run(

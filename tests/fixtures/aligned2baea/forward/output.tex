@@ -1,0 +1,11 @@
+\documentclass{article}
+\newcommand{\keepaligned}{\begin{aligned}[t]p\end{aligned}}
+\begin{document}
+Inline $ \ba x\ea alpha $
+Nested:
+\[\ba a + \ba b\ea\ea z\]
+Unchanged:
+\begin{aligned}[b]c\end{aligned}
+% \begin{aligned}[t]ignored\end{aligned}
+\end{document}
+Trailing \begin{aligned}[t]q\end{aligned}

@@ -29,6 +29,9 @@ lt-cli list-graphics thesis.tex --unique
 lt-cli tex2uni paper.tex
 lt-cli tex2uni paper.tex --reverse
 lt-cli uni2tex paper.tex
+lt-cli aligned2baea paper.tex
+lt-cli aligned2baea paper.tex --reverse
+lt-cli baea2aligned paper.tex
 ```
 
 ## What the commands do
@@ -57,6 +60,17 @@ through `--reverse`.
 
 Runs the reverse-direction conversion from mapped Unicode math symbols back to
 LaTeX macros.
+
+### `aligned2baea`
+
+Compresses exact `\begin{aligned}[t] ... \end{aligned}` blocks into the local
+`\ba ... \ea` shorthand. With `--reverse`, it expands the shorthand back to
+explicit `aligned` environments.
+
+### `baea2aligned`
+
+Runs the reverse-direction conversion from `\ba` / `\ea` back to explicit
+`aligned` environments.
 
 ## Commands that rewrite `.tex` files
 
@@ -157,14 +171,22 @@ latex-toolkit/
 │   │   ├── tex2uni/
 │   │   │   ├── README.md
 │   │   │   └── main.py
-│   │   └── uni2tex/
+│   │   ├── uni2tex/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   ├── aligned2baea/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   └── baea2aligned/
 │   │       ├── README.md
 │   │       └── main.py
 │   └── lib/
 │       ├── __init__.py
+│       ├── aligned_baea.py
 │       ├── backup.py
 │       ├── core.py
 │       ├── latex.py
+│       ├── latex_parser.py
 │       ├── math_unicode.py
 │       └── symbol_mappings.py
 └── tests/
