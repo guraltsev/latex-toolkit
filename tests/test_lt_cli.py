@@ -21,6 +21,8 @@ class LtCliTests(TestCase):
         self.assertIn("expand-includes", result.stdout)
         self.assertIn("strip-comments", result.stdout)
         self.assertIn("list-graphics", result.stdout)
+        self.assertIn("tex2uni", result.stdout)
+        self.assertIn("uni2tex", result.stdout)
 
     def test_unknown_command_exits_nonzero(self) -> None:
         result = subprocess.run(

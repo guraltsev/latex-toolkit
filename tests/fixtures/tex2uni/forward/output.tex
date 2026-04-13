@@ -1,0 +1,15 @@
+\documentclass{article}
+\newcommand{\alphamacro}{\alpha}
+\begin{document}
+Text \alpha stays as-is.
+Inline $ \alphabeta + α + β $ converts only mapped control words.
+Display:
+\[
+Γ ⊂ Ω
+\]
+\begin{equation}
+∫_0^∞ ϕ
+\end{equation}
+Comment % $\gamma$ and \delta stay untouched here
+\end{document}
+Trailing \delta stays too.

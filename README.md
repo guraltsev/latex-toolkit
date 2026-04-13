@@ -26,6 +26,9 @@ lt-cli strip-comments paper.tex -o paper.clean.tex
 lt-cli expand-includes thesis.tex
 lt-cli expand-includes thesis.tex -o thesis.flat.tex
 lt-cli list-graphics thesis.tex --unique
+lt-cli tex2uni paper.tex
+lt-cli tex2uni paper.tex --reverse
+lt-cli uni2tex paper.tex
 ```
 
 ## What the commands do
@@ -44,6 +47,17 @@ Flattens a document by recursively expanding `\input{...}`, `\include{...}`,
 Lists `\includegraphics{...}` targets, optionally across recursively included
 source files.
 
+### `tex2uni`
+
+Converts a mapped set of LaTeX math macros to Unicode symbols, limited to
+mutable math-mode content. The same command also supports the reverse direction
+through `--reverse`.
+
+### `uni2tex`
+
+Runs the reverse-direction conversion from mapped Unicode math symbols back to
+LaTeX macros.
+
 ## Commands that rewrite `.tex` files
 
 This repository has one explicit policy for commands that overwrite a source
@@ -60,57 +74,18 @@ Those commands must:
 In other words, overwriting is the default write mode for mutating commands.
 When callers want a different destination, they pass `-o`.
 
-Here is a snippet on how to do this
-``` python
-import argparse
-# ...
-from lib.backup import backup_file
-from pathlib import Path
-# ...
+### How the test suite enforces this
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-	# ...
-    )
-    parser.add_argument("input",
-	# ...
-	)
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Write expanded output to this path instead of overwriting the input file.",
-    )
-    parser.add_argument(
-        "-B",
-        "--no-backup",
-        action="store_true",
-        help="Do not create a backup before overwriting the input file.",
-    )
-    parser.add_argument(
-        "--backup-dir",
-        default=".lt-backup",
-        help="Relative or absolute directory for backups when overwriting. Default: %(default)s",
-    )
-    return parser
-	
-# ...
-def main(argv: list[str] | None = None) -> int:
-# ...
-	parser = build_parser()
-    args = parser.parse_args(argv)
-# ...
-    input_path = Path(args.input).expanduser().resolve()
-    output_path = Path(args.output).expanduser().resolve() if args.output else input_path
+The test suite treats every command as a source-overwriting command unless the
+command module explicitly opts out with:
 
-    if output_path == input_path and not args.no_backup:
-        backup_file(input_path, args.backup_dir)
-# ...
-```
-
-This behavior is tested by the test suite. To opt out and declare that you do not modify the input tex file define globally in your module/command
-``` python
+```python
 OVERWRITES_SOURCE_TEX = False
 ```
+
+That declaration is for read-only commands such as `list-graphics`.
+Any command that does not opt out is expected to follow the write-policy rules
+above.
 
 ## Backup behavior
 
@@ -126,7 +101,7 @@ Default behavior:
 
 ## Library core
 
-The shared library includes a core `TexFile` data structure in
+The shared library now includes a core `TexFile` data structure in
 `src/lib/core.py`.
 
 It stores:
@@ -154,6 +129,8 @@ lt-cli expand-includes thesis.tex
 lt-cli expand-includes thesis.tex -o flat.tex
 lt-cli strip-comments draft.tex
 lt-cli list-graphics thesis.tex --with-source
+lt-cli tex2uni draft.tex
+lt-cli uni2tex draft.tex
 ```
 
 ## Project layout
@@ -174,14 +151,22 @@ latex-toolkit/
 │   │   ├── list-graphics/
 │   │   │   ├── README.md
 │   │   │   └── main.py
-│   │   └── strip-comments/
+│   │   ├── strip-comments/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   ├── tex2uni/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   └── uni2tex/
 │   │       ├── README.md
 │   │       └── main.py
 │   └── lib/
 │       ├── __init__.py
 │       ├── backup.py
 │       ├── core.py
-│       └── latex.py
+│       ├── latex.py
+│       ├── math_unicode.py
+│       └── symbol_mappings.py
 └── tests/
     ├── test_backup.py
     ├── test_commands.py
