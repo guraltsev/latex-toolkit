@@ -60,18 +60,57 @@ Those commands must:
 In other words, overwriting is the default write mode for mutating commands.
 When callers want a different destination, they pass `-o`.
 
-### How the test suite enforces this
+Here is a snippet on how to do this
+``` python
+import argparse
+# ...
+from lib.backup import backup_file
+from pathlib import Path
+# ...
 
-The test suite treats every command as a source-overwriting command unless the
-command module explicitly opts out with:
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+	# ...
+    )
+    parser.add_argument("input",
+	# ...
+	)
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Write expanded output to this path instead of overwriting the input file.",
+    )
+    parser.add_argument(
+        "-B",
+        "--no-backup",
+        action="store_true",
+        help="Do not create a backup before overwriting the input file.",
+    )
+    parser.add_argument(
+        "--backup-dir",
+        default=".lt-backup",
+        help="Relative or absolute directory for backups when overwriting. Default: %(default)s",
+    )
+    return parser
+	
+# ...
+def main(argv: list[str] | None = None) -> int:
+# ...
+	parser = build_parser()
+    args = parser.parse_args(argv)
+# ...
+    input_path = Path(args.input).expanduser().resolve()
+    output_path = Path(args.output).expanduser().resolve() if args.output else input_path
 
-```python
-OVERWRITES_SOURCE_TEX = False
+    if output_path == input_path and not args.no_backup:
+        backup_file(input_path, args.backup_dir)
+# ...
 ```
 
-That declaration is for read-only commands such as `list-graphics`.
-Any command that does not opt out is expected to follow the write-policy rules
-above.
+This behavior is tested by the test suite. To opt out and declare that you do not modify the input tex file define globally in your module/command
+``` python
+OVERWRITES_SOURCE_TEX = False
+```
 
 ## Backup behavior
 
@@ -87,7 +126,7 @@ Default behavior:
 
 ## Library core
 
-The shared library now includes a core `TexFile` data structure in
+The shared library includes a core `TexFile` data structure in
 `src/lib/core.py`.
 
 It stores:
