@@ -1,6 +1,6 @@
 # list-graphics
 
-`list-graphics` prints the targets of `\\includegraphics{...}` commands.
+`list-graphics` prints the targets of `\includegraphics{...}` commands.
 
 ## Usage
 
@@ -13,6 +13,6 @@ lt-cli list-graphics thesis.tex --no-recursive
 
 ## Notes
 
-- By default, scans the root file and recursively included `\\input` / `\\include` files.
-- Ignores graphics directives that appear inside `%` comments.
-- This is a read-only command and does not need backup handling.
+- By default, it scans the root file and recursively included `\input`, `\include`, `\subfile`, and `\subfileinclude` sources.
+- Graphics directives inside `%` comments are ignored.
+- This is a read-only command and opts out of the write-policy tests with `OVERWRITES_SOURCE_TEX = False`.

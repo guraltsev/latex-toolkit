@@ -1,20 +1,21 @@
 # strip-comments
 
 `strip-comments` removes LaTeX `%` comments while preserving escaped percent
-signs such as `\\%`.
+signs such as `\%`.
 
 ## Usage
 
 ```bash
 lt-cli strip-comments paper.tex
 lt-cli strip-comments paper.tex -o paper.clean.tex
-lt-cli strip-comments paper.tex --in-place
-lt-cli strip-comments paper.tex --in-place -B
+lt-cli strip-comments paper.tex -B
 ```
 
 ## Notes
 
-- Keeps line endings stable so line numbers stay easier to compare.
-- Ignores escaped percent signs (`\\%`).
-- Not a full TeX lexer; constructs such as verbatim-like package environments are outside this command's scope.
-- When overwriting a file, it creates a UTC backup through `lib.backup.backup_file()` unless `-B/--no-backup` is supplied.
+- By default, the command overwrites the input file.
+- Use `-o/--output` to write the cleaned document to a different path.
+- A UTC backup is created through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- Line endings stay stable so line numbers remain easier to compare.
+- Escaped percent signs (`\%`) are preserved.
+- This is not a full TeX lexer; verbatim-like package environments are outside the command's scope.

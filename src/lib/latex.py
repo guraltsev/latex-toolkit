@@ -6,26 +6,42 @@ They do not attempt to be a complete TeX parser.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 import re
 
-INCLUDE_RE = re.compile(r"\\(?P<kind>input|include)\s*\{(?P<target>[^{}]+)\}")
+from lib.core import TexFile, read_tex_file, write_tex_file
+
+INCLUDE_RE = re.compile(
+    r"\\(?P<kind>input|include|subfile|subfileinclude)\s*\{(?P<target>[^{}]+)\}"
+)
 GRAPHICS_RE = re.compile(r"\\includegraphics(?:\s*\[[^\]]*\])?\s*\{(?P<target>[^{}]+)\}")
-FULL_LINE_INCLUDE_RE = re.compile(r"^\s*\\(?P<kind>input|include)\s*\{(?P<target>[^{}]+)\}\s*$")
+FULL_LINE_INCLUDE_RE = re.compile(
+    r"^\s*\\(?P<kind>input|include|subfile|subfileinclude)\s*\{(?P<target>[^{}]+)\}\s*$"
+)
+BEGIN_DOCUMENT_RE = re.compile(r"\\begin\s*\{document\}")
+END_DOCUMENT_RE = re.compile(r"\\end\s*\{document\}")
+SUBFILE_COMMANDS = {"subfile", "subfileinclude"}
 
 
 class IncludeCycleError(RuntimeError):
     """Raised when include expansion detects a recursive include cycle."""
 
 
+@dataclass(frozen=True, slots=True)
+class IncludeReference:
+    """A lightweight include command reference found in TeX source."""
+
+    kind: str
+    target: str
+
+
 def read_text(path: str | Path) -> str:
-    return Path(path).read_text(encoding="utf-8")
+    return read_tex_file(path).code
 
 
 def write_text(path: str | Path, content: str) -> None:
-    output_path = Path(path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(content, encoding="utf-8")
+    write_tex_file(TexFile(content, None), path)
 
 
 def _line_ending(fragment: str) -> str:
@@ -100,59 +116,136 @@ def resolve_tex_input(base_file: str | Path, target: str) -> Path:
     )
 
 
-def extract_include_targets(text: str) -> list[str]:
-    targets: list[str] = []
+def extract_include_references(text: str) -> list[IncludeReference]:
+    references: list[IncludeReference] = []
     for line in text.splitlines(keepends=True):
         code, _comment = split_comment(line)
         body, _ending = _split_trailing_line_ending(code)
-        targets.extend(match.group("target") for match in INCLUDE_RE.finditer(body))
-    return targets
+        references.extend(
+            IncludeReference(kind=match.group("kind"), target=match.group("target"))
+            for match in INCLUDE_RE.finditer(body)
+        )
+    return references
 
 
-def walk_tex_sources(root_file: str | Path) -> list[Path]:
-    root_path = Path(root_file).expanduser().resolve()
+def extract_include_targets(text: str) -> list[str]:
+    return [reference.target for reference in extract_include_references(text)]
+
+
+def _extract_subfile_body(text: str) -> str | None:
+    r"""Return the included body of a ``subfiles`` child, if recognizable.
+
+    When a subfile is loaded from the main document, the subfiles package ignores
+    the subfile preamble up to ``\begin{document}`` and ignores
+    ``\end{document}`` and everything after it. If no begin marker is found, the
+    caller should fall back to the original text.
+    """
+
+    started = False
+    parts: list[str] = []
+
+    for line in text.splitlines(keepends=True):
+        code, comment = split_comment(line)
+        body, ending = _split_trailing_line_ending(code)
+
+        if not started:
+            begin_match = BEGIN_DOCUMENT_RE.search(body)
+            if begin_match is None:
+                continue
+            started = True
+            remainder = body[begin_match.end() :]
+            if remainder or comment:
+                parts.append(remainder + ending + comment)
+            continue
+
+        end_match = END_DOCUMENT_RE.search(body)
+        if end_match is not None:
+            prefix = body[: end_match.start()]
+            if prefix:
+                parts.append(prefix)
+            return "".join(parts)
+
+        parts.append(body + ending + comment)
+
+    if not started:
+        return None
+    return "".join(parts)
+
+
+def _effective_tex_file(tex_file: TexFile, include_kind: str | None) -> TexFile:
+    if include_kind not in SUBFILE_COMMANDS:
+        return tex_file
+
+    subfile_body = _extract_subfile_body(tex_file.code)
+    if subfile_body is None:
+        return tex_file
+    return TexFile(code=subfile_body, filename=tex_file.filename)
+
+
+def _coerce_to_tex_file(source: str | Path | TexFile) -> TexFile:
+    if isinstance(source, TexFile):
+        return source
+    return read_tex_file(source)
+
+
+def _require_filename(tex_file: TexFile) -> Path:
+    if tex_file.filename is None:
+        raise ValueError("This operation requires a named TeX file.")
+    return tex_file.filename
+
+
+def walk_tex_documents(root_file: str | Path | TexFile) -> list[TexFile]:
+    root_tex = _coerce_to_tex_file(root_file)
     visited: set[Path] = set()
-    ordered: list[Path] = []
+    ordered: list[TexFile] = []
 
-    def visit(current: Path) -> None:
-        resolved = current.resolve()
+    def visit(current: TexFile, include_kind: str | None) -> None:
+        resolved = _require_filename(current).resolve()
         if resolved in visited:
             return
         visited.add(resolved)
-        ordered.append(resolved)
-        content = read_text(resolved)
-        for target in extract_include_targets(content):
-            visit(resolve_tex_input(resolved, target))
 
-    visit(root_path)
+        effective = _effective_tex_file(current, include_kind)
+        ordered.append(effective)
+        for reference in extract_include_references(effective.code):
+            child_path = resolve_tex_input(resolved, reference.target)
+            visit(read_tex_file(child_path), reference.kind)
+
+    visit(root_tex, None)
     return ordered
 
 
-def expand_includes(root_file: str | Path) -> str:
-    root_path = Path(root_file).expanduser().resolve()
+def walk_tex_sources(root_file: str | Path | TexFile) -> list[Path]:
+    return [_require_filename(tex_file).resolve() for tex_file in walk_tex_documents(root_file)]
 
-    def expand_file(current: Path, stack: tuple[Path, ...]) -> str:
-        resolved = current.resolve()
+
+def expand_includes(root_file: str | Path | TexFile) -> TexFile:
+    root_tex = _coerce_to_tex_file(root_file)
+
+    def expand_file(current: TexFile, stack: tuple[Path, ...], include_kind: str | None) -> str:
+        resolved = _require_filename(current).resolve()
         if resolved in stack:
             cycle = " -> ".join(str(path) for path in (*stack, resolved))
             raise IncludeCycleError(f"Include cycle detected: {cycle}")
 
-        content = read_text(resolved)
+        effective = _effective_tex_file(current, include_kind)
         out_parts: list[str] = []
         next_stack = (*stack, resolved)
 
         def replace_match(match: re.Match[str]) -> str:
-            child = resolve_tex_input(resolved, match.group("target"))
-            return expand_file(child, next_stack)
+            child_path = resolve_tex_input(resolved, match.group("target"))
+            child_tex = read_tex_file(child_path)
+            return expand_file(child_tex, next_stack, match.group("kind"))
 
-        for line in content.splitlines(keepends=True):
+        for line in effective.code.splitlines(keepends=True):
             code, comment = split_comment(line)
             body, line_ending = _split_trailing_line_ending(code)
 
             full_line_match = FULL_LINE_INCLUDE_RE.fullmatch(body)
             if full_line_match is not None:
-                child = resolve_tex_input(resolved, full_line_match.group("target"))
-                expanded_child = expand_file(child, next_stack)
+                child_path = resolve_tex_input(resolved, full_line_match.group("target"))
+                child_tex = read_tex_file(child_path)
+                expanded_child = expand_file(child_tex, next_stack, full_line_match.group("kind"))
                 if line_ending and not expanded_child.endswith(("\n", "\r")):
                     expanded_child += line_ending
                 out_parts.append(expanded_child + comment)
@@ -163,7 +256,7 @@ def expand_includes(root_file: str | Path) -> str:
 
         return "".join(out_parts)
 
-    return expand_file(root_path, ())
+    return TexFile.anonymous(expand_file(root_tex, (), None))
 
 
 def extract_graphics_targets(text: str) -> list[str]:

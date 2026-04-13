@@ -5,32 +5,33 @@ from __future__ import annotations
 
 from pathlib import Path
 import argparse
-import sys
 
 from lib.backup import backup_file
-from lib.latex import expand_includes, write_text
+from lib.core import write_tex_file
+from lib.latex import expand_includes
+
+OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="expand-includes",
-        description="Recursively expand \\input{...} and \\include{...} references.",
+        description=(
+            "Recursively expand \\input{...}, \\include{...}, and subfiles commands. "
+            "By default the input file is overwritten; use -o/--output to write elsewhere."
+        ),
     )
     parser.add_argument("input", help="Root .tex file to flatten.")
-
-    destination = parser.add_mutually_exclusive_group()
-    destination.add_argument("-o", "--output", help="Write expanded output to this path.")
-    destination.add_argument(
-        "--in-place",
-        action="store_true",
-        help="Overwrite the input file with the expanded document.",
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Write expanded output to this path instead of overwriting the input file.",
     )
-
     parser.add_argument(
         "-B",
         "--no-backup",
         action="store_true",
-        help="Do not create a backup before overwriting a file.",
+        help="Do not create a backup before overwriting the input file.",
     )
     parser.add_argument(
         "--backup-dir",
@@ -45,22 +46,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     input_path = Path(args.input).expanduser().resolve()
-    flattened = expand_includes(input_path)
+    expanded = expand_includes(input_path)
+    output_path = Path(args.output).expanduser().resolve() if args.output else input_path
 
-    if args.in_place:
-        if not args.no_backup:
-            backup_file(input_path, args.backup_dir)
-        write_text(input_path, flattened)
-        return 0
+    if output_path == input_path and not args.no_backup:
+        backup_file(input_path, args.backup_dir)
 
-    if args.output:
-        output_path = Path(args.output).expanduser().resolve()
-        if output_path == input_path and not args.no_backup:
-            backup_file(input_path, args.backup_dir)
-        write_text(output_path, flattened)
-        return 0
-
-    sys.stdout.write(flattened)
+    write_tex_file(expanded, output_path)
     return 0
 
 

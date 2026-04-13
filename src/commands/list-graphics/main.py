@@ -7,7 +7,10 @@ from pathlib import Path
 import argparse
 import sys
 
-from lib.latex import extract_graphics_targets, read_text, walk_tex_sources
+from lib.core import read_tex_file
+from lib.latex import extract_graphics_targets, walk_tex_documents
+
+OVERWRITES_SOURCE_TEX = False
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -39,12 +42,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     input_path = Path(args.input).expanduser().resolve()
-    sources = [input_path] if args.no_recursive else walk_tex_sources(input_path)
+    sources = [read_tex_file(input_path)] if args.no_recursive else walk_tex_documents(input_path)
 
     seen: set[str] = set()
     for source in sources:
-        for target in extract_graphics_targets(read_text(source)):
-            rendered = f"{source}: {target}" if args.with_source else target
+        source_path = source.filename if source.filename is not None else input_path
+        for target in extract_graphics_targets(source.code):
+            rendered = f"{source_path}: {target}" if args.with_source else target
             if args.unique and rendered in seen:
                 continue
             seen.add(rendered)
