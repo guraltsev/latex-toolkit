@@ -25,6 +25,10 @@ class LtCliTests(TestCase):
         self.assertIn("uni2tex", result.stdout)
         self.assertIn("aligned2baea", result.stdout)
         self.assertIn("baea2aligned", result.stdout)
+        self.assertIn("eqn-star2dmath", result.stdout)
+        self.assertIn("dmath2eqn-star", result.stdout)
+        self.assertIn("eqn2dmath-eqnum", result.stdout)
+        self.assertIn("dmath-eqnum2eqn", result.stdout)
 
     def test_unknown_command_exits_nonzero(self) -> None:
         result = subprocess.run(

@@ -32,6 +32,12 @@ lt-cli uni2tex paper.tex
 lt-cli aligned2baea paper.tex
 lt-cli aligned2baea paper.tex --reverse
 lt-cli baea2aligned paper.tex
+lt-cli eqn-star2dmath paper.tex
+lt-cli eqn-star2dmath paper.tex --reverse
+lt-cli dmath2eqn-star paper.tex
+lt-cli eqn2dmath-eqnum paper.tex
+lt-cli eqn2dmath-eqnum paper.tex --reverse
+lt-cli dmath-eqnum2eqn paper.tex
 ```
 
 ## What the commands do
@@ -71,6 +77,29 @@ explicit `aligned` environments.
 
 Runs the reverse-direction conversion from `\ba` / `\ea` back to explicit
 `aligned` environments.
+
+### `eqn-star2dmath`
+
+Rewrites `equation*` environments as plain `\[ ... \]` display math. The same
+command also supports the reverse direction through `--reverse`, which rewrites
+plain display math back to `equation*` while leaving standalone `\eqnum`
+blocks untouched.
+
+### `dmath2eqn-star`
+
+Runs the reverse-direction conversion from plain `\[ ... \]` display math back
+to `equation*` environments.
+
+### `eqn2dmath-eqnum`
+
+Rewrites `equation` environments as `\[\eqnum ... \]` numbered-display blocks.
+The same command also supports the reverse direction through `--reverse`, which
+rewrites only standalone `\eqnum`-prefixed display math back to `equation`.
+
+### `dmath-eqnum2eqn`
+
+Runs the reverse-direction conversion from `\[\eqnum ... \]` display math back
+to `equation` environments.
 
 ## Commands that rewrite `.tex` files
 
@@ -145,6 +174,10 @@ lt-cli strip-comments draft.tex
 lt-cli list-graphics thesis.tex --with-source
 lt-cli tex2uni draft.tex
 lt-cli uni2tex draft.tex
+lt-cli eqn-star2dmath draft.tex
+lt-cli dmath2eqn-star draft.tex
+lt-cli eqn2dmath-eqnum draft.tex
+lt-cli dmath-eqnum2eqn draft.tex
 ```
 
 ## Project layout
@@ -177,7 +210,19 @@ latex-toolkit/
 │   │   ├── aligned2baea/
 │   │   │   ├── README.md
 │   │   │   └── main.py
-│   │   └── baea2aligned/
+│   │   ├── baea2aligned/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   ├── eqn-star2dmath/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   ├── dmath2eqn-star/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   ├── eqn2dmath-eqnum/
+│   │   │   ├── README.md
+│   │   │   └── main.py
+│   │   └── dmath-eqnum2eqn/
 │   │       ├── README.md
 │   │       └── main.py
 │   └── lib/
@@ -185,6 +230,8 @@ latex-toolkit/
 │       ├── aligned_baea.py
 │       ├── backup.py
 │       ├── core.py
+│       ├── equation_eqnum_displaymath.py
+│       ├── equation_star_displaymath.py
 │       ├── latex.py
 │       ├── latex_parser.py
 │       ├── math_unicode.py
