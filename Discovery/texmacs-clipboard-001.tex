@@ -1,0 +1,588 @@
+\section{Generalities}\label{sec:generalities}
+
+{\toLLM{Rework this section to allow for arbitrary positive non-integer holder
+classes.}} {\fromLLM{I replaced the first-order H{\"o}lder scale by the
+positive noninteger scale. The cancellation order in the analysis estimates is
+now $\lfloor \alpha \rfloor$, and the homogeneous reconstruction is formulated
+by finite differences of order $\lfloor \alpha \rfloor + 1$.}}
+
+In this section we record the conventions and estimates for test functions,
+wavelet coefficients, reconstruction operators, and convolution multipliers
+used later. We write
+\[ \R^{d + 1}_+ \eqd \R^d \times (0, \infty) . \]
+We fix constants $0 < c_0 < C_0 < \infty$ and write $\1_{t \approx 1}$ for the
+indicator of the interval $[c_0, C_0]$. All $L^p (\R^{d + 1}_+)$-norms below
+are taken with respect to $\dd x \frac{\dd t}{t}$.
+
+Whenever $\alpha > 0$ is not an integer, we write
+\[ k_{\alpha} \eqd \lfloor \alpha \rfloor, \qquad \sigma_{\alpha} \eqd \alpha
+   - k_{\alpha} \in (0, 1), \qquad n_{\alpha} \eqd k_{\alpha} + 1. \]
+A family
+\[ \theta = \{\theta_{(x, t)} \}_{(x, t) \in \R^{d + 1}_+} \subset \Sch (\R^d)
+\]
+is bounded in $\Sch (\R^d)$ if, for every nonnegative integer $M$ and every
+multiindex $\beta$,
+\[ \sup_{(x, t) \in \R^{d + 1}_+} \sup_{z \in \R^d} \langle z \rangle^M  |
+   \partial^{\beta} \theta_{(x, t)} (z) | < \infty . \]
+The implicit constants in estimates involving such a family may depend on
+finitely many of these uniform Schwartz seminorms.
+
+\begin{definition}[Cancellation classes]
+  \label{def:psi-classes}The set $\Psi (\R^d) \subset \Sch (\R^d)$ is the set
+  of Schwartz functions whose Fourier transform is supported away from the
+  origin:
+  \begin{equation}
+    \label{eq:psi-fourier-support} \Psi (\R^d) \eqd \left\{ f \in \Sch (\R^d)
+    \st 0 \nin \spt \FT{f} \right\} .
+  \end{equation}
+  Equivalently, $\FT{f}$ vanishes in a neighbourhood of the origin. In
+  particular, $\Psi (\R^d) \subset \Psi^m (\R^d)$ for every nonnegative
+  integer $m$.
+  
+  For a nonnegative integer $m$, the set $\Psi^m (\R^d) \subset \Sch (\R^d)$
+  is the set of Schwartz functions with vanishing moments up to order $m$:
+  \begin{equation}
+    \label{eq:psi-vanishing-moments} \Psi^m (\R^d) \eqd \left\{ f \in \Sch
+    (\R^d) \st \int_{\R^d} f (x) P (x) \hspace{0.17em} \dd x = 0 \quad
+    \text{for every polynomial } P \text{with } \deg (P) \le m \right\} .
+  \end{equation}
+\end{definition}
+
+\begin{definition}[H{\"o}lder spaces]
+  \label{def:holder-spaces}Let $\alpha > 0$ be noninteger. For $f \in
+  C^{k_{\alpha}} (\R^d)$, define the homogeneous H{\"o}lder seminorm by
+  \begin{equation}
+    \label{eq:holder-homogeneous-seminorm} \|f\|_{\dot{\mathcal{C}}^{\alpha}
+    (\R^d)} \eqd \max_{| \gamma | = k_{\alpha}} \sup_{x \neq x'}  \frac{|
+    \partial^{\gamma} f (x') - \partial^{\gamma} f (x) |}{|x' -
+    x|^{\sigma_{\alpha}}} .
+  \end{equation}
+  The homogeneous space is used modulo the kernel of this seminorm, namely
+  modulo polynomials of degree at most $k_{\alpha}$.
+  
+  Define the nonhomogeneous H{\"o}lder norm by
+  \begin{equation}
+    \label{eq:holder-nonhomogeneous-norm} \|f\|_{\mathcal{C}^{\alpha} (\R^d)}
+    \eqd \sum_{| \gamma | \le k_{\alpha}} \| \partial^{\gamma}
+    f\|_{L^{\infty}} + \max_{| \gamma | = k_{\alpha}}
+    \sup_{\tmscript{\begin{array}{c}
+      x \neq x'\\
+      |x' - x| < 1
+    \end{array}}}  \frac{| \partial^{\gamma} f (x') - \partial^{\gamma} f (x)
+    |}{|x' - x|^{\sigma_{\alpha}}} .
+  \end{equation}
+  We also use the finite-difference notation
+  \[ \Delta_h f (y) \eqd f (y + h) - f (y), \qquad \Delta_h^n \eqd \Delta_h
+     \circ \Delta_h^{n - 1}  \quad (n \ge 2) . \]
+  For positive noninteger $\alpha$, the standard finite-difference
+  characterization gives
+  \begin{equation}
+    \label{eq:holder-homogeneous-finite-difference}
+    \|f\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} \simeq_{d, \alpha}
+    \sup_{\tmscript{\begin{array}{c}
+      y \in \R^d\\
+      h \in \R^d \setminus \{0\}
+    \end{array}}}  \frac{| \Delta_h^{n_{\alpha}} f (y) |}{|h|^{\alpha}}
+  \end{equation}
+  on the quotient by polynomials of degree at most $k_{\alpha}$, and
+  \begin{equation}
+    \label{eq:holder-nonhomogeneous-finite-difference}
+    \|f\|_{\mathcal{C}^{\alpha} (\R^d)} \simeq_{d, \alpha} \|f\|_{L^{\infty}}
+    + \sup_{\tmscript{\begin{array}{c}
+      y \in \R^d\\
+      0 < |h| < 1
+    \end{array}}}  \frac{| \Delta_h^{n_{\alpha}} f (y) |}{|h|^{\alpha}} .
+  \end{equation}
+\end{definition}
+
+\begin{definition}[Wavelet coefficients]
+  \label{def:wavelet-coefficients}For $\varphi \in \Sch (\R^d)$ and $(x, t)
+  \in \R^{d + 1}_+$, define
+  \[ \Tr_x \varphi (y) \eqd \varphi (y - x), \qquad \Dil_t \varphi (y) \eqd
+     t^{- d} \varphi (y / t) . \]
+  For a function $f$ of at most polynomial growth and $\varphi \in \Sch
+  (\R^d)$, define
+  \begin{equation}
+    \label{eq:wavelet-coefficient-fixed-test} \Em_{\varphi} [f] (x, t) \eqd
+    \int_{\R^d} f (y) \Tr_x \Dil_t \varphi (y) \hspace{0.17em} \dd y
+  \end{equation}
+  whenever the integral is absolutely convergent.
+\end{definition}
+
+\begin{remark}
+  \label{rmk:variable-wavelets}We also allow the test function to depend on
+  $(x, t)$. Thus, if
+  \[ \varphi : (x, t) \mapsto \varphi_{(x, t)} \in \Sch (\R^d), \]
+  then
+  \begin{equation}
+    \label{eq:wavelet-coefficient-family} \Em_{\varphi} [f] (x, t) \eqd
+    \int_{\R^d} f (y) \Tr_x \Dil_t \varphi_{(x, t)} (y) \hspace{0.17em} \dd y
+  \end{equation}
+  whenever the integral is absolutely convergent.
+\end{remark}
+
+\begin{proposition}[Wavelet coefficient bounds for H{\"o}lder spaces]
+  \label{prop:holder-analysis}Let $\alpha > 0$ be noninteger. Let
+  \[ \psi : \R^{d + 1}_+ \to \Psi^{k_{\alpha}} (\R^d) \]
+  be a bounded family. Then, for every $f \in C^{k_{\alpha}} (\R^d)$ with
+  $\|f\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} < \infty$, it holds that
+  \begin{equation}
+    \label{eq:holder-analysis-homogeneous} \left| t^{- \alpha} \Em_{\psi} [f]
+    \right|_{L^{\infty} (\R^{d + 1}_+)} \lesssim_{d, \alpha, \psi}
+    \|f\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} .
+  \end{equation}
+  Furthermore, if
+  \[ \varphi : \R^{d + 1}_+ \to \Sch (\R^d) \]
+  is a bounded family, then, for every $f \in \mathcal{C}^{\alpha} (\R^d)$,
+  \begin{equation}
+    \label{eq:holder-analysis-nonhomogeneous} \begin{ltae}
+      \left| \1_{t \approx 1} t^{- \alpha} \Em_{\varphi} [f]
+      \right|_{L^{\infty} (\R^{d + 1}_+)} + \left| \1_{t < 1} t^{- \alpha}
+      \Em_{\psi} [f] \right|_{L^{\infty} (\R^{d + 1}_+)}\\
+      \qquad \lesssim_{d, \alpha, \psi, \varphi, c_0, C_0}
+      \|f\|_{\mathcal{C}^{\alpha} (\R^d)} .
+    \end{ltae}
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Let $k = k_{\alpha}$. We first prove \eqref{eq:holder-analys	is-homogeneous}.
+  For fixed $x \in \R^d$, define the Taylor polynomial
+  \[ P_{x, k}  (x + tz) \eqd \sum_{| \gamma | \le k} \frac{t^{| \gamma |}
+     z^{\gamma}}{\gamma !} \partial^{\gamma} f (x) . \]
+  Since $\psi_{(x, t)} \in \Psi^k (\R^d)$, all moments of $\psi_{(x, t)}$ of
+  order at most $k$ vanish. Hence
+  \[ \Em_{\psi} [f] (x, t) = \int_{\R^d} (f (x + tz) - P_{x, k} (x + tz))
+     \psi_{(x, t)} (z) \hspace{0.17em} \dd z. \]
+  Taylor's theorem with H{\"o}lder remainder gives
+  \[ |f (x + tz) - P_{x, k} (x + tz) | \lesssim_{d, \alpha}
+     \|f\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} t^{\alpha} |z|^{\alpha} . \]
+  Therefore
+  \[ | \Em_{\psi} [f] (x, t) | \begin{ltae}
+       \le \|f\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} t^{\alpha}  \int_{\R^d}
+       |z|^{\alpha} | \psi_{(x, t)} (z) | \hspace{0.17em} \dd z\\
+       \lesssim_{d, \alpha, \psi} t^{\alpha} \|f\|_{\dot{\mathcal{C}}^{\alpha}
+       (\R^d)} .
+     \end{ltae} \]
+  This proves \eqref{eq:holder-analysis-homogeneous}.
+  
+  Next assume $f \in \mathcal{C}^{\alpha} (\R^d)$ and $0 < t < 1$. The same
+  Taylor polynomial satisfies
+  \[ |f (x + tz) - P_{x, k} (x + tz) | \lesssim_{d, \alpha}
+     \|f\|_{\mathcal{C}^{\alpha} (\R^d)} t^{\alpha} \langle z \rangle^{\alpha}
+     . \]
+  Indeed, this is the usual Taylor remainder estimate when $|tz| < 1$. When
+  $|tz| \ge 1$, the $L^{\infty}$-bounds on the derivatives $\partial^{\gamma}
+  f$, $| \gamma | \le k$, give the same estimate because $k < \alpha$. Using
+  the vanishing moments of $\psi_{(x, t)}$, we obtain
+  \[ | \Em_{\psi} [f] (x, t) | \lesssim_{d, \alpha, \psi} t^{\alpha}
+     \|f\|_{\mathcal{C}^{\alpha} (\R^d)}  \qquad (0 < t < 1) . \]
+  This proves the second term in \eqref{eq:holder-analysis-nonhomogeneous}.
+  
+  It remains to estimate the term with $t \approx 1$. No cancellation is
+  needed. Since $\varphi$ is bounded in the Schwartz topology,
+  \[ | \Em_{\varphi} [f] (x, t) | \le \|f\|_{L^{\infty}}  \int_{\R^d} |
+     \varphi_{(x, t)} (z) | \hspace{0.17em} \dd z \lesssim_{\varphi}
+     \|f\|_{\mathcal{C}^{\alpha} (\R^d)} . \]
+  On the support of $\1_{t \approx 1}$, the factor $t^{- \alpha}$ is bounded
+  by a constant depending only on $\alpha, c_0, C_0$. This proves
+  \eqref{eq:holder-analysis-nonhomogeneous}.
+\end{proof}
+
+\begin{definition}[Reconstruction operator]
+  \label{def:reconstruction-operator}Let $F : \R^{d + 1}_+ \to \C$, and let
+  \[ \varphi : \R^{d + 1}_+ \to \Sch (\R^d) \]
+  be a bounded family of test functions. Whenever the integral is absolutely
+  convergent, define
+  \begin{equation}
+    \label{eq:reconstruction-operator} (\mathcal{R}_{\varphi} [F]) (x) \eqd
+    \int_0^{\infty} \int_{\R^d} F (y, t) \Tr_y \Dil_t \varphi_{(y, t)} (x)
+    \hspace{0.17em} \dd y \frac{\dd t}{t} .
+  \end{equation}
+  If $E \subset (0, \infty)$, then $\mathcal{R}_{\varphi} [\1_E F]$ denotes
+  the same operator with $F (x, t)$ replaced by $\1_E (t) F (x, t)$.
+\end{definition}
+
+\begin{lemma}[Kernel bounds]
+  \label{lem:kernel-bounds}Let
+  \[ \theta : \R^{d + 1}_+ \to \Sch (\R^d) \]
+  be a bounded family. Then, for every multiindex $\gamma$, every integer $n
+  \ge 1$, every $t > 0$, and every $y, h \in \R^d$, it holds that
+  \begin{equation}
+    \label{eq:kernel-derivative-l1} \int_{\R^d} \left| \partial_y^{\gamma}
+    \Tr_x \Dil_t \theta_{(x, t)} (y) \right| \hspace{0.17em} \dd x
+    \lesssim_{d, \gamma, \theta} t^{- | \gamma |}
+  \end{equation}
+  and
+  \begin{equation}
+    \label{eq:kernel-finite-difference-bound} \int_{\R^d} \left| \Delta_h^n
+    \partial_y^{\gamma} \Tr_x \Dil_t \theta_{(x, t)} (y) \right|
+    \hspace{0.17em} \dd x \lesssim_{d, \gamma, n, \theta} t^{- | \gamma |}
+    \min \left\{ 1, \left( \frac{|h|}{t} \right)^n \right\} .
+  \end{equation}
+  In particular, taking $\gamma = 0$ and $n = 1$ gives
+  \[ \int_{\R^d} \left| \Tr_x \Dil_t \theta_{(x, t)} (y + h) - \Tr_x \Dil_t
+     \theta_{(x, t)} (y) \right| \hspace{0.17em} \dd x \lesssim_{d, \theta}
+     \min \left\{ 1, \frac{|h|}{t} \right\} . \]
+\end{lemma}
+
+\begin{proof}
+  Choose an integer $N > d$. By boundedness in the Schwartz topology,
+  \[ \left| \partial_y^{\gamma} \Tr_x \Dil_t \theta_{(x, t)} (y) \right|
+     \lesssim_{\gamma, \theta, N} t^{- d - | \gamma |} \left\langle \frac{y -
+     x}{t} \right\rangle^{- N} . \]
+  Integrating in $x$ gives \eqref{eq:kernel-derivative-l1}.
+  
+  The estimate
+  \[ \int_{\R^d} \left| \Delta_h^n \partial_y^{\gamma} \Tr_x \Dil_t
+     \theta_{(x, t)} (y) \right| \hspace{0.17em} \dd x \lesssim_{d, \gamma, n,
+     \theta} t^{- | \gamma |} \]
+  follows from \eqref{eq:kernel-derivative-l1} and the identity
+  \[ \Delta_h^n g = \sum_{j = 0}^n (- 1)^{n - j} \binom{n}{j} g (\cdummy + jh)
+     . \]
+  On the other hand, the iterated mean value theorem gives
+  \[ \Delta_h^n g (y) = \int_{[0, 1]^n} D_h^n g (y + (s_1 + \cdots + s_n) h)
+     \hspace{0.17em} \dd s_1 \cdots \dd s_n . \]
+  Applying this to $g (y) = \partial_y^{\gamma} \Tr_x \Dil_t \theta_{(x, t)}
+  (y)$, and using the uniform Schwartz bounds for derivatives of order $|
+  \gamma | + n$, gives
+  \[ \left| \Delta_h^n \partial_y^{\gamma} \Tr_x \Dil_t \theta_{(x, t)} (y)
+     \right| \lesssim_{\gamma, n, \theta, N} |h|^n t^{- d - | \gamma | - n}
+     \sup_{0 \le s \le n} \left\langle \frac{y + sh - x}{t} \right\rangle^{-
+     N} . \]
+  Integrating in $x$ yields
+  \[ \int_{\R^d} \left| \Delta_h^n \partial_y^{\gamma} \Tr_x \Dil_t
+     \theta_{(x, t)} (y) \right| \hspace{0.17em} \dd x \lesssim_{d, \gamma, n,
+     \theta} t^{- | \gamma |} \left( \frac{|h|}{t} \right)^n . \]
+  Combining the last two estimates proves
+  \eqref{eq:kernel-finite-difference-bound}.
+\end{proof}
+
+\begin{proposition}[Reconstruction of H{\"o}lder spaces]
+  \label{prop:holder-reconstruction}Let $\alpha > 0$ be noninteger. Let $F :
+  \R^{d + 1}_+ \to \C$ be measurable and assume
+  \begin{equation}
+    \label{eq:holder-reconstruction-size-assumption} A \eqd | t^{- \alpha} F
+    |_{L^{\infty} (\R^{d + 1}_+)} < \infty .
+  \end{equation}
+  Let
+  \[ \psi : \R^{d + 1}_+ \to \Psi^{k_{\alpha}} (\R^d) \]
+  be a bounded family. The homogeneous reconstruction $\mathcal{R}_{\psi} [F]$
+  is the class modulo polynomials of degree at most $k_{\alpha}$ determined by
+  the absolutely convergent finite-difference formula
+  \begin{equation}
+    \label{eq:homogeneous-reconstruction-increment} \Delta_h^{n_{\alpha}}
+    (\mathcal{R}_{\psi} [F]) (y) \eqd \int_0^{\infty} \int_{\R^d} F (x, t)
+    \Delta_h^{n_{\alpha}} \left[ \Tr_x \Dil_t \psi_{(x, t)} \right] (y)
+    \hspace{0.17em} \dd x \frac{\dd t}{t} .
+  \end{equation}
+  It satisfies
+  \begin{equation}
+    \label{eq:holder-reconstruction-homogeneous} \|\mathcal{R}_{\psi}
+    [F]\|_{\dot{\mathcal{C}}^{\alpha} (\R^d)} \lesssim_{d, \alpha, \psi} |
+    t^{- \alpha} F |_{L^{\infty} (\R^{d + 1}_+)} .
+  \end{equation}
+  Furthermore, if
+  \[ \varphi : \R^{d + 1}_+ \to \Sch (\R^d) \]
+  is a bounded family, then the expression
+  \[ \mathcal{R}_{\psi} [\1_{t \le 1} F] +\mathcal{R}_{\varphi} [\1_{t \approx
+     1} F] \]
+  is absolutely convergent pointwise and satisfies
+  \begin{equation}
+    \label{eq:holder-reconstruction-nonhomogeneous} \left| \mathcal{R}_{\psi}
+    [\1_{t \le 1} F] +\mathcal{R}_{\varphi} [\1_{t \approx 1} F]
+    \right|_{\mathcal{C}^{\alpha} (\R^d)} \lesssim_{d, \alpha, \psi, \varphi,
+    c_0, C_0} | t^{- \alpha} F |_{L^{\infty} (\R^{d + 1}_+)} .
+  \end{equation}
+\end{proposition}
+
+{\fromLLM{The all-scale homogeneous synthesis integral need not converge
+pointwise for a general $F$ satisfying only $F (x, t) = O (t^{\alpha})$ as $t
+\to \infty$. I therefore stated the homogeneous reconstruction modulo
+constants through the increment formula
+\eqref{eq:homogeneous-reconstruction-increment}. If the manuscript needs a
+canonical pointwise representative, an additional large-scale normalization or
+decay assumption on $F$ is required.}} {\fromLLM{After extending the statement
+to arbitrary positive noninteger $\alpha$, the ambiguity is by polynomials of
+degree at most $\lfloor \alpha \rfloor$, not only by constants. The formula
+\eqref{eq:homogeneous-reconstruction-increment} is therefore a
+finite-difference formula of order $\lfloor \alpha \rfloor + 1$; when $\alpha
+\in (0, 1)$ it is the increment formula from the previous version.}}
+
+{\toLLM{No, no need for a canonical representative, but do include a remark
+about this ambiguity of representative (let us set $f (0) = 0$).}}
+{\fromLLM{For $\alpha > 1$, setting $f (0) = 0$ fixes only the constant part
+of the polynomial ambiguity. The remark below records this and also gives the
+standard full-jet normalization if a single representative is ever needed.}}
+
+\begin{remark}[Representative in the homogeneous reconstruction]
+  \label{rmk:homogeneous-reconstruction-representative}The homogeneous
+  reconstruction in  Proposition~\ref{prop:holder-reconstruction} is defined
+  modulo polynomials of degree at most $k_{\alpha}$. If $\alpha \in (0, 1)$,
+  this is only a constant ambiguity, and the convention $f (0) = 0$ selects a
+  representative. If $k_{\alpha} \ge 1$, the same convention fixes only the
+  constant coefficient. A full normalization may be imposed by requiring
+  \[ \partial^{\gamma} f (0) = 0 \qquad \text{for every } | \gamma | \le
+     k_{\alpha} . \]
+  The estimates above are invariant under the choice of representative.
+\end{remark}
+
+\begin{proof}
+  If $A = \infty$, there is nothing to prove. Hence assume $A < \infty$.
+  
+  {\step{Homogeneous reconstruction.}} Let $n = n_{\alpha}$. By 
+  Lemma~\ref{lem:kernel-bounds},
+  \[ \begin{ltae}
+       \int_0^{\infty} \int_{\R^d} |F (x, t) | \left| \Delta_h^n \left[ \Tr_x
+       \Dil_t \psi_{(x, t)} \right] (y) \right| \hspace{0.17em} \dd x
+       \frac{\dd t}{t}\\
+       \qquad \lesssim_{d, n, \psi} A \int_0^{\infty} t^{\alpha} \min \left\{
+       1, \left( \frac{|h|}{t} \right)^n \right\} \frac{\dd t}{t}\\
+       \qquad \lesssim_{\alpha, n, d, \psi} A |h|^{\alpha} .
+     \end{ltae} \]
+  The last integral is finite because $n > \alpha$. More explicitly, for $h
+  \neq 0$,
+  \[ \int_0^{\infty} t^{\alpha} \min \left\{ 1, \left( \frac{|h|}{t} \right)^n
+     \right\} \frac{\dd t}{t} = |h|^{\alpha}  \left( \int_0^1 s^{\alpha} 
+     \frac{\dd s}{s} + \int_1^{\infty} s^{\alpha - n}  \frac{\dd s}{s} \right)
+     . \]
+  Thus the integral in \eqref{eq:homogeneous-reconstruction-increment} is
+  absolutely convergent and satisfies
+  \[ | \Delta_h^n (\mathcal{R}_{\psi} [F]) (y) | \lesssim_{d, \alpha, \psi} A
+     |h|^{\alpha} . \]
+  The formula is consistent with finite differences of smooth truncated
+  syntheses. Indeed, for $0 < \varepsilon < R < \infty$, set
+  \[ G_{\varepsilon, R} (y) \eqd \int_{\varepsilon}^R \int_{\R^d} F (x, t)
+     \Tr_x \Dil_t \psi_{(x, t)} (y) \hspace{0.17em} \dd x \frac{\dd t}{t} . \]
+  The preceding tail estimates show that $\Delta_h^n G_{\varepsilon, R} (y)$
+  converges as $\varepsilon \to 0^+$ and $R \to \infty$, for every $y, h \in
+  \R^d$. Hence the limit determines an element of the homogeneous quotient
+  modulo polynomials of degree at most $n - 1 = k_{\alpha}$. By the
+  finite-difference characterization
+  \eqref{eq:holder-homogeneous-finite-difference}, this gives
+  \eqref{eq:holder-reconstruction-homogeneous}.
+  
+  {\step{Nonhomogeneous reconstruction.}} Set
+  \[ G \eqd \mathcal{R}_{\psi} [\1_{t \le 1} F] +\mathcal{R}_{\varphi} [\1_{t
+     \approx 1} F] . \]
+  The pointwise absolute convergence and the $L^{\infty}$-bound follow from
+  \eqref{eq:kernel-derivative-l1} with $\gamma = 0$:
+  \[ |G (y) | \begin{ltae}
+       \lesssim_{d, \psi, \varphi} A \left( \int_0^1 t^{\alpha}  \frac{\dd
+       t}{t} + \int_{c_0}^{C_0} t^{\alpha}  \frac{\dd t}{t} \right)\\
+       \lesssim_{d, \alpha, \psi, \varphi, c_0, C_0} A.
+     \end{ltae} \]
+  Let $0 < |h| < 1$. Using \eqref{eq:kernel-finite-difference-bound} with $n =
+  n_{\alpha}$, we obtain
+  \[ | \Delta_h^n G (y) | \begin{ltae}
+       \lesssim_{d, n, \psi, \varphi} \begin{ltae}
+         A \left( \int_0^1 t^{\alpha} \min \left\{ 1, \left( \frac{|h|}{t}
+         \right)^n \right\} \frac{\dd t}{t} \right.\\
+         \left. \qquad + \int_{c_0}^{C_0} t^{\alpha} \min \left\{ 1, \left(
+         \frac{|h|}{t} \right)^n \right\} \frac{\dd t}{t} \right)
+       \end{ltae}\\
+       \lesssim_{d, \alpha, \psi, \varphi, c_0, C_0} A |h|^{\alpha} .
+     \end{ltae} \]
+  The finite-difference characterization
+  \eqref{eq:holder-nonhomogeneous-finite-difference} now proves
+  \eqref{eq:holder-reconstruction-nonhomogeneous}.
+\end{proof}
+
+\subsection{Boundedness of integral
+operators}\label{subsec:boundedness-integral-operators}
+
+{\toLLM{Define and prove boundedness of order $s$ smooth singular integral
+operators of convolution type fon Holder spaces.
+
+Take that a order $s$ smooth singular integral operators is such if its
+multipliers (FT of the kernel)
+
+satisfies
+\[ | \langle \xi \rangle^{- s + | \alpha |} \partial^{\alpha} m (\xi) |
+   \lesssim 1 \]}}
+
+{\fromLLM{The multiplier condition with $\langle \xi \rangle$ is an
+inhomogeneous symbol condition. I therefore state the boundedness theorem for
+the nonhomogeneous spaces $\mathcal{C}^{\alpha}$. A homogeneous statement
+requires an additional low-frequency condition on $m$; see
+~\ref{rmk:homogeneous-symbol-caveat}.}}
+
+{\toLLM{Actually, use the condition $| | \xi |^{- s + | \alpha |}
+\partial^{\alpha} m (\xi) | \lesssim 1$ so rewrite everything for homogeneous
+symbols. Also, I do not care about negative regularity holder spaces so assume
+that $s + \alpha > 0$. \ }}
+
+\
+
+\begin{definition}[Smooth convolution singular integrals]
+  \label{def:smooth-convolution-singular-integrals}Let $s \in \R$. A
+  convolution operator $T_m$ is a smooth singular integral operator of order
+  $s$ if its multiplier $m \in C^{\infty} (\R^d)$ satisfies, for every
+  nonnegative integer $M$,
+  \begin{equation}
+    \label{eq:symbol-seminorm} \mathfrak{S}_{s, M} (m) \eqd \max_{| \mu | \le
+    M} \sup_{\xi \in \R^d} \langle \xi \rangle^{- s + | \mu |}  |
+    \partial^{\mu} m (\xi) | < \infty .
+  \end{equation}
+  Initially, for $f \in \Sch (\R^d)$, we set
+  \[ T_m f \eqd \mathcal{F}^{- 1} (m \FT{f}) . \]
+  Equivalently, $T_m f = K \ast f$ with $K =\mathcal{F}^{- 1} m$ understood as
+  a tempered distribution.
+\end{definition}
+
+{\toLLM{I do NOT want any non-homogeneous LP characterization that is discrete
+in scales. I rather would require higher cancellation on my wavepackets. I
+actually really dislike your proof. What I do want is a proof that uses the
+analysis and reconstruction operator. Morally, commute the linear functional
+and the integral and note that $T_m$ acts on wavelets and gives wavelest.
+Therefore the statement should follow from the round-trip holder -> wavelet
+coeffs -> reconstruction. }}
+
+\begin{lemma}[Inhomogeneous Littlewood--Paley characterization]
+  \label{lem:lp-holder-characterization}Choose $\chi \in C_c^{\infty} (\R^d)$
+  such that $\chi (\xi) = 1$ for $| \xi | \le 1$ and $\spt \chi \subset \{|
+  \xi | < 2\}$. Define
+  \[ \eta_0 (\xi) \eqd \chi (\xi), \qquad \eta_j (\xi) \eqd \chi (2^{- j} \xi)
+     - \chi (2^{- j + 1} \xi)  \quad (j \ge 1), \]
+  and
+  \[ \Delta_j f \eqd \mathcal{F}^{- 1} (\eta_j \FT{f}) . \]
+  Let $\alpha > 0$ be noninteger. Then
+  \begin{equation}
+    \label{eq:lp-holder-characterization} \|f\|_{\mathcal{C}^{\alpha} (\R^d)}
+    \simeq_{d, \alpha, \chi} \sup_{j \ge 0} 2^{j \alpha}  \| \Delta_j
+    f\|_{L^{\infty} (\R^d)}
+  \end{equation}
+  for tempered distributions $f$, with the convention that the right-hand side
+  is finite exactly for $f \in \mathcal{C}^{\alpha} (\R^d)$.
+\end{lemma}
+
+\begin{proof}
+  Let $n = n_{\alpha}$. First assume $f \in \mathcal{C}^{\alpha} (\R^d)$. The
+  estimate for $j = 0$ follows from the $L^{\infty}$-bound on $f$. For $j \ge
+  1$, the kernel $\mathcal{F}^{- 1} \eta_j$ has vanishing moments of all
+  orders. Subtracting the Taylor polynomial of degree $k_{\alpha}$ at the
+  evaluation point and using the same remainder estimate as in the proof of 
+  Proposition~\ref{prop:holder-analysis} gives
+  \[ \| \Delta_j f\|_{L^{\infty}} \lesssim_{d, \alpha, \chi} 2^{- j \alpha}
+     \|f\|_{\mathcal{C}^{\alpha} (\R^d)} . \]
+  Hence the right-hand side of \eqref{eq:lp-holder-characterization} is
+  bounded by $\|f\|_{\mathcal{C}^{\alpha}}$.
+  
+  Conversely, assume
+  \[ B \eqd \sup_{j \ge 0} 2^{j \alpha}  \| \Delta_j f\|_{L^{\infty}} < \infty
+     . \]
+  Since $\alpha > 0$, the series $\sum_{j \ge 0} \Delta_j f$ converges
+  uniformly and represents $f$ as a tempered distribution. Thus
+  \[ \|f\|_{L^{\infty}} \le \sum_{j \ge 0} \| \Delta_j f\|_{L^{\infty}}
+     \lesssim_{\alpha} B. \]
+  Bernstein's inequality gives
+  \[ \| \Delta_h^n \Delta_j f\|_{L^{\infty}} \lesssim_{d, n, \chi} \min \{ 1,
+     (2^j |h|)^n \}  \| \Delta_j f\|_{L^{\infty}} . \]
+  Hence, for $0 < |h| < 1$,
+  \[ \| \Delta_h^n f\|_{L^{\infty}} \begin{ltae}
+       \le \sum_{j \ge 0} \| \Delta_h^n \Delta_j f\|_{L^{\infty}}\\
+       \lesssim_{d, n, \chi} B \sum_{j \ge 0} 2^{- j \alpha} \min \{ 1, (2^j
+       |h|)^n \}\\
+       \lesssim_{d, \alpha, \chi} B |h|^{\alpha} .
+     \end{ltae} \]
+  The last bound follows by splitting the sum at the scale $2^j |h| \approx
+  1$, using $n > \alpha$. The finite-difference characterization
+  \eqref{eq:holder-nonhomogeneous-finite-difference} proves the converse
+  estimate.
+\end{proof}
+
+\begin{proposition}[H{\"o}lder boundedness of smooth convolution singular
+integrals]
+  \label{prop:smooth-convolution-singular-integral-holder}Let $s \in \R$, and
+  let $T_m$ be a smooth convolution singular integral operator of order $s$ in
+  the sense of  Definition~\ref{def:smooth-convolution-singular-integrals}.
+  Let $\alpha > 0$ be noninteger and set
+  \[ \beta \eqd \alpha - s. \]
+  Assume that $\beta > 0$ and that $\beta$ is not an integer. Then $T_m$
+  extends to a bounded operator
+  \[ T_m : \mathcal{C}^{\alpha} (\R^d) \to \mathcal{C}^{\beta} (\R^d), \]
+  and
+  \begin{equation}
+    \label{eq:smooth-singular-integral-holder-bound} \|T_m
+    f\|_{\mathcal{C}^{\beta} (\R^d)} \lesssim_{d, \alpha, s, \chi}
+    \mathfrak{S}_{s, d + 2} (m) \|f\|_{\mathcal{C}^{\alpha} (\R^d)} .
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Let $\eta_j$ and $\Delta_j$ be as in 
+  Lemma~\ref{lem:lp-holder-characterization}. Choose
+  \[ \tilde{\eta}_j \eqd \sum_{\tmscript{\begin{array}{c}
+       \ell \ge 0\\
+       | \ell - j| \le 2
+     \end{array}}} \eta_{\ell}, \qquad \tilde{\Delta}_j f \eqd
+     \sum_{\tmscript{\begin{array}{c}
+       \ell \ge 0\\
+       | \ell - j| \le 2
+     \end{array}}} \Delta_{\ell} f. \]
+  By finite overlap of the frequency supports, $\tilde{\eta}_j = 1$ on $\spt
+  \eta_j$.
+  
+  Put
+  \[ K_j \eqd \mathcal{F}^{- 1}  (\eta_j m) . \]
+  We first prove the dyadic kernel estimate
+  \begin{equation}
+    \label{eq:dyadic-symbol-kernel-l1} \|K_j \|_{L^1 (\R^d)} \lesssim_{d, s,
+    \chi} \mathfrak{S}_{s, d + 2} (m) 2^{js}  \qquad (j \ge 0) .
+  \end{equation}
+  For $j \ge 1$, write
+  \[ \eta_j (\xi) = \eta (2^{- j} \xi), \qquad \eta (\xi) \eqd \chi (\xi) -
+     \chi (2 \xi) . \]
+  Then
+  \[ K_j (x) = 2^{j (d + s)} \kappa_j  (2^j x), \qquad \kappa_j \eqd
+     \mathcal{F}^{- 1} a_j, \]
+  where
+  \[ a_j (\xi) \eqd 2^{- js} m (2^j \xi) \eta (\xi) . \]
+  Since $\eta$ is supported in a fixed annulus, the symbol estimates give
+  \[ \sup_{j \ge 1} \max_{| \mu | \le d + 2} \| \partial^{\mu} a_j
+     \|_{L^{\infty}} \lesssim_{d, s, \chi} \mathfrak{S}_{s, d + 2} (m) . \]
+  Integration by parts in the inverse Fourier transform therefore yields
+  \[ \sup_{j \ge 1} \| \kappa_j \|_{L^1} \lesssim_{d, s, \chi}
+     \mathfrak{S}_{s, d + 2} (m), \]
+  which proves \eqref{eq:dyadic-symbol-kernel-l1} for $j \ge 1$. The case $j =
+  0$ is the same compact-frequency estimate applied to $\eta_0 m$.
+  
+  For $f \in \Sch (\R^d)$,
+  \[ \Delta_j T_m f = K_j \ast \tilde{\Delta}_j f. \]
+  Thus, using \eqref{eq:dyadic-symbol-kernel-l1},
+  \[ 2^{j \beta}  \| \Delta_j T_m f\|_{L^{\infty}} \begin{ltae}
+       \le 2^{j \beta} \|K_j \|_{L^1}  \| \tilde{\Delta}_j f\|_{L^{\infty}}\\
+       \lesssim_{d, s, \chi} \mathfrak{S}_{s, d + 2} (m) 2^{j (\beta + s)} 
+       \sum_{\tmscript{\begin{array}{c}
+         \ell \ge 0\\
+         | \ell - j| \le 2
+       \end{array}}} \| \Delta_{\ell} f\|_{L^{\infty}}\\
+       \lesssim_{d, \alpha, s, \chi} \mathfrak{S}_{s, d + 2} (m)
+       \|f\|_{\mathcal{C}^{\alpha} (\R^d)} .
+     \end{ltae} \]
+  Since $\beta + s = \alpha$, taking the supremum over $j \ge 0$ and using 
+  Lemma~\ref{lem:lp-holder-characterization} gives
+  \eqref{eq:smooth-singular-integral-holder-bound} for Schwartz functions.
+  
+  For general $f \in \mathcal{C}^{\alpha} (\R^d)$, the same estimates show
+  that the series
+  \[ \sum_{j \ge 0} K_j \ast \tilde{\Delta}_j f \]
+  converges uniformly, because $\| \Delta_j T_m f\|_{L^{\infty}} \lesssim 2^{-
+  j \beta}$ and $\beta > 0$. This series defines the extension of $T_m f$,
+  agrees with the Fourier multiplier definition on $\Sch (\R^d)$, and
+  satisfies \eqref{eq:smooth-singular-integral-holder-bound}.
+\end{proof}
+
+\begin{remark}[Homogeneous low-frequency caveat]
+  \label{rmk:homogeneous-symbol-caveat}The condition
+  \eqref{eq:symbol-seminorm} is adapted to the inhomogeneous scale. A
+  corresponding homogeneous estimate
+  \[ \dot{\mathcal{C}}^{\alpha} (\R^d) \to \dot{\mathcal{C}}^{\alpha - s}
+     (\R^d) \]
+  requires a homogeneous low-frequency normalization of the multiplier.
+  Without such a condition, lower-order pieces may obstruct the large-scale
+  homogeneous bound. For example, the identity multiplier belongs to the
+  inhomogeneous order-$s$ class for every $s \ge 0$, but the identity need not
+  map $\dot{\mathcal{C}}^{\alpha}$ to $\dot{\mathcal{C}}^{\alpha - s}$ when $s
+  > 0$.
+\end{remark}

@@ -155,6 +155,17 @@ python -m latex-toolkit.commands.baea2aligned .\paper.tex
 python -m latex-toolkit.commands.baea2aligned .\paper.tex -o .\paper.expanded.tex
 ```
 
+### `ltae2aligned`
+
+Rewrites `\begin{ltae} ... \end{ltae}` environments as
+`\begin{aligned}[t] ... \end{aligned}` blocks and prefixes top-level rows with
+`&`. Nested environments such as `cases` keep their own row structure.
+
+```powershell
+python -m latex-toolkit.commands.ltae2aligned .\paper.tex
+python -m latex-toolkit.commands.ltae2aligned .\paper.tex -o .\paper.converted.tex
+```
+
 ### `eqn-star2dmath`
 
 Rewrites `equation*` environments as plain `\[ ... \]` display math. Use
