@@ -81,3 +81,19 @@ class CommandModuleInvocationTests(TestCase):
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("input", result.stderr)
+
+    def test_missing_input_file_reports_concise_failure(self) -> None:
+        """A command reports an expected file failure without a Python traceback."""
+
+        result = subprocess.run(
+            [sys.executable, "-m", "latex-toolkit.commands.strip-comments", "missing.tex"],
+            env=_pythonpath_env(),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("ERROR: strip-comments failed:", result.stderr)
+        self.assertIn("missing.tex", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)

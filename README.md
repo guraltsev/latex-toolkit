@@ -201,8 +201,8 @@ python -m latex-toolkit.commands.tmscript2substack .\paper.tex -o .\paper.conver
 
 ### `texmacs_latex_to_llm_latex.cmd`
 
-Runs a clipboard pipeline for TeXmacs-generated LaTeX: `ltae2aligned`,
-`dollar2bracket`, then `uni2tex`.
+Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
+`ltae2aligned`, `tmscript2substack`, then `uni2tex`.
 
 ```powershell
 .\texmacs_latex_to_llm_latex.cmd

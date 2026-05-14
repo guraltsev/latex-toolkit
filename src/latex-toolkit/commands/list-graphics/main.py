@@ -6,11 +6,10 @@ from __future__ import annotations
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 import argparse
-import sys
 
-from lib.clipboard import read_clipboard_text, write_clipboard_text
 from lib.core import read_tex_file
 from lib.latex import extract_graphics_targets, walk_tex_documents
+from lib.logging_config import run_clipboard_transform, run_command
 
 # This command reports targets and never overwrites source TeX files.
 OVERWRITES_SOURCE_TEX = False
@@ -72,43 +71,44 @@ def transform_text(text: str, *, unique: bool = False, with_source: bool = False
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    def run() -> int:
+        parser = build_parser()
+        args = parser.parse_args(argv)
 
-    if args.clipboard:
-        if args.input is not None:
-            parser.error("--clipboard cannot be combined with an input path.")
-        try:
-            rendered = transform_text(
-                read_clipboard_text(),
-                unique=args.unique,
-                with_source=args.with_source,
+        if args.clipboard:
+            if args.input is not None:
+                parser.error("--clipboard cannot be combined with an input path.")
+            run_clipboard_transform(
+                "list-graphics",
+                lambda text: transform_text(
+                    text,
+                    unique=args.unique,
+                    with_source=args.with_source,
+                ),
             )
-            write_clipboard_text(rendered)
-        except RuntimeError as exc:
-            sys.stderr.write(f"{exc}\n")
-            return 1
+            return 0
+
+        if args.input is None:
+            parser.error("the following arguments are required: input")
+
+        input_path = Path(args.input).expanduser().resolve()
+        sources = [read_tex_file(input_path)] if args.no_recursive else walk_tex_documents(input_path)
+
+        # Render all discovered targets before writing so uniqueness behavior is
+        # shared between file and clipboard modes.
+        source_targets = (
+            (
+                source.filename if source.filename is not None else input_path,
+                extract_graphics_targets(source.code),
+            )
+            for source in sources
+        )
+        for rendered in _render_targets(source_targets, unique=args.unique, with_source=args.with_source):
+            print(rendered)
+
         return 0
 
-    if args.input is None:
-        parser.error("the following arguments are required: input")
-
-    input_path = Path(args.input).expanduser().resolve()
-    sources = [read_tex_file(input_path)] if args.no_recursive else walk_tex_documents(input_path)
-
-    # Render all discovered targets before writing so uniqueness behavior is
-    # shared between file and clipboard modes.
-    source_targets = (
-        (
-            source.filename if source.filename is not None else input_path,
-            extract_graphics_targets(source.code),
-        )
-        for source in sources
-    )
-    for rendered in _render_targets(source_targets, unique=args.unique, with_source=args.with_source):
-        sys.stdout.write(f"{rendered}\n")
-
-    return 0
+    return run_command("list-graphics", run)
 
 
 def _render_targets(

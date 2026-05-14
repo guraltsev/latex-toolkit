@@ -5,11 +5,10 @@ from __future__ import annotations
 
 from pathlib import Path
 import argparse
-import sys
 
 from lib.backup import DEFAULT_BACKUP_DIR, backup_file
-from lib.clipboard import read_clipboard_text, write_clipboard_text
 from lib.latex import strip_comments_from_text, read_text, write_text
+from lib.logging_config import run_clipboard_transform, run_command
 
 # This command overwrites source files unless output or clipboard mode is used.
 OVERWRITES_SOURCE_TEX = True
@@ -68,31 +67,30 @@ def transform_text(text: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    def run() -> int:
+        parser = build_parser()
+        args = parser.parse_args(argv)
 
-    if args.clipboard:
-        if args.input is not None or args.output is not None:
-            parser.error("--clipboard cannot be combined with input or output paths.")
-        try:
-            write_clipboard_text(transform_text(read_clipboard_text()))
-        except RuntimeError as exc:
-            sys.stderr.write(f"{exc}\n")
-            return 1
+        if args.clipboard:
+            if args.input is not None or args.output is not None:
+                parser.error("--clipboard cannot be combined with input or output paths.")
+            run_clipboard_transform("strip-comments", transform_text)
+            return 0
+
+        if args.input is None:
+            parser.error("the following arguments are required: input")
+
+        input_path = Path(args.input).expanduser().resolve()
+        stripped = transform_text(read_text(input_path))
+        output_path = Path(args.output).expanduser().resolve() if args.output else input_path
+
+        if output_path == input_path and not args.no_backup:
+            backup_file(input_path, args.backup_dir)
+
+        write_text(output_path, stripped)
         return 0
 
-    if args.input is None:
-        parser.error("the following arguments are required: input")
-
-    input_path = Path(args.input).expanduser().resolve()
-    stripped = transform_text(read_text(input_path))
-    output_path = Path(args.output).expanduser().resolve() if args.output else input_path
-
-    if output_path == input_path and not args.no_backup:
-        backup_file(input_path, args.backup_dir)
-
-    write_text(output_path, stripped)
-    return 0
+    return run_command("strip-comments", run)
 
 
 if __name__ == "__main__":  # pragma: no cover

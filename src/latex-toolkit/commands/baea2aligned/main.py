@@ -7,6 +7,7 @@ from pathlib import Path
 import importlib.util
 
 from lib.backup import backup_file  # Imported to keep mutating-command policy explicit.
+from lib.logging_config import run_command
 
 # This alias overwrites source files through the delegated aligned2baea command.
 OVERWRITES_SOURCE_TEX = True
@@ -54,17 +55,20 @@ def transform_text(text: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    module = _load_aligned2baea_module()
-    return module.main(
-        argv,
-        prog="baea2aligned",
-        description=(
-            "Expand \\ba / \\ea into exact \\begin{aligned}[t] / \\end{aligned} blocks. "
-            "By default the input file is overwritten; use -o/--output to write elsewhere."
-        ),
-        include_reverse=False,
-        force_reverse=True,
-    )
+    def run() -> int:
+        module = _load_aligned2baea_module()
+        return module.main(
+            argv,
+            prog="baea2aligned",
+            description=(
+                "Expand \\ba / \\ea into exact \\begin{aligned}[t] / \\end{aligned} blocks. "
+                "By default the input file is overwritten; use -o/--output to write elsewhere."
+            ),
+            include_reverse=False,
+            force_reverse=True,
+        )
+
+    return run_command("baea2aligned", run)
 
 
 if __name__ == "__main__":  # pragma: no cover
