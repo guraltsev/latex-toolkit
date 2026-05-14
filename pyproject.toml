@@ -5,19 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "latex-toolkit"
 version = "0.1.0"
-description = "Small, composable LaTeX command toolkit with a thin dispatcher and relocatable commands."
+description = "Small, composable LaTeX command toolkit with python -m command modules."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
-[project.scripts]
-lt-cli = "lt_cli:main"
-
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["lib", "commands"]
-py-modules = ["lt_cli"]
 include-package-data = true
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["latex-toolkit*"]
+
 [tool.setuptools.package-data]
-commands = ["*/*.py", "*/*.md"]
+"latex-toolkit.commands" = ["*/*.md"]

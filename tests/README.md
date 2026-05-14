@@ -1,0 +1,1 @@
+Guidelines for authoring and running tests are located in `/docs/tests.md`

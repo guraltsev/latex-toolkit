@@ -1,3 +1,10 @@
+"""Library tests for aligned-environment shorthand conversion.
+
+The tests call the public text conversion function directly and assert
+observable source rewrites. CLI write policy and low-level token spans are out
+of scope.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,14 +13,17 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+TOOLKIT = SRC / "latex-toolkit"
+if str(TOOLKIT) not in sys.path:
+    sys.path.insert(0, str(TOOLKIT))
 
 from lib.aligned_baea import convert_text  # noqa: E402
 
 
 class AlignedBaeaLibraryTests(TestCase):
     def test_forward_conversion_only_compresses_exact_aligned_t_in_document_body(self) -> None:
+        """Forward conversion compresses exact document-body aligned[t] blocks only."""
+
         source = (
             "\\documentclass{article}\n"
             "\\newcommand{\\keep}{\\begin{aligned}[t]p\\end{aligned}}\n"
@@ -40,6 +50,8 @@ class AlignedBaeaLibraryTests(TestCase):
         )
 
     def test_reverse_conversion_respects_control_word_boundaries(self) -> None:
+        """Reverse conversion expands shorthand tokens without touching longer names."""
+
         source = (
             "\\begin{document}\n"
             "\\ba x\\ea alpha\n"

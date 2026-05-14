@@ -1,3 +1,10 @@
+"""Library tests for display-math and equation conversions.
+
+The tests call public text conversion functions and assert observable LaTeX
+rewrites. CLI backup behavior and parser implementation details are out of
+scope.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -6,8 +13,9 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+TOOLKIT = SRC / "latex-toolkit"
+if str(TOOLKIT) not in sys.path:
+    sys.path.insert(0, str(TOOLKIT))
 
 from lib.equation_eqnum_displaymath import convert_text as convert_eqn_eqnum_text  # noqa: E402
 from lib.equation_star_displaymath import convert_text as convert_eqn_star_text  # noqa: E402
@@ -15,6 +23,8 @@ from lib.equation_star_displaymath import convert_text as convert_eqn_star_text 
 
 class EquationDisplayMathLibraryTests(TestCase):
     def test_equation_star_forward_only_rewrites_document_body_and_preserves_eqnum_displaymath(self) -> None:
+        """Forward equation* conversion rewrites document-body environments only."""
+
         source = (
             "\\documentclass{article}\n"
             "\\newcommand{\\keep}{\\begin{equation*}p\\end{equation*}}\n"
@@ -41,6 +51,8 @@ class EquationDisplayMathLibraryTests(TestCase):
         )
 
     def test_equation_star_reverse_skips_standalone_eqnum_blocks(self) -> None:
+        """Reverse equation* conversion leaves standalone eqnum display math alone."""
+
         source = (
             "\\begin{document}\n"
             "\\[x\\]\n"
@@ -63,6 +75,8 @@ class EquationDisplayMathLibraryTests(TestCase):
         )
 
     def test_equation_forward_inserts_eqnum_without_double_spacing_before_leading_whitespace(self) -> None:
+        """Numbered equation conversion preserves leading body whitespace."""
+
         source = "\\begin{document}\\begin{equation}\n  x+y\n\\end{equation}\\end{document}"
 
         converted = convert_eqn_eqnum_text(source)
@@ -70,6 +84,8 @@ class EquationDisplayMathLibraryTests(TestCase):
         self.assertEqual(converted, "\\begin{document}\\[\\eqnum\n  x+y\n\\]\\end{document}")
 
     def test_eqnum_displaymath_reverse_only_rewrites_standalone_eqnum_prefix(self) -> None:
+        """Eqnum reverse conversion rewrites only standalone eqnum prefixes."""
+
         source = (
             "\\begin{document}\n"
             "\\[\\eqnum x\\]\n"
