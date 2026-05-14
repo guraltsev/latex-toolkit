@@ -199,13 +199,50 @@ python -m latex-toolkit.commands.tmscript2substack .\paper.tex
 python -m latex-toolkit.commands.tmscript2substack .\paper.tex -o .\paper.converted.tex
 ```
 
+### `proofstar2proof`
+
+Rewrites TeXmacs `\begin{proof*}{Title} ... \end{proof*}` environments as
+`\begin{proof}[Title] ... \end{proof}` environments. Use `--reverse` to rewrite
+titled `proof` environments back to TeXmacs `proof*` environments.
+
+```powershell
+python -m latex-toolkit.commands.proofstar2proof .\paper.tex
+python -m latex-toolkit.commands.proofstar2proof .\paper.tex --reverse
+python -m latex-toolkit.commands.proofstar2proof .\paper.tex -o .\paper.converted.tex
+```
+
+### `proof2proofstar`
+
+Runs the reverse-direction conversion from
+`\begin{proof}[Title] ... \end{proof}` back to
+`\begin{proof*}{Title} ... \end{proof*}`.
+
+```powershell
+python -m latex-toolkit.commands.proof2proofstar .\paper.tex
+python -m latex-toolkit.commands.proof2proofstar .\paper.tex -o .\paper.converted.tex
+```
+
 ### `texmacs_latex_to_llm_latex.cmd`
 
 Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
-`ltae2aligned`, `tmscript2substack`, then `uni2tex`.
+`ltae2aligned`, `tmscript2substack`, `proofstar2proof`, then `uni2tex`.
 
 ```powershell
 .\texmacs_latex_to_llm_latex.cmd
+```
+
+### `snapper_format`
+
+Formats LaTeX prose with the external `snapper` semantic line break formatter
+so each emitted prose line contains at most one sentence. The first formatting
+run downloads `snapper-fmt` into `local_lib/snapper-fmt`; that directory is kept
+in git with `.gitkeep`, while the installed runtime is ignored.
+
+```powershell
+python -m latex-toolkit.commands.snapper_format .\paper.tex
+python -m latex-toolkit.commands.snapper_format .\paper.tex -o .\paper.snapped.tex
+python -m latex-toolkit.commands.snapper_format --clipboard
+.\snapper_format.cmd .\paper.tex
 ```
 
 ### `eqn-star2dmath`

@@ -26,6 +26,9 @@ if errorlevel 1 exit /b %ERRORLEVEL%
 call :run tmscript2substack
 if errorlevel 1 exit /b %ERRORLEVEL%
 
+call :run proofstar2proof
+if errorlevel 1 exit /b %ERRORLEVEL%
+
 call :run uni2tex
 if errorlevel 1 exit /b %ERRORLEVEL%
 
