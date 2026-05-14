@@ -133,6 +133,29 @@ python -m latex-toolkit.commands.uni2tex .\paper.tex
 python -m latex-toolkit.commands.uni2tex .\paper.tex -o .\paper.ascii.tex
 ```
 
+### `dollar2bracket`
+
+Rewrites matched `$...$` and `$$...$$` math delimiters as `\(...\)` and
+`\[...\]`. Use `--reverse` to convert bracket delimiters back to dollar
+delimiters. Comments, escaped dollar signs, and unmatched delimiters are
+preserved.
+
+```powershell
+python -m latex-toolkit.commands.dollar2bracket .\paper.tex
+python -m latex-toolkit.commands.dollar2bracket .\paper.tex --reverse
+python -m latex-toolkit.commands.dollar2bracket .\paper.tex -o .\paper.converted.tex
+```
+
+### `bracket2dollar`
+
+Runs the reverse-direction conversion from `\(...\)` and `\[...\]` back to
+`$...$` and `$$...$$`.
+
+```powershell
+python -m latex-toolkit.commands.bracket2dollar .\paper.tex
+python -m latex-toolkit.commands.bracket2dollar .\paper.tex -o .\paper.converted.tex
+```
+
 ### `aligned2baea`
 
 Compresses exact `\begin{aligned}[t] ... \end{aligned}` blocks into the local
@@ -164,6 +187,25 @@ Rewrites `\begin{ltae} ... \end{ltae}` environments as
 ```powershell
 python -m latex-toolkit.commands.ltae2aligned .\paper.tex
 python -m latex-toolkit.commands.ltae2aligned .\paper.tex -o .\paper.converted.tex
+```
+
+### `tmscript2substack`
+
+Rewrites TeXmacs `\tmscript{\begin{array}{c} ... \end{array}}` constructs as
+`\substack{...}`.
+
+```powershell
+python -m latex-toolkit.commands.tmscript2substack .\paper.tex
+python -m latex-toolkit.commands.tmscript2substack .\paper.tex -o .\paper.converted.tex
+```
+
+### `texmacs_latex_to_llm_latex.cmd`
+
+Runs a clipboard pipeline for TeXmacs-generated LaTeX: `ltae2aligned`,
+`dollar2bracket`, then `uni2tex`.
+
+```powershell
+.\texmacs_latex_to_llm_latex.cmd
 ```
 
 ### `eqn-star2dmath`
