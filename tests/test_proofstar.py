@@ -12,11 +12,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-TOOLKIT = SRC / "latex-toolkit"
-if str(TOOLKIT) not in sys.path:
-    sys.path.insert(0, str(TOOLKIT))
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from lib.proofstar import convert_text  # noqa: E402
+from latex_toolkit.lib.proofstar import convert_text  # noqa: E402
 
 
 class ProofstarLibraryTests(TestCase):

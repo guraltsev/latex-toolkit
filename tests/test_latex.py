@@ -13,12 +13,11 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-TOOLKIT = SRC / "latex-toolkit"
-if str(TOOLKIT) not in sys.path:
-    sys.path.insert(0, str(TOOLKIT))
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from lib.core import TexFile, read_tex_file, write_tex_file  # noqa: E402
-from lib.latex import expand_includes, walk_tex_sources  # noqa: E402
+from latex_toolkit.lib.core import TexFile, read_tex_file, write_tex_file  # noqa: E402
+from latex_toolkit.lib.latex import expand_includes, walk_tex_sources  # noqa: E402
 
 
 class LatexLibraryTests(TestCase):

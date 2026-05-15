@@ -17,5 +17,5 @@ if errorlevel 1 (
     exit /b 1
 )
 
-python -m latex-toolkit.commands.snapper_format %*
+python -m latex_toolkit.commands.snapper_format %*
 exit /b %ERRORLEVEL%

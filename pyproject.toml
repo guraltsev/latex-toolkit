@@ -16,7 +16,7 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["latex-toolkit*"]
+include = ["latex_toolkit*"]
 
 [tool.setuptools.package-data]
-"latex-toolkit.commands" = ["*/*.md"]
+"latex_toolkit.commands" = ["*/*.md"]

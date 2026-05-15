@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""CLI for bracing arguments passed to configured unary LaTeX macros."""
+
+from __future__ import annotations
+
+from collections.abc import Iterable
+from pathlib import Path
+import argparse
+
+from latex_toolkit.lib.backup import DEFAULT_BACKUP_DIR, backup_file
+from latex_toolkit.lib.core import write_tex_file
+from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
+from latex_toolkit.lib.unary_macro_bracing import convert_tex_file, convert_text, load_macro_commands
+
+# This command overwrites source files unless output or clipboard mode is used.
+OVERWRITES_SOURCE_TEX = True
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="brace_unary_macros",
+        description=(
+            "Rewrite configured unary macro uses such as \\bar x as \\bar{x}. "
+            "By default the input file is overwritten; use -o/--output to write elsewhere."
+        ),
+    )
+    parser.add_argument("input", nargs="?", help="Input .tex file.")
+    parser.add_argument(
+        "--clipboard",
+        action="store_true",
+        help="Read LaTeX from the clipboard and replace it with converted output.",
+    )
+    parser.add_argument(
+        "--macros-file",
+        help=(
+            "Absolute path to a TOML file whose top-level commands array replaces "
+            "the default unary macro list."
+        ),
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        "--output-file",
+        dest="output",
+        help="Write converted output to this path instead of overwriting the input file.",
+    )
+    parser.add_argument(
+        "-B",
+        "--no-backup",
+        action="store_true",
+        help="Do not create a backup before overwriting the input file.",
+    )
+    parser.add_argument(
+        "--backup-dir",
+        default=DEFAULT_BACKUP_DIR,
+        help="Relative or absolute directory for backups when overwriting. Default: %(default)s",
+    )
+    return parser
+
+
+def transform_text(text: str, *, commands: Iterable[str] | None = None) -> str:
+    """Brace configured unary macro arguments in ``text``.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to transform.
+    commands : collections.abc.Iterable of str, optional
+        Macro command names to use instead of the default command list.
+
+    Returns
+    -------
+    str
+        Source text with matching unbraced macro arguments wrapped in braces.
+    """
+
+    return convert_text(text, commands=commands)
+
+
+def main(argv: list[str] | None = None) -> int:
+    def run() -> int:
+        parser = build_parser()
+        args = parser.parse_args(argv)
+        commands = load_macro_commands(args.macros_file) if args.macros_file else None
+
+        if args.clipboard:
+            if args.input is not None or args.output is not None:
+                parser.error("--clipboard cannot be combined with input or output paths.")
+            run_clipboard_transform(
+                "brace_unary_macros",
+                lambda text: transform_text(text, commands=commands),
+            )
+            return 0
+
+        if args.input is None:
+            parser.error("the following arguments are required: input")
+
+        input_path = Path(args.input).expanduser().resolve()
+        converted = convert_tex_file(input_path, commands=commands)
+        output_path = Path(args.output).expanduser().resolve() if args.output else input_path
+
+        if output_path == input_path and not args.no_backup:
+            backup_file(input_path, args.backup_dir)
+
+        write_tex_file(converted, output_path)
+        return 0
+
+    return run_command("brace_unary_macros", run)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())

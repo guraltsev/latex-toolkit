@@ -15,11 +15,10 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-TOOLKIT = SRC / "latex-toolkit"
-if str(TOOLKIT) not in sys.path:
-    sys.path.insert(0, str(TOOLKIT))
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from lib.backup import backup_file  # noqa: E402
+from latex_toolkit.lib.backup import backup_file  # noqa: E402
 
 
 class BackupTests(TestCase):
@@ -31,7 +30,7 @@ class BackupTests(TestCase):
             source = work / "paper.tex"
             source.write_text("hello", encoding="utf-8")
 
-            with patch("lib.backup.current_backup_timestamp", return_value="20260412-0315"):
+            with patch("latex_toolkit.lib.backup.current_backup_timestamp", return_value="20260412-0315"):
                 backup_path = backup_file(source)
 
             self.assertEqual(backup_path.name, "20260412-0315--paper.tex")
@@ -46,7 +45,7 @@ class BackupTests(TestCase):
             source = work / "paper.tex"
             source.write_text("hello", encoding="utf-8")
 
-            with patch("lib.backup.current_backup_timestamp", return_value="20260412-0315"):
+            with patch("latex_toolkit.lib.backup.current_backup_timestamp", return_value="20260412-0315"):
                 first = backup_file(source)
                 second = backup_file(source)
 

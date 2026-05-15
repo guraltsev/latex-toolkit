@@ -2,15 +2,15 @@
 
 ## Status
 
-Open. This is the major architecture alignment issue.
+Resolved. The canonical source layout now uses underscore package names.
 
 ## Problem
 
 `docs/development_guide.md` says command package directories use underscores,
-not dashes. The current source tree still has dash-named Python package
-directories. The top-level source package is `src/latex-toolkit`, and command
-packages include `strip-comments`, `expand-includes`, `eqn-star2dmath`,
-`eqn2dmath-eqnum`, `dmath2eqn-star`, and `dmath-eqnum2eqn`.
+not dashes. The source tree previously had dash-named Python package
+directories, including command packages such as `strip-comments`,
+`expand-includes`, `eqn-star2dmath`, `eqn2dmath-eqnum`,
+`dmath2eqn-star`, and `dmath-eqnum2eqn`.
 
 The README also presents dash spellings as the command package spelling. That
 contradicts the guide's rule that user-facing historical or shell-facing names
@@ -20,9 +20,9 @@ Python identifiers.
 ## Impact
 
 Dash-named packages can be executed with `python -m`, but they are awkward for
-normal Python imports and tooling. The repo has compensating machinery:
+normal Python imports and tooling. The repo had compensating machinery:
 
-- `src/latex-toolkit/__init__.py` mutates `sys.path` and package `__path__` to
+- `src/latex_toolkit/__init__.py` mutates `sys.path` and package `__path__` to
   support source-checkout command execution.
 - Reverse-command aliases load sibling command modules with
   `importlib.util.spec_from_file_location(...)`.
@@ -61,3 +61,15 @@ Keep dash spellings only as user-facing compatibility shims when needed.
 - Existing documented command invocations either still work through explicit
   compatibility shims or are intentionally updated in README and command docs.
 - The full test suite passes.
+
+## Resolution
+
+- Renamed the top-level source package to `latex_toolkit`.
+- Renamed dash-named command packages to underscore identifiers, including
+  `strip_comments`, `expand_includes`, `list_graphics`,
+  `eqn_star2dmath`, `eqn2dmath_eqnum`, `dmath2eqn_star`, and
+  `dmath_eqnum2eqn`.
+- Updated command imports, metadata, README examples, command docs, local
+  launchers, and tests to use canonical underscore module paths.
+- Kept historical dash spellings as user-facing command labels in help text
+  and log messages where those names already existed.

@@ -15,7 +15,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-COMMANDS_ROOT = SRC / "latex-toolkit" / "commands"
+COMMANDS_ROOT = SRC / "latex_toolkit" / "commands"
 
 
 def _available_commands() -> tuple[str, ...]:
@@ -44,7 +44,7 @@ class CommandModuleInvocationTests(TestCase):
         for command_name in _available_commands():
             with self.subTest(command=command_name):
                 result = subprocess.run(
-                    [sys.executable, "-m", f"latex-toolkit.commands.{command_name}", "--help"],
+                    [sys.executable, "-m", f"latex_toolkit.commands.{command_name}", "--help"],
                     env=_pythonpath_env(),
                     text=True,
                     capture_output=True,
@@ -52,13 +52,13 @@ class CommandModuleInvocationTests(TestCase):
                 )
 
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertIn(command_name, result.stdout)
+                self.assertIn("usage:", result.stdout)
 
-    def test_direct_command_alias_omits_commands_segment(self) -> None:
-        """A command can run directly under the root package name."""
+    def test_underscore_module_keeps_historical_help_name(self) -> None:
+        """Canonical underscore modules can keep dash spellings in help text."""
 
         result = subprocess.run(
-            [sys.executable, "-m", "latex-toolkit.strip-comments", "--help"],
+            [sys.executable, "-m", "latex_toolkit.commands.strip_comments", "--help"],
             env=_pythonpath_env(),
             text=True,
             capture_output=True,
@@ -72,7 +72,7 @@ class CommandModuleInvocationTests(TestCase):
         """A file-oriented command reports a parser error when no input is given."""
 
         result = subprocess.run(
-            [sys.executable, "-m", "latex-toolkit.commands.strip-comments"],
+            [sys.executable, "-m", "latex_toolkit.commands.strip_comments"],
             env=_pythonpath_env(),
             text=True,
             capture_output=True,
@@ -86,7 +86,7 @@ class CommandModuleInvocationTests(TestCase):
         """A command reports an expected file failure without a Python traceback."""
 
         result = subprocess.run(
-            [sys.executable, "-m", "latex-toolkit.commands.strip-comments", "missing.tex"],
+            [sys.executable, "-m", "latex_toolkit.commands.strip_comments", "missing.tex"],
             env=_pythonpath_env(),
             text=True,
             capture_output=True,

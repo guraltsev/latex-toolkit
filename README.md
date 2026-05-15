@@ -10,7 +10,7 @@ local `src` directory on `PYTHONPATH` for the current PowerShell session:
 
 ```powershell
 $env:PYTHONPATH = (Resolve-Path .\src).Path
-python -m latex-toolkit.commands.strip-comments .\paper.tex
+python -m latex_toolkit.commands.strip_comments .\paper.tex
 ```
 
 You can also run from `src` directly because Python automatically puts the
@@ -18,7 +18,7 @@ current directory on the module search path:
 
 ```powershell
 cd path\to\latex-toolkit\src
-python -m latex-toolkit.commands.strip-comments ..\paper.tex
+python -m latex_toolkit.commands.strip_comments ..\paper.tex
 ```
 
 Use absolute paths or paths relative to your current working directory for TeX
@@ -29,22 +29,19 @@ files and output files.
 Every command can run as a Python package without naming its `main` module:
 
 ```powershell
-python -m latex-toolkit.commands.<command-name> <input.tex> [options]
+python -m latex_toolkit.commands.<command_name> <input.tex> [options]
 ```
 
-Command names keep their directory spelling, including hyphens:
+Python module names use underscores because they are importable package names:
 
 ```powershell
-python -m latex-toolkit.commands.eqn-star2dmath .\paper.tex
-python -m latex-toolkit.commands.eqn2dmath-eqnum .\paper.tex --reverse
+python -m latex_toolkit.commands.eqn_star2dmath .\paper.tex
+python -m latex_toolkit.commands.eqn2dmath_eqnum .\paper.tex --reverse
 ```
 
-For convenience, the root package also looks inside `commands`, so the shorter
-form works too:
-
-```powershell
-python -m latex-toolkit.strip-comments .\paper.tex
-```
+Some commands still print historical dash spellings such as `strip-comments`
+in help text and log messages; those are command labels, not Python module
+paths.
 
 ## File Writes
 
@@ -61,7 +58,7 @@ Write to a separate output file with `--output-file` or `-o`. In that mode, no
 backup is created and the input file is left unchanged.
 
 ```powershell
-python -m latex-toolkit.commands.expand-includes .\main.tex --output-file .\flat.tex
+python -m latex_toolkit.commands.expand_includes .\main.tex --output-file .\flat.tex
 ```
 
 Use `-B` or `--no-backup` only when overwriting the input file without creating
@@ -74,7 +71,7 @@ from the system clipboard and replaces the clipboard contents with the result.
 Do not pass input or output paths with `--clipboard`.
 
 ```powershell
-python -m latex-toolkit.commands.tex2uni --clipboard
+python -m latex_toolkit.commands.tex2uni --clipboard
 ```
 
 ## Commands
@@ -84,8 +81,8 @@ python -m latex-toolkit.commands.tex2uni --clipboard
 Removes LaTeX `%` comments while preserving escaped percent signs such as `\%`.
 
 ```powershell
-python -m latex-toolkit.commands.strip-comments .\paper.tex
-python -m latex-toolkit.commands.strip-comments .\paper.tex -o .\paper.clean.tex
+python -m latex_toolkit.commands.strip_comments .\paper.tex
+python -m latex_toolkit.commands.strip_comments .\paper.tex -o .\paper.clean.tex
 ```
 
 ### `expand-includes`
@@ -94,8 +91,8 @@ Flattens a document by recursively expanding `\input{...}`, `\include{...}`,
 `\subfile{...}`, and `\subfileinclude{...}` references.
 
 ```powershell
-python -m latex-toolkit.commands.expand-includes .\main.tex
-python -m latex-toolkit.commands.expand-includes .\main.tex --output-file .\flat.tex
+python -m latex_toolkit.commands.expand_includes .\main.tex
+python -m latex_toolkit.commands.expand_includes .\main.tex --output-file .\flat.tex
 ```
 
 ### `list-graphics`
@@ -105,10 +102,10 @@ source files. This command prints to standard output and does not overwrite TeX
 files.
 
 ```powershell
-python -m latex-toolkit.commands.list-graphics .\thesis.tex
-python -m latex-toolkit.commands.list-graphics .\thesis.tex --unique
-python -m latex-toolkit.commands.list-graphics .\thesis.tex --with-source
-python -m latex-toolkit.commands.list-graphics .\thesis.tex --no-recursive
+python -m latex_toolkit.commands.list_graphics .\thesis.tex
+python -m latex_toolkit.commands.list_graphics .\thesis.tex --unique
+python -m latex_toolkit.commands.list_graphics .\thesis.tex --with-source
+python -m latex_toolkit.commands.list_graphics .\thesis.tex --no-recursive
 ```
 
 ### `tex2uni`
@@ -118,9 +115,9 @@ content. Use `--reverse` to convert mapped Unicode symbols back to LaTeX
 macros.
 
 ```powershell
-python -m latex-toolkit.commands.tex2uni .\paper.tex
-python -m latex-toolkit.commands.tex2uni .\paper.tex --reverse
-python -m latex-toolkit.commands.tex2uni .\paper.tex -o .\paper.unicode.tex
+python -m latex_toolkit.commands.tex2uni .\paper.tex
+python -m latex_toolkit.commands.tex2uni .\paper.tex --reverse
+python -m latex_toolkit.commands.tex2uni .\paper.tex -o .\paper.unicode.tex
 ```
 
 ### `uni2tex`
@@ -129,8 +126,8 @@ Runs the reverse-direction conversion from mapped Unicode math symbols back to
 LaTeX macros.
 
 ```powershell
-python -m latex-toolkit.commands.uni2tex .\paper.tex
-python -m latex-toolkit.commands.uni2tex .\paper.tex -o .\paper.ascii.tex
+python -m latex_toolkit.commands.uni2tex .\paper.tex
+python -m latex_toolkit.commands.uni2tex .\paper.tex -o .\paper.ascii.tex
 ```
 
 ### `dollar2bracket`
@@ -141,9 +138,9 @@ delimiters. Comments, escaped dollar signs, and unmatched delimiters are
 preserved.
 
 ```powershell
-python -m latex-toolkit.commands.dollar2bracket .\paper.tex
-python -m latex-toolkit.commands.dollar2bracket .\paper.tex --reverse
-python -m latex-toolkit.commands.dollar2bracket .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.dollar2bracket .\paper.tex
+python -m latex_toolkit.commands.dollar2bracket .\paper.tex --reverse
+python -m latex_toolkit.commands.dollar2bracket .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `bracket2dollar`
@@ -152,8 +149,8 @@ Runs the reverse-direction conversion from `\(...\)` and `\[...\]` back to
 `$...$` and `$$...$$`.
 
 ```powershell
-python -m latex-toolkit.commands.bracket2dollar .\paper.tex
-python -m latex-toolkit.commands.bracket2dollar .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.bracket2dollar .\paper.tex
+python -m latex_toolkit.commands.bracket2dollar .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `aligned2baea`
@@ -163,9 +160,9 @@ Compresses exact `\begin{aligned}[t] ... \end{aligned}` blocks into the local
 explicit `aligned` environments.
 
 ```powershell
-python -m latex-toolkit.commands.aligned2baea .\paper.tex
-python -m latex-toolkit.commands.aligned2baea .\paper.tex --reverse
-python -m latex-toolkit.commands.aligned2baea .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.aligned2baea .\paper.tex
+python -m latex_toolkit.commands.aligned2baea .\paper.tex --reverse
+python -m latex_toolkit.commands.aligned2baea .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `baea2aligned`
@@ -174,8 +171,8 @@ Runs the reverse-direction conversion from `\ba` / `\ea` back to explicit
 `aligned` environments.
 
 ```powershell
-python -m latex-toolkit.commands.baea2aligned .\paper.tex
-python -m latex-toolkit.commands.baea2aligned .\paper.tex -o .\paper.expanded.tex
+python -m latex_toolkit.commands.baea2aligned .\paper.tex
+python -m latex_toolkit.commands.baea2aligned .\paper.tex -o .\paper.expanded.tex
 ```
 
 ### `ltae2aligned`
@@ -185,8 +182,8 @@ Rewrites `\begin{ltae} ... \end{ltae}` environments as
 `&`. Nested environments such as `cases` keep their own row structure.
 
 ```powershell
-python -m latex-toolkit.commands.ltae2aligned .\paper.tex
-python -m latex-toolkit.commands.ltae2aligned .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.ltae2aligned .\paper.tex
+python -m latex_toolkit.commands.ltae2aligned .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `tmscript2substack`
@@ -195,8 +192,8 @@ Rewrites TeXmacs `\tmscript{\begin{array}{c} ... \end{array}}` constructs as
 `\substack{...}`.
 
 ```powershell
-python -m latex-toolkit.commands.tmscript2substack .\paper.tex
-python -m latex-toolkit.commands.tmscript2substack .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.tmscript2substack .\paper.tex
+python -m latex_toolkit.commands.tmscript2substack .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `tm_alignedt2ltae`
@@ -206,9 +203,9 @@ table is converted only when every row has exactly two cells and the first
 cell is empty.
 
 ```powershell
-python -m latex-toolkit.commands.tm_alignedt2ltae .\paper.tm
-python -m latex-toolkit.commands.tm_alignedt2ltae .\paper.tm -o .\paper.converted.tm
-python -m latex-toolkit.commands.tm_alignedt2ltae --clipboard
+python -m latex_toolkit.commands.tm_alignedt2ltae .\paper.tm
+python -m latex_toolkit.commands.tm_alignedt2ltae .\paper.tm -o .\paper.converted.tm
+python -m latex_toolkit.commands.tm_alignedt2ltae --clipboard
 ```
 
 ### `tm2tm.cmd`
@@ -227,9 +224,9 @@ Rewrites TeXmacs `\begin{proof*}{Title} ... \end{proof*}` environments as
 titled `proof` environments back to TeXmacs `proof*` environments.
 
 ```powershell
-python -m latex-toolkit.commands.proofstar2proof .\paper.tex
-python -m latex-toolkit.commands.proofstar2proof .\paper.tex --reverse
-python -m latex-toolkit.commands.proofstar2proof .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.proofstar2proof .\paper.tex
+python -m latex_toolkit.commands.proofstar2proof .\paper.tex --reverse
+python -m latex_toolkit.commands.proofstar2proof .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `proof2proofstar`
@@ -239,8 +236,8 @@ Runs the reverse-direction conversion from
 `\begin{proof*}{Title} ... \end{proof*}`.
 
 ```powershell
-python -m latex-toolkit.commands.proof2proofstar .\paper.tex
-python -m latex-toolkit.commands.proof2proofstar .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.proof2proofstar .\paper.tex
+python -m latex_toolkit.commands.proof2proofstar .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `brace_unary_macros`
@@ -250,8 +247,8 @@ The default list includes `\FT`, `\bar`, `\tilde`, `\dot`, and common math
 accent variants.
 
 ```powershell
-python -m latex-toolkit.commands.brace_unary_macros .\paper.tex
-python -m latex-toolkit.commands.brace_unary_macros .\paper.tex --macros-file C:\path\macros.toml
+python -m latex_toolkit.commands.brace_unary_macros .\paper.tex
+python -m latex_toolkit.commands.brace_unary_macros .\paper.tex --macros-file C:\path\macros.toml
 ```
 
 Custom TOML files replace the default list and use a top-level `commands`
@@ -269,9 +266,9 @@ size variants such as `\bigl\|`, `\Bigl\|`, and `\bigr\|` follow the same
 left/right convention.
 
 ```powershell
-python -m latex-toolkit.commands.texmacs_vert_delimiters .\paper.tex
-python -m latex-toolkit.commands.texmacs_vert_delimiters .\paper.tex -o .\paper.converted.tex
-python -m latex-toolkit.commands.texmacs_vert_delimiters --clipboard
+python -m latex_toolkit.commands.texmacs_vert_delimiters .\paper.tex
+python -m latex_toolkit.commands.texmacs_vert_delimiters .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.texmacs_vert_delimiters --clipboard
 ```
 
 ### `texmacs_latex_to_llm_latex.cmd`
@@ -301,9 +298,9 @@ run downloads `snapper-fmt` into `local_lib/snapper-fmt`; that directory is kept
 in git with `.gitkeep`, while the installed runtime is ignored.
 
 ```powershell
-python -m latex-toolkit.commands.snapper_format .\paper.tex
-python -m latex-toolkit.commands.snapper_format .\paper.tex -o .\paper.snapped.tex
-python -m latex-toolkit.commands.snapper_format --clipboard
+python -m latex_toolkit.commands.snapper_format .\paper.tex
+python -m latex_toolkit.commands.snapper_format .\paper.tex -o .\paper.snapped.tex
+python -m latex_toolkit.commands.snapper_format --clipboard
 .\snapper_format.cmd .\paper.tex
 ```
 
@@ -314,9 +311,9 @@ Rewrites `equation*` environments as plain `\[ ... \]` display math. Use
 `\eqnum` blocks are left untouched.
 
 ```powershell
-python -m latex-toolkit.commands.eqn-star2dmath .\paper.tex
-python -m latex-toolkit.commands.eqn-star2dmath .\paper.tex --reverse
-python -m latex-toolkit.commands.eqn-star2dmath .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.eqn_star2dmath .\paper.tex
+python -m latex_toolkit.commands.eqn_star2dmath .\paper.tex --reverse
+python -m latex_toolkit.commands.eqn_star2dmath .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `dmath2eqn-star`
@@ -325,8 +322,8 @@ Runs the reverse-direction conversion from plain `\[ ... \]` display math back
 to `equation*` environments.
 
 ```powershell
-python -m latex-toolkit.commands.dmath2eqn-star .\paper.tex
-python -m latex-toolkit.commands.dmath2eqn-star .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.dmath2eqn_star .\paper.tex
+python -m latex_toolkit.commands.dmath2eqn_star .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `eqn2dmath-eqnum`
@@ -336,9 +333,9 @@ Use `--reverse` to rewrite only standalone `\eqnum`-prefixed display math back
 to `equation`.
 
 ```powershell
-python -m latex-toolkit.commands.eqn2dmath-eqnum .\paper.tex
-python -m latex-toolkit.commands.eqn2dmath-eqnum .\paper.tex --reverse
-python -m latex-toolkit.commands.eqn2dmath-eqnum .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.eqn2dmath_eqnum .\paper.tex
+python -m latex_toolkit.commands.eqn2dmath_eqnum .\paper.tex --reverse
+python -m latex_toolkit.commands.eqn2dmath_eqnum .\paper.tex -o .\paper.converted.tex
 ```
 
 ### `dmath-eqnum2eqn`
@@ -347,6 +344,6 @@ Runs the reverse-direction conversion from `\[\eqnum ... \]` display math back
 to `equation` environments.
 
 ```powershell
-python -m latex-toolkit.commands.dmath-eqnum2eqn .\paper.tex
-python -m latex-toolkit.commands.dmath-eqnum2eqn .\paper.tex -o .\paper.converted.tex
+python -m latex_toolkit.commands.dmath_eqnum2eqn .\paper.tex
+python -m latex_toolkit.commands.dmath_eqnum2eqn .\paper.tex -o .\paper.converted.tex
 ```

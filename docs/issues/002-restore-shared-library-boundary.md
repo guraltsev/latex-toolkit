@@ -6,7 +6,7 @@ Open.
 
 ## Problem
 
-`docs/development_guide.md` says `src/latex-toolkit/lib/` is for meaningful
+`docs/development_guide.md` says `src/latex_toolkit/lib/` is for meaningful
 shared code and should not receive command-specific behavior merely to shorten
 command files or simplify imports.
 

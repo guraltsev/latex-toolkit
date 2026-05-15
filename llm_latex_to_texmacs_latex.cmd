@@ -56,9 +56,9 @@ exit /b 0
 set "COMMAND_NAME=brace_unary_macros"
 >&2 echo latex-toolkit: running %COMMAND_NAME%...
 if "%MACROS_FILE%"=="" (
-    python -m latex-toolkit.commands.%COMMAND_NAME% --clipboard
+    python -m latex_toolkit.commands.%COMMAND_NAME% --clipboard
 ) else (
-    python -m latex-toolkit.commands.%COMMAND_NAME% --clipboard --macros-file "%MACROS_FILE%"
+    python -m latex_toolkit.commands.%COMMAND_NAME% --clipboard --macros-file "%MACROS_FILE%"
 )
 set "STATUS=%ERRORLEVEL%"
 if not "%STATUS%"=="0" (
@@ -72,7 +72,7 @@ exit /b 0
 :run
 set "COMMAND_NAME=%~1"
 >&2 echo latex-toolkit: running %COMMAND_NAME%...
-python -m latex-toolkit.commands.%COMMAND_NAME% --clipboard
+python -m latex_toolkit.commands.%COMMAND_NAME% --clipboard
 set "STATUS=%ERRORLEVEL%"
 if not "%STATUS%"=="0" (
     >&2 echo latex-toolkit: %COMMAND_NAME% failed with exit code %STATUS%.

@@ -26,7 +26,7 @@ class DisplayMathEquationCommandTests(TestCase):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(SRC)
         return subprocess.run(
-            [sys.executable, "-m", f"latex-toolkit.commands.{command_name}", *command_args],
+            [sys.executable, "-m", f"latex_toolkit.commands.{command_name}", *command_args],
             cwd=str(cwd) if cwd is not None else None,
             env=env,
             text=True,
@@ -53,7 +53,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("eqn-star2dmath", str(copied_input))
+            result = self.run_cli("eqn_star2dmath", str(copied_input))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -70,7 +70,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("eqn-star2dmath", str(copied_input), "--reverse")
+            result = self.run_cli("eqn_star2dmath", str(copied_input), "--reverse")
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -87,7 +87,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("dmath2eqn-star", str(copied_input))
+            result = self.run_cli("dmath2eqn_star", str(copied_input))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -105,7 +105,7 @@ class DisplayMathEquationCommandTests(TestCase):
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
             output_path = work / "converted.tex"
 
-            result = self.run_cli("eqn-star2dmath", str(copied_input), "-o", str(output_path))
+            result = self.run_cli("eqn_star2dmath", str(copied_input), "-o", str(output_path))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), original_text)
@@ -120,7 +120,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("eqn2dmath-eqnum", str(copied_input))
+            result = self.run_cli("eqn2dmath_eqnum", str(copied_input))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -137,7 +137,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("eqn2dmath-eqnum", str(copied_input), "--reverse")
+            result = self.run_cli("eqn2dmath_eqnum", str(copied_input), "--reverse")
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -154,7 +154,7 @@ class DisplayMathEquationCommandTests(TestCase):
             work = Path(temp_dir)
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
 
-            result = self.run_cli("dmath-eqnum2eqn", str(copied_input))
+            result = self.run_cli("dmath_eqnum2eqn", str(copied_input))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), expected_text)
@@ -172,7 +172,7 @@ class DisplayMathEquationCommandTests(TestCase):
             copied_input, original_text, expected_text = self._copy_fixture_input(fixture_dir, work)
             output_path = work / "converted.tex"
 
-            result = self.run_cli("eqn2dmath-eqnum", str(copied_input), "-o", str(output_path))
+            result = self.run_cli("eqn2dmath_eqnum", str(copied_input), "-o", str(output_path))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(copied_input.read_text(encoding="utf-8"), original_text)

@@ -24,7 +24,7 @@ class CommandTests(TestCase):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(SRC)
         return subprocess.run(
-            [sys.executable, "-m", f"latex-toolkit.commands.{command_name}", *command_args],
+            [sys.executable, "-m", f"latex_toolkit.commands.{command_name}", *command_args],
             cwd=str(cwd) if cwd is not None else None,
             env=env,
             text=True,
@@ -43,7 +43,7 @@ class CommandTests(TestCase):
             original_main = "Intro\n\\input{chapter}\nDone\n"
             main.write_text(original_main, encoding="utf-8")
 
-            result = self.run_cli("expand-includes", str(main))
+            result = self.run_cli("expand_includes", str(main))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout, "")
@@ -65,7 +65,7 @@ class CommandTests(TestCase):
             original_main = "Intro\n\\input{chapter}\nDone\n"
             main.write_text(original_main, encoding="utf-8")
 
-            result = self.run_cli("expand-includes", str(main), "--output-file", str(output))
+            result = self.run_cli("expand_includes", str(main), "--output-file", str(output))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(main.read_text(encoding="utf-8"), original_main)
@@ -81,7 +81,7 @@ class CommandTests(TestCase):
             original = "keep \\% literal % drop me\n"
             source.write_text(original, encoding="utf-8")
 
-            result = self.run_cli("strip-comments", str(source))
+            result = self.run_cli("strip_comments", str(source))
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(source.read_text(encoding="utf-8"), "keep \\% literal \n")
@@ -116,7 +116,7 @@ class CommandTests(TestCase):
                 encoding="utf-8",
             )
 
-            result = self.run_cli("list-graphics", str(work / "main.tex"), "--unique")
+            result = self.run_cli("list_graphics", str(work / "main.tex"), "--unique")
 
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.splitlines(), ["figures/a.pdf", "figures/b.pdf"])

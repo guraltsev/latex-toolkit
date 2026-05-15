@@ -16,7 +16,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-COMMANDS_ROOT = SRC / "latex-toolkit" / "commands"
+COMMANDS_ROOT = SRC / "latex_toolkit" / "commands"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
@@ -35,7 +35,7 @@ def _available_commands() -> tuple[str, ...]:
 def _load_command_module(command_name: str) -> object:
     """Import a command implementation module for parser inspection."""
 
-    return importlib.import_module(f"latex-toolkit.commands.{command_name}.main")
+    return importlib.import_module(f"latex_toolkit.commands.{command_name}.main")
 
 
 def _command_entrypoint(command_name: str) -> Path:
@@ -51,7 +51,7 @@ def _imports_backup_file(command_name: str) -> bool:
     for node in ast.walk(tree):
         if not isinstance(node, ast.ImportFrom):
             continue
-        if node.module != "lib.backup":
+        if node.module != "latex_toolkit.lib.backup":
             continue
         if any(alias.name == "backup_file" for alias in node.names):
             return True
@@ -82,7 +82,7 @@ class WritePolicyTests(TestCase):
     def test_read_only_commands_opt_out_explicitly(self) -> None:
         """Read-only commands declare that they do not overwrite source TeX."""
 
-        module = _load_command_module("list-graphics")
+        module = _load_command_module("list_graphics")
         self.assertIs(getattr(module, "OVERWRITES_SOURCE_TEX", True), False)
 
     def test_commands_expose_clipboard_mode(self) -> None:
@@ -112,7 +112,7 @@ class WritePolicyTests(TestCase):
             with self.subTest(command=command_name):
                 self.assertTrue(
                     _imports_backup_file(command_name),
-                    f"{command_name} must import backup_file from lib.backup",
+                    f"{command_name} must import backup_file from latex_toolkit.lib.backup",
                 )
                 option_strings = _parser_option_strings(command_name)
                 self.assertIn("-B", option_strings)

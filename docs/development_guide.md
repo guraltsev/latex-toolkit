@@ -5,7 +5,7 @@ ordinary Python style, docstring format, or test policy.
 
 ## Library Boundary
 
-`src/latex-toolkit/lib/` is for meaningful shared code.
+`src/latex_toolkit/lib/` is for meaningful shared code.
 
 Put code in `lib` only when it is reusable across command families, represents
 shared infrastructure, or is an intentional public Python building block. Good

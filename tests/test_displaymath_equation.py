@@ -13,12 +13,11 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-TOOLKIT = SRC / "latex-toolkit"
-if str(TOOLKIT) not in sys.path:
-    sys.path.insert(0, str(TOOLKIT))
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-from lib.equation_eqnum_displaymath import convert_text as convert_eqn_eqnum_text  # noqa: E402
-from lib.equation_star_displaymath import convert_text as convert_eqn_star_text  # noqa: E402
+from latex_toolkit.lib.equation_eqnum_displaymath import convert_text as convert_eqn_eqnum_text  # noqa: E402
+from latex_toolkit.lib.equation_star_displaymath import convert_text as convert_eqn_star_text  # noqa: E402
 
 
 class EquationDisplayMathLibraryTests(TestCase):

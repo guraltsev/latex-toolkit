@@ -26,7 +26,7 @@ class TexmacsAlignedLtaeCommandTests(TestCase):
         env = os.environ.copy()
         env["PYTHONPATH"] = str(SRC)
         return subprocess.run(
-            [sys.executable, "-m", f"latex-toolkit.commands.{command_name}", *command_args],
+            [sys.executable, "-m", f"latex_toolkit.commands.{command_name}", *command_args],
             cwd=str(cwd) if cwd is not None else None,
             env=env,
             text=True,
