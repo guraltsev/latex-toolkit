@@ -261,6 +261,19 @@ array. Use TOML literal strings to avoid escaping backslashes:
 commands = ['\FT', '\bar', '\tilde']
 ```
 
+### `texmacs_vert_delimiters`
+
+Rewrites sized `\|` delimiters to explicit TeXmacs-friendly delimiter commands:
+`\left\|` becomes `\left \lVert`, `\right\|` becomes `\right \rVert`, and
+size variants such as `\bigl\|`, `\Bigl\|`, and `\bigr\|` follow the same
+left/right convention.
+
+```powershell
+python -m latex-toolkit.commands.texmacs_vert_delimiters .\paper.tex
+python -m latex-toolkit.commands.texmacs_vert_delimiters .\paper.tex -o .\paper.converted.tex
+python -m latex-toolkit.commands.texmacs_vert_delimiters --clipboard
+```
+
 ### `texmacs_latex_to_llm_latex.cmd`
 
 Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
@@ -273,7 +286,7 @@ Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
 ### `llm_latex_to_texmacs_latex.cmd`
 
 Runs a clipboard conversion for LLM-friendly LaTeX headed back to TeXmacs:
-`brace_unary_macros`, then `proof2proofstar`.
+`brace_unary_macros`, `texmacs_vert_delimiters`, then `proof2proofstar`.
 
 ```powershell
 .\llm_latex_to_texmacs_latex.cmd

@@ -43,6 +43,9 @@ if errorlevel 1 (
 call :run_brace_unary_macros
 if errorlevel 1 exit /b %ERRORLEVEL%
 
+call :run texmacs_vert_delimiters
+if errorlevel 1 exit /b %ERRORLEVEL%
+
 call :run proof2proofstar
 if errorlevel 1 exit /b %ERRORLEVEL%
 
