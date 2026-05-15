@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 
-from .core import TexFile, read_tex_file
-from .latex_parser import (
+from latex_toolkit.lib.core import TexFile, read_tex_file
+from latex_toolkit.lib.latex_parser import (
     extract_environment_name,
     find_matching_environment_block,
     split_document_regions,

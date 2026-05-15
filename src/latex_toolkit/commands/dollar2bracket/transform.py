@@ -9,8 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .core import TexFile, read_tex_file
-from .latex_parser import LatexToken, split_document_regions, tokenize_latex
+from latex_toolkit.lib.core import TexFile, read_tex_file
+from latex_toolkit.lib.latex_parser import LatexToken, split_document_regions, tokenize_latex
 
 
 def convert_tex_file(source: str | Path | TexFile, *, reverse: bool = False) -> TexFile:

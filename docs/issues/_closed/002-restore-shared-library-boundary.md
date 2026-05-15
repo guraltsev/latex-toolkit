@@ -2,7 +2,8 @@
 
 ## Status
 
-Open.
+Resolved. Command-family transforms now live with their owning command
+packages, and `lib` contains only shared source infrastructure.
 
 ## Problem
 
@@ -47,3 +48,17 @@ across unrelated command families.
 - Command-family transforms live near their command families.
 - Imports are normal Python imports.
 - Tests continue to cover observable transform and CLI behavior.
+
+## Resolution
+
+- Moved command-family transform modules from `src/latex_toolkit/lib/` into the
+  direct command packages that own them, including aligned/baea,
+  dollar/bracket delimiters, display-math/equation, ltae/aligned,
+  proof/proofstar, TeXmacs aligned/ltae, tmscript/substack,
+  unary-macro bracing, and tex/Unicode conversion.
+- Kept reverse command aliases importing the direct command package entrypoints.
+- Updated transform tests to exercise command-level `transform_text(...)`
+  entrypoints instead of importing command-owned implementation modules from
+  `lib`.
+- Documented the intentional shared library modules in
+  `docs/development_guide.md`.

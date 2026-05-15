@@ -1,6 +1,6 @@
-"""Library tests for strict TeXmacs ``aligned`` to ``ltae`` conversion.
+"""Command transform tests for strict TeXmacs ``aligned`` to ``ltae`` conversion.
 
-The tests call the public text conversion function and assert observable
+The tests call the command's public text transform and assert observable
 TeXmacs rewrites. CLI write policy and parser spans are out of scope.
 """
 
@@ -15,10 +15,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.texmacs_aligned_ltae import convert_text  # noqa: E402
+from latex_toolkit.commands.tm_alignedt2ltae.main import transform_text  # noqa: E402
 
 
-class TexmacsAlignedLtaeLibraryTests(TestCase):
+class TexmacsAlignedLtaeTransformTests(TestCase):
     def test_strict_two_column_aligned_t_table_is_rewritten(self) -> None:
         """Strict top-aligned tables become ltae tables with empty cells removed."""
 
@@ -32,7 +32,7 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
             "</equation*>\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -51,7 +51,7 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
         nested = "<aligned|t|<tformat|<table|<row|<cell|>|<cell|inner>>>>>"
         source = f"<aligned|t|<tformat|<table|<row|<cell|>|<cell|outer {nested}>>>>>"
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         nested_expected = "<ltae|<tformat|<table|<row|<cell|inner>>>>>"
         self.assertEqual(
@@ -70,7 +70,7 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
             ">>>"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -87,7 +87,7 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
         unicode_text = "H\u00f6lder \u03b1"
         source = f"<aligned|t|<tformat|<table|<row|<cell|>|<cell|{unicode_text}>>>>>\n"
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(converted, f"<ltae|<tformat|<table|<row|<cell|{unicode_text}>>>>>\n")
 
@@ -101,7 +101,7 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
             "<aligned|t|<tformat|<table|<row|<cell|>|<cell|ok>>>>>"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,

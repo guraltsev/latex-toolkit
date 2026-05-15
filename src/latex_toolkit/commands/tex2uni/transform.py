@@ -10,7 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 import re
 
-from .core import TexFile, read_tex_file
+from latex_toolkit.lib.core import TexFile, read_tex_file
 from .symbol_mappings import LATEX2UNICODE_MAP, UNICODE2LATEX_MAP
 
 # Document markers bound conversions to body text when a full document exists.

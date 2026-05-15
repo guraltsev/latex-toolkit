@@ -1,6 +1,6 @@
-"""Library tests for titled ``proof*`` and ``proof`` conversion.
+"""Command transform tests for titled ``proof*`` and ``proof`` conversion.
 
-The tests call the public text conversion function and assert observable LaTeX
+The tests call the command's public text transform and assert observable LaTeX
 rewrites. CLI write policy and low-level tokenizer spans are out of scope.
 """
 
@@ -15,10 +15,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.proofstar import convert_text  # noqa: E402
+from latex_toolkit.commands.proofstar2proof.main import transform_text  # noqa: E402
 
 
-class ProofstarLibraryTests(TestCase):
+class ProofstarTransformTests(TestCase):
     def test_titled_proofstar_is_rewritten_in_document_body(self) -> None:
         """Titled proofstar environments become proof environments in document bodies."""
 
@@ -34,7 +34,7 @@ class ProofstarLibraryTests(TestCase):
             "\\begin{proof*}{Tail}tail\\end{proof*}\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -57,7 +57,7 @@ class ProofstarLibraryTests(TestCase):
             "\\begin{proof*}{Missing end}\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(converted, source)
 
@@ -80,7 +80,7 @@ class ProofstarLibraryTests(TestCase):
             "\\begin{proof}[Tail]tail\\end{proof}\n"
         )
 
-        converted = convert_text(source, reverse=True)
+        converted = transform_text(source, reverse=True)
 
         self.assertEqual(
             converted,

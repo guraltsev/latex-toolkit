@@ -16,6 +16,23 @@ Do not move command-specific behavior into `lib` merely to avoid import
 awkwardness, to make tests easier to write, or to make a command file shorter.
 If behavior belongs to one command family, keep it with that command family.
 
+The current intentional shared library modules are:
+
+- `backup`: file backup policy shared by mutating commands.
+- `clipboard`: the system clipboard boundary used by clipboard-enabled
+  commands.
+- `core`: the `TexFile` value object and TeX file I/O helpers.
+- `latex`: lightweight LaTeX source inspection, comment handling, include
+  traversal, and small public text helpers shared by multiple commands.
+- `latex_parser`: tokenization and document-region primitives used by command
+  transforms.
+- `logging_config`: command execution wrappers and logging setup.
+
+Command-family transforms live under `src/latex_toolkit/commands/` with the
+command packages that own them. Public command-level text transforms are
+exposed through each command package's `main.transform_text(...)` when a direct
+Python entrypoint is useful.
+
 ## Command Package Names
 
 Command package directories use underscores, not dashes.

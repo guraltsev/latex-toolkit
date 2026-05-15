@@ -1,6 +1,6 @@
-"""Library tests for aligned-environment shorthand conversion.
+"""Command transform tests for aligned-environment shorthand conversion.
 
-The tests call the public text conversion function directly and assert
+The tests call the command's public text transform directly and assert
 observable source rewrites. CLI write policy and low-level token spans are out
 of scope.
 """
@@ -16,10 +16,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.aligned_baea import convert_text  # noqa: E402
+from latex_toolkit.commands.aligned2baea.main import transform_text  # noqa: E402
 
 
-class AlignedBaeaLibraryTests(TestCase):
+class AlignedBaeaTransformTests(TestCase):
     def test_forward_conversion_only_compresses_exact_aligned_t_in_document_body(self) -> None:
         """Forward conversion compresses exact document-body aligned[t] blocks only."""
 
@@ -34,7 +34,7 @@ class AlignedBaeaLibraryTests(TestCase):
             "\\begin{aligned}[t]tail\\end{aligned}\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -59,7 +59,7 @@ class AlignedBaeaLibraryTests(TestCase):
             "\\end{document}\n"
         )
 
-        converted = convert_text(source, reverse=True)
+        converted = transform_text(source, reverse=True)
 
         self.assertEqual(
             converted,

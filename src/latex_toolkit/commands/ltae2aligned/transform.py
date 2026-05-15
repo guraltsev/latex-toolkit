@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .core import TexFile, read_tex_file
-from .latex_parser import (
+from latex_toolkit.lib.core import TexFile, read_tex_file
+from latex_toolkit.lib.latex_parser import (
     LatexToken,
     extract_environment_name,
     find_matching_environment_block,

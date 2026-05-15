@@ -1,6 +1,6 @@
-"""Library tests for ``ltae`` to ``aligned[t]`` conversion.
+"""Command transform tests for ``ltae`` to ``aligned[t]`` conversion.
 
-The tests call the public text conversion function and assert observable LaTeX
+The tests call the command's public text transform and assert observable LaTeX
 rewrites. CLI write policy and low-level tokenizer spans are out of scope.
 """
 
@@ -15,10 +15,10 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.ltae_aligned import convert_text  # noqa: E402
+from latex_toolkit.commands.ltae2aligned.main import transform_text  # noqa: E402
 
 
-class LtaeAlignedLibraryTests(TestCase):
+class LtaeAlignedTransformTests(TestCase):
     def test_ltae_conversion_prefixes_top_level_rows_only(self) -> None:
         """Ltae conversion adds row markers without entering nested environments."""
 
@@ -39,7 +39,7 @@ class LtaeAlignedLibraryTests(TestCase):
             "\\begin{ltae}tail\\end{ltae}\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -64,6 +64,6 @@ class LtaeAlignedLibraryTests(TestCase):
 
         source = "\\begin{ltae}\\text{a\\\\b}\\\\c\\end{ltae}"
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(converted, "\\begin{aligned}[t]&\\text{a\\\\b}\\\\&c\\end{aligned}")

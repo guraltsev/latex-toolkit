@@ -1,6 +1,6 @@
-"""Library tests for dollar and bracket math delimiter conversion.
+"""Command transform tests for dollar and bracket math delimiter conversion.
 
-The tests call the public text conversion function and assert observable
+The tests call the command's public text transform and assert observable
 LaTeX rewrites. Tokenization internals are out of scope.
 """
 
@@ -15,7 +15,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.dollar_delimiters import convert_text  # noqa: E402
+from latex_toolkit.commands.dollar2bracket.main import transform_text  # noqa: E402
 
 
 class DollarDelimiterTests(TestCase):
@@ -33,7 +33,7 @@ class DollarDelimiterTests(TestCase):
             "$tail$\n"
         )
 
-        converted = convert_text(source)
+        converted = transform_text(source)
 
         self.assertEqual(
             converted,
@@ -62,7 +62,7 @@ class DollarDelimiterTests(TestCase):
             "\\[tail\\]\n"
         )
 
-        converted = convert_text(source, reverse=True)
+        converted = transform_text(source, reverse=True)
 
         self.assertEqual(
             converted,

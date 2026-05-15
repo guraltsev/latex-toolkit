@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from .core import TexFile, read_tex_file
+from latex_toolkit.lib.core import TexFile, read_tex_file
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,6 +1,6 @@
-"""Library tests for display-math and equation conversions.
+"""Command transform tests for display-math and equation conversions.
 
-The tests call public text conversion functions and assert observable LaTeX
+The tests call command public text transforms and assert observable LaTeX
 rewrites. CLI backup behavior and parser implementation details are out of
 scope.
 """
@@ -16,11 +16,11 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from latex_toolkit.lib.equation_eqnum_displaymath import convert_text as convert_eqn_eqnum_text  # noqa: E402
-from latex_toolkit.lib.equation_star_displaymath import convert_text as convert_eqn_star_text  # noqa: E402
+from latex_toolkit.commands.eqn2dmath_eqnum.main import transform_text as convert_eqn_eqnum_text  # noqa: E402
+from latex_toolkit.commands.eqn_star2dmath.main import transform_text as convert_eqn_star_text  # noqa: E402
 
 
-class EquationDisplayMathLibraryTests(TestCase):
+class EquationDisplayMathTransformTests(TestCase):
     def test_equation_star_forward_only_rewrites_document_body_and_preserves_eqnum_displaymath(self) -> None:
         """Forward equation* conversion rewrites document-body environments only."""
 

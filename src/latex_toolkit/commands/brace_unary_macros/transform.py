@@ -12,8 +12,8 @@ from pathlib import Path
 import re
 import tomllib
 
-from .core import TexFile, read_tex_file
-from .latex_parser import split_document_regions
+from latex_toolkit.lib.core import TexFile, read_tex_file
+from latex_toolkit.lib.latex_parser import split_document_regions
 
 # Default unary macros cover the local Fourier-transform shorthand and common
 # one-argument math accents or decorators that are often written without braces.
