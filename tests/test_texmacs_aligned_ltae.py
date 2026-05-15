@@ -60,6 +60,28 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
             f"<ltae|<tformat|<table|<row|<cell|outer {nested_expected}>>>>>",
         )
 
+    def test_first_row_first_cell_prefix_is_hoisted_before_ltae(self) -> None:
+        """A leading first-column prefix is moved before the converted table."""
+
+        prefix = "<around|\\<\\|\\|\\>|f|\\<\\|\\|\\>><rsub|X>"
+        source = (
+            "<aligned|t|<tformat|<table|"
+            f"<row|<cell|{prefix}>|<cell|\\<lesssim\\>a>>|"
+            "<row|<cell|>|<cell|\\<le\\>b>>"
+            ">>>"
+        )
+
+        converted = convert_text(source)
+
+        self.assertEqual(
+            converted,
+            prefix
+            + "<ltae|<tformat|<table|"
+            "<row|<cell|\\<lesssim\\>a>>|"
+            "<row|<cell|\\<le\\>b>>"
+            ">>>",
+        )
+
     def test_non_ascii_text_is_preserved_during_rewrite(self) -> None:
         """TeXmacs normalization preserves ordinary Unicode text."""
 

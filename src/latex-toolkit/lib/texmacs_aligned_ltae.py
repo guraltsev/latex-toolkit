@@ -2,9 +2,10 @@
 
 The conversion targets TeXmacs markup of the form
 ``<aligned|t|<tformat|<table|...>>>`` only when every row has exactly two
-cells and the first cell is empty. Other TeXmacs constructs, including
-non-strict ``aligned`` tables, are preserved while nested strict tables are
-still converted.
+cells and the first column is empty, or when only the first row's first cell
+is populated and can be hoisted before the converted table. Other TeXmacs
+constructs, including non-strict ``aligned`` tables, are preserved while
+nested strict tables are still converted.
 """
 
 from __future__ import annotations
@@ -32,6 +33,14 @@ class _Node:
     content_end: int
     end: int
     parts: tuple[_Span, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class _RowConversion:
+    """A converted table row paired with its original first-cell payload."""
+
+    first_cell_payload: str
+    row_text: str
 
 
 def convert_tex_file(source: str | Path | TexFile) -> TexFile:
@@ -133,13 +142,15 @@ def _convert_aligned_node(text: str, node: _Node) -> str | None:
     if _part_text(text, parts[1]).strip() != "t":
         return None
 
-    converted_tformat = _convert_tformat(_part_text(text, parts[2]))
-    if converted_tformat is None:
+    converted = _convert_tformat(_part_text(text, parts[2]))
+    if converted is None:
         return None
-    return f"<ltae|{converted_tformat}>"
+
+    leading_text, converted_tformat = converted
+    return f"{leading_text}<ltae|{converted_tformat}>"
 
 
-def _convert_tformat(text: str) -> str | None:
+def _convert_tformat(text: str) -> tuple[str, str] | None:
     single = _single_node(text)
     if single is None:
         return None
@@ -149,13 +160,15 @@ def _convert_tformat(text: str) -> str | None:
     if len(parts) != 2 or _part_text(text, parts[0]) != "tformat":
         return None
 
-    converted_table = _convert_table(_part_text(text, parts[1]))
-    if converted_table is None:
+    converted = _convert_table(_part_text(text, parts[1]))
+    if converted is None:
         return None
-    return f"{prefix}<tformat|{converted_table}>{suffix}"
+
+    leading_text, converted_table = converted
+    return leading_text, f"{prefix}<tformat|{converted_table}>{suffix}"
 
 
-def _convert_table(text: str) -> str | None:
+def _convert_table(text: str) -> tuple[str, str] | None:
     single = _single_node(text)
     if single is None:
         return None
@@ -165,17 +178,24 @@ def _convert_table(text: str) -> str | None:
     if len(parts) < 2 or _part_text(text, parts[0]) != "table":
         return None
 
-    converted_rows: list[str] = []
+    # First parse every row as a two-cell row. The first-column policy is
+    # checked only after every row has proved it can be rewritten.
+    rows: list[_RowConversion] = []
     for row_part in parts[1:]:
         converted_row = _convert_row(_part_text(text, row_part))
         if converted_row is None:
             return None
-        converted_rows.append(converted_row)
+        rows.append(converted_row)
 
-    return f"{prefix}<table|{'|'.join(converted_rows)}>{suffix}"
+    leading_text = _first_column_leading_text(rows)
+    if leading_text is None:
+        return None
+
+    converted_rows = [row.row_text for row in rows]
+    return leading_text, f"{prefix}<table|{'|'.join(converted_rows)}>{suffix}"
 
 
-def _convert_row(text: str) -> str | None:
+def _convert_row(text: str) -> _RowConversion | None:
     single = _single_node(text)
     if single is None:
         return None
@@ -184,27 +204,49 @@ def _convert_row(text: str) -> str | None:
     parts = node.parts
     if len(parts) != 3 or _part_text(text, parts[0]) != "row":
         return None
-    if not _is_empty_cell(_part_text(text, parts[1])):
+
+    first_cell_payload = _cell_payload_text(_part_text(text, parts[1]))
+    if first_cell_payload is None:
         return None
 
     converted_cell = _convert_payload_cell(_part_text(text, parts[2]))
     if converted_cell is None:
         return None
-    return f"{prefix}<row|{converted_cell}>{suffix}"
+    return _RowConversion(
+        first_cell_payload=first_cell_payload,
+        row_text=f"{prefix}<row|{converted_cell}>{suffix}",
+    )
 
 
-def _is_empty_cell(text: str) -> bool:
+def _first_column_leading_text(rows: list[_RowConversion]) -> str | None:
+    first_column_payloads = [row.first_cell_payload for row in rows]
+    if all(payload.strip() == "" for payload in first_column_payloads):
+        return ""
+
+    # Multi-row tables sometimes use the first row's first cell as a left
+    # prefix for the aligned block. Hoist only that shape and leave other
+    # non-empty first-column layouts untouched.
+    first_payload, *remaining_payloads = first_column_payloads
+    if (
+        len(first_column_payloads) >= 2
+        and first_payload.strip() != ""
+        and all(payload.strip() == "" for payload in remaining_payloads)
+    ):
+        return _rewrite_text(first_payload)
+
+    return None
+
+
+def _cell_payload_text(text: str) -> str | None:
     single = _single_node(text)
     if single is None:
-        return False
+        return None
 
     _, node, _ = single
     parts = node.parts
-    return (
-        len(parts) == 2
-        and _part_text(text, parts[0]) == "cell"
-        and _part_text(text, parts[1]).strip() == ""
-    )
+    if len(parts) != 2 or _part_text(text, parts[0]) != "cell":
+        return None
+    return _part_text(text, parts[1])
 
 
 def _convert_payload_cell(text: str) -> str | None:

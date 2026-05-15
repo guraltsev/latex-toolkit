@@ -2,7 +2,9 @@
 
 `tm_alignedt2ltae` rewrites strict TeXmacs `<aligned|t|...>` tables as
 `<ltae|...>` tables. A table is converted only when every row has exactly two
-cells and the first cell is empty.
+cells and the first column is empty. If only the first row's first cell is
+populated, that payload is moved immediately before the converted `ltae`
+table.
 
 ## Usage
 
