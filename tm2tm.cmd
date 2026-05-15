@@ -10,6 +10,7 @@ if "%PYTHONPATH%"=="" (
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
 
+
 >&2 echo latex-toolkit: starting TeXmacs snippet normalization.
 
 python --version >nul 2>&1

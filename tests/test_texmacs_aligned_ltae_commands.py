@@ -52,3 +52,59 @@ class TexmacsAlignedLtaeCommandTests(TestCase):
             backups = sorted((work / ".backup").iterdir())
             self.assertEqual(len(backups), 1)
             self.assertEqual(backups[0].read_text(encoding="utf-8"), source)
+
+    def test_tm_alignedt2ltae_preserves_unicode_text_when_overwriting(self) -> None:
+        """The command preserves Unicode text while rewriting TeXmacs tables."""
+
+        unicode_text = "H\u00f6lder \u03b1"
+        source = f"<aligned|t|<tformat|<table|<row|<cell|>|<cell|{unicode_text}>>>>>\n"
+        expected = f"<ltae|<tformat|<table|<row|<cell|{unicode_text}>>>>>\n"
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            input_path = work / "unicode.tm"
+            input_path.write_text(source, encoding="utf-8")
+
+            result = self.run_cli("tm_alignedt2ltae", str(input_path))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(input_path.read_text(encoding="utf-8"), expected)
+
+    def test_tm_alignedt2ltae_overwrites_readable_tmu_source(self) -> None:
+        """The tm command converts readable .tmu documents and keeps a backup."""
+
+        source = (
+            "<subsection|Coefficient upper bounds for H\u00f6lder spaces>\n\n"
+            "<\\equation>\n"
+            "  <label|eq:holder-analysis-nonhomogeneous-upper>"
+            "<aligned|t|<tformat|<table|"
+            "<row|<cell|>|<cell|sup<rsub|\\<psi\\>> t<rsup|-\\<alpha\\>>>>|"
+            "<row|<cell|>|<cell|\\<lesssim\\><rsub|d,\\<alpha\\>>"
+            "<around|\\<\\|\\|\\>|f|\\<\\|\\|\\>>>>"
+            ">>>\n"
+            "</equation>\n"
+        )
+        expected = (
+            "<subsection|Coefficient upper bounds for H\u00f6lder spaces>\n\n"
+            "<\\equation>\n"
+            "  <label|eq:holder-analysis-nonhomogeneous-upper>"
+            "<ltae|<tformat|<table|"
+            "<row|<cell|sup<rsub|\\<psi\\>> t<rsup|-\\<alpha\\>>>>|"
+            "<row|<cell|\\<lesssim\\><rsub|d,\\<alpha\\>>"
+            "<around|\\<\\|\\|\\>|f|\\<\\|\\|\\>>>>"
+            ">>>\n"
+            "</equation>\n"
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            input_path = work / "fragment.tmu"
+            input_path.write_text(source, encoding="utf-8")
+
+            result = self.run_cli("tm_alignedt2ltae", str(input_path))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(input_path.read_text(encoding="utf-8"), expected)
+            backups = sorted((work / ".backup").iterdir())
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), source)

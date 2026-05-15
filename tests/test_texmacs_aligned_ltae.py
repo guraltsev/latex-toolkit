@@ -63,11 +63,12 @@ class TexmacsAlignedLtaeLibraryTests(TestCase):
     def test_non_ascii_text_is_preserved_during_rewrite(self) -> None:
         """TeXmacs normalization preserves ordinary Unicode text."""
 
-        source = "<aligned|t|<tformat|<table|<row|<cell|>|<cell|Hölder α>>>>>\n"
+        unicode_text = "H\u00f6lder \u03b1"
+        source = f"<aligned|t|<tformat|<table|<row|<cell|>|<cell|{unicode_text}>>>>>\n"
 
         converted = convert_text(source)
 
-        self.assertEqual(converted, "<ltae|<tformat|<table|<row|<cell|Hölder α>>>>>\n")
+        self.assertEqual(converted, f"<ltae|<tformat|<table|<row|<cell|{unicode_text}>>>>>\n")
 
     def test_non_strict_aligned_tables_are_preserved(self) -> None:
         """Aligned tables outside the strict two-column shape remain unchanged."""
