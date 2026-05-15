@@ -7,6 +7,8 @@ if "%PYTHONPATH%"=="" (
 ) else (
     set "PYTHONPATH=%TOOLKIT_ROOT%src;%PYTHONPATH%"
 )
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
 
 python --version >nul 2>&1
 if errorlevel 1 (

@@ -199,6 +199,27 @@ python -m latex-toolkit.commands.tmscript2substack .\paper.tex
 python -m latex-toolkit.commands.tmscript2substack .\paper.tex -o .\paper.converted.tex
 ```
 
+### `tm_alignedt2ltae`
+
+Rewrites strict TeXmacs `<aligned|t|...>` tables as `<ltae|...>` tables. A
+table is converted only when every row has exactly two cells and the first
+cell is empty.
+
+```powershell
+python -m latex-toolkit.commands.tm_alignedt2ltae .\paper.tm
+python -m latex-toolkit.commands.tm_alignedt2ltae .\paper.tm -o .\paper.converted.tm
+python -m latex-toolkit.commands.tm_alignedt2ltae --clipboard
+```
+
+### `tm2tm.cmd`
+
+Runs a clipboard normalization pipeline for TeXmacs snippets:
+`tm_alignedt2ltae`.
+
+```powershell
+.\tm2tm.cmd
+```
+
 ### `proofstar2proof`
 
 Rewrites TeXmacs `\begin{proof*}{Title} ... \end{proof*}` environments as
@@ -222,6 +243,24 @@ python -m latex-toolkit.commands.proof2proofstar .\paper.tex
 python -m latex-toolkit.commands.proof2proofstar .\paper.tex -o .\paper.converted.tex
 ```
 
+### `brace_unary_macros`
+
+Adds braces around the next unbraced token passed to configured unary macros.
+The default list includes `\FT`, `\bar`, `\tilde`, `\dot`, and common math
+accent variants.
+
+```powershell
+python -m latex-toolkit.commands.brace_unary_macros .\paper.tex
+python -m latex-toolkit.commands.brace_unary_macros .\paper.tex --macros-file C:\path\macros.toml
+```
+
+Custom TOML files replace the default list and use a top-level `commands`
+array. Use TOML literal strings to avoid escaping backslashes:
+
+```toml
+commands = ['\FT', '\bar', '\tilde']
+```
+
 ### `texmacs_latex_to_llm_latex.cmd`
 
 Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
@@ -229,6 +268,16 @@ Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
 
 ```powershell
 .\texmacs_latex_to_llm_latex.cmd
+```
+
+### `llm_latex_to_texmacs_latex.cmd`
+
+Runs a clipboard conversion for LLM-friendly LaTeX headed back to TeXmacs:
+`brace_unary_macros`, then `proof2proofstar`.
+
+```powershell
+.\llm_latex_to_texmacs_latex.cmd
+.\llm_latex_to_texmacs_latex.cmd --macros-file C:\path\macros.toml
 ```
 
 ### `snapper_format`

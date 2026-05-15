@@ -96,6 +96,22 @@ class SymbolCommandTests(TestCase):
             self.assertEqual(len(backups), 1)
             self.assertEqual(backups[0].read_text(encoding="utf-8"), original_text)
 
+    def test_uni2tex_preserves_non_ascii_prose_while_converting_math(self) -> None:
+        """Unicode prose survives symbol conversion while mapped math changes."""
+
+        source = "Hölder outside and $α$ inside.\n"
+        expected = "Hölder outside and $\\alpha $ inside.\n"
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            input_path = work / "unicode.tex"
+            input_path.write_text(source, encoding="utf-8")
+
+            result = self.run_cli("uni2tex", str(input_path))
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(input_path.read_text(encoding="utf-8"), expected)
+
     def test_tex2uni_output_option_uses_expected_output_without_touching_source(self) -> None:
         """Writing converted symbols to an output file preserves the source."""
 

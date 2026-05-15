@@ -7,6 +7,8 @@ if "%PYTHONPATH%"=="" (
 ) else (
     set "PYTHONPATH=%TOOLKIT_ROOT%src;%PYTHONPATH%"
 )
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
 
 >&2 echo latex-toolkit: starting TeXmacs clipboard conversion.
 
