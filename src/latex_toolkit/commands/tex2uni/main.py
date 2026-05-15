@@ -21,6 +21,24 @@ def build_parser(
     description: str | None = None,
     include_reverse: bool = True,
 ) -> argparse.ArgumentParser:
+    """Build the command-line argument parser.
+
+    Parameters
+    ----------
+    prog : str
+        Program name shown in help and error output.
+    description : str or None
+        Optional parser description. ``None`` uses this command's default
+        description.
+    include_reverse : bool
+        Whether to expose the ``--reverse`` option.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parser configured for the conversion command.
+    """
+
     parser = argparse.ArgumentParser(
         prog=prog,
         description=(
@@ -92,6 +110,36 @@ def main(
     include_reverse: bool = True,
     force_reverse: bool | None = None,
 ) -> int:
+    """Run the command-line workflow.
+
+    Parameters
+    ----------
+    argv : list of str or None
+        Command-line arguments to parse. ``None`` reads arguments from
+        ``sys.argv``.
+    prog : str
+        Program name shown in help, errors, and log messages.
+    description : str or None
+        Optional parser description. ``None`` uses this command's default
+        description.
+    include_reverse : bool
+        Whether to expose the ``--reverse`` option.
+    force_reverse : bool or None
+        Forced conversion direction for reverse command aliases. ``None`` uses
+        parsed command-line options.
+
+    Returns
+    -------
+    int
+        Process exit status, with ``0`` for success and ``1`` for expected
+        operational failures.
+
+    Raises
+    ------
+    SystemExit
+        Command-line arguments are invalid.
+    """
+
     def run() -> int:
         parser = build_parser(prog=prog, description=description, include_reverse=include_reverse)
         args = parser.parse_args(argv)

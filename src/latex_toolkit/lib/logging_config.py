@@ -75,6 +75,11 @@ def run_clipboard_transform(command_name: str, transform: Callable[[str], str]) 
     -------
     None
         The system clipboard is replaced with the transformed text.
+
+    Raises
+    ------
+    RuntimeError
+        Clipboard text cannot be read or written.
     """
 
     from latex_toolkit.lib.clipboard import read_clipboard_text, write_clipboard_text

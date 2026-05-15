@@ -12,6 +12,14 @@ OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser():
+    """Build the command-line argument parser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parser configured for the reverse aligned-block conversion alias.
+    """
+
     return aligned2baea_command.build_parser(
         prog="baea2aligned",
         description=(
@@ -40,6 +48,26 @@ def transform_text(text: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the command-line workflow.
+
+    Parameters
+    ----------
+    argv : list of str or None
+        Command-line arguments to parse. ``None`` reads arguments from
+        ``sys.argv``.
+
+    Returns
+    -------
+    int
+        Process exit status, with ``0`` for success and ``1`` for expected
+        operational failures.
+
+    Raises
+    ------
+    SystemExit
+        Command-line arguments are invalid.
+    """
+
     def run() -> int:
         return aligned2baea_command.main(
             argv,

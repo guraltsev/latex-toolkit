@@ -60,26 +60,76 @@ _LATEX_RULES = tuple(
 
 
 def convert_tex_file(source: str | Path | TexFile, *, reverse: bool = False) -> TexFile:
-    """Convert mapped math symbols in ``source`` and return an anonymous ``TexFile``."""
+    """Convert mapped math symbols in ``source`` and return an anonymous buffer.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+    reverse : bool
+        ``False`` converts mapped LaTeX macros to Unicode symbols. ``True``
+        converts mapped Unicode symbols back to LaTeX macros.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with converted math symbols.
+    """
 
     tex_file = _coerce_to_tex_file(source)
     return TexFile.anonymous(convert_text(tex_file.code, reverse=reverse))
 
 
 def tex_to_unicode(source: str | Path | TexFile) -> TexFile:
-    """Convert mapped LaTeX math macros to Unicode symbols."""
+    """Convert mapped LaTeX math macros to Unicode symbols.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with mapped LaTeX math macros converted.
+    """
 
     return convert_tex_file(source, reverse=False)
 
 
 def unicode_to_tex(source: str | Path | TexFile) -> TexFile:
-    """Convert mapped Unicode math symbols to LaTeX macros."""
+    """Convert mapped Unicode math symbols to LaTeX macros.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with mapped Unicode math symbols converted.
+    """
 
     return convert_tex_file(source, reverse=True)
 
 
 def convert_text(text: str, *, reverse: bool = False) -> str:
-    """Convert mapped math symbols inside raw LaTeX text."""
+    """Convert mapped math symbols inside raw LaTeX text.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to transform.
+    reverse : bool
+        ``False`` converts mapped LaTeX macros to Unicode symbols. ``True``
+        converts mapped Unicode symbols back to LaTeX macros.
+
+    Returns
+    -------
+    str
+        Source text with mapped symbols converted only inside math context.
+    """
 
     preamble, begin_doc, body, end_doc, postamble = split_document_regions(text)
     if begin_doc and end_doc:
@@ -94,6 +144,18 @@ def split_document_regions(text: str) -> tuple[str, str, str, str, str]:
     Returns ``(preamble, begin_doc, body, end_doc, postamble)``. If a balanced
     pair is not found outside comments, the original text is returned as the
     preamble and the other fields are empty strings.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to split.
+
+    Returns
+    -------
+    tuple of str
+        ``(preamble, begin_doc, body, end_doc, postamble)`` or the original
+        text plus four empty strings when no balanced document environment is
+        found outside comments.
     """
 
     begin_match = _find_token_outside_comments(text, _BEGIN_DOCUMENT_RE)

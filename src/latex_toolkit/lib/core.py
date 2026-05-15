@@ -18,10 +18,32 @@ from pathlib import Path
 
 @dataclass(frozen=True, slots=True)
 class TexFile:
-    """A LaTeX source buffer plus optional filename metadata.
+    """Represent a LaTeX source buffer plus optional filename metadata.
 
     ``filename`` is the resolved source file when the buffer comes from disk.
     Generated buffers use ``None``.
+
+    Parameters
+    ----------
+    code : str
+        LaTeX source text held by the buffer.
+    filename : pathlib.Path or None
+        Resolved source filename, or ``None`` when the buffer was generated
+        without an owning path.
+
+    Methods
+    -------
+    from_path
+        Load a named TeX file from disk.
+    anonymous
+        Create a generated buffer with no filename.
+
+    Attributes
+    ----------
+    code : str
+        LaTeX source text held by the buffer.
+    filename : pathlib.Path or None
+        Resolved source filename, or ``None`` for anonymous buffers.
     """
 
     code: str
@@ -29,24 +51,78 @@ class TexFile:
 
     @classmethod
     def from_path(cls, path: str | Path) -> "TexFile":
+        """Load a named TeX file from disk.
+
+        Parameters
+        ----------
+        path : str or pathlib.Path
+            TeX file path to expand, resolve, and read as UTF-8 text.
+
+        Returns
+        -------
+        TexFile
+            Buffer containing the file contents and resolved filename.
+        """
+
         file_path = Path(path).expanduser().resolve()
         return cls(code=file_path.read_text(encoding="utf-8"), filename=file_path)
 
     @classmethod
     def anonymous(cls, code: str) -> "TexFile":
+        """Create a generated TeX buffer without filename metadata.
+
+        Parameters
+        ----------
+        code : str
+            LaTeX source text for the generated buffer.
+
+        Returns
+        -------
+        TexFile
+            Buffer whose ``filename`` is ``None``.
+        """
+
         return cls(code=code, filename=None)
 
 
 def read_tex_file(path: str | Path) -> TexFile:
-    """Load a TeX file from disk into a :class:`TexFile`."""
+    """Load a TeX file from disk into a named source buffer.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        TeX file path to expand, resolve, and read as UTF-8 text.
+
+    Returns
+    -------
+    TexFile
+        Buffer containing the file contents and resolved filename.
+    """
 
     return TexFile.from_path(path)
 
 
 def write_tex_file(tex_file: TexFile, destination: str | Path | None = None) -> Path:
-    """Write ``tex_file`` to ``destination`` or back to its own filename.
+    """Write a TeX buffer to disk.
 
     Anonymous buffers must be given an explicit destination.
+
+    Parameters
+    ----------
+    tex_file : TexFile
+        Source buffer whose ``code`` will be written as UTF-8 text.
+    destination : str, pathlib.Path, or None
+        Output path. ``None`` writes back to ``tex_file.filename``.
+
+    Returns
+    -------
+    pathlib.Path
+        Resolved path that was written.
+
+    Raises
+    ------
+    ValueError
+        ``destination`` is ``None`` and ``tex_file`` is anonymous.
     """
 
     if destination is None:

@@ -16,6 +16,14 @@ OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line argument parser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parser configured for recursive include expansion.
+    """
+
     parser = argparse.ArgumentParser(
         prog="expand-includes",
         description=(
@@ -65,6 +73,15 @@ def transform_text(text: str, *, base_dir: str | Path | None = None) -> str:
     -------
     str
         Source text with supported include commands expanded.
+
+    Raises
+    ------
+    ValueError
+        Expansion requires filename metadata and cannot proceed.
+    FileNotFoundError
+        A referenced include target cannot be resolved.
+    latex_toolkit.lib.latex.IncludeCycleError
+        Include expansion encounters a recursive include cycle.
     """
 
     root_dir = Path.cwd() if base_dir is None else Path(base_dir).expanduser().resolve()
@@ -73,6 +90,26 @@ def transform_text(text: str, *, base_dir: str | Path | None = None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the command-line workflow.
+
+    Parameters
+    ----------
+    argv : list of str or None
+        Command-line arguments to parse. ``None`` reads arguments from
+        ``sys.argv``.
+
+    Returns
+    -------
+    int
+        Process exit status, with ``0`` for success and ``1`` for expected
+        operational failures.
+
+    Raises
+    ------
+    SystemExit
+        Command-line arguments are invalid.
+    """
+
     def run() -> int:
         parser = build_parser()
         args = parser.parse_args(argv)

@@ -17,6 +17,14 @@ OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line argument parser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parser configured for the unary macro bracing command.
+    """
+
     parser = argparse.ArgumentParser(
         prog="brace_unary_macros",
         description=(
@@ -78,6 +86,26 @@ def transform_text(text: str, *, commands: Iterable[str] | None = None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the command-line workflow.
+
+    Parameters
+    ----------
+    argv : list of str or None
+        Command-line arguments to parse. ``None`` reads arguments from
+        ``sys.argv``.
+
+    Returns
+    -------
+    int
+        Process exit status, with ``0`` for success and ``1`` for expected
+        operational failures.
+
+    Raises
+    ------
+    SystemExit
+        Command-line arguments are invalid.
+    """
+
     def run() -> int:
         parser = build_parser()
         args = parser.parse_args(argv)

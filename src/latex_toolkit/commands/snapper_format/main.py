@@ -27,6 +27,14 @@ DOCUMENT_END = r"\end{document}"
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line argument parser.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Parser configured for snapper-based LaTeX formatting.
+    """
+
     parser = argparse.ArgumentParser(
         prog="snapper_format",
         description=(
@@ -90,6 +98,12 @@ def transform_text(text: str, *, max_width: int = 0) -> str:
     -------
     str
         Source text formatted by the local ``snapper`` executable.
+
+    Raises
+    ------
+    RuntimeError
+        The local snapper executable cannot be found, installed, or run
+        successfully.
     """
 
     snapper = ensure_snapper()
@@ -118,6 +132,26 @@ def transform_text(text: str, *, max_width: int = 0) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the command-line workflow.
+
+    Parameters
+    ----------
+    argv : list of str or None
+        Command-line arguments to parse. ``None`` reads arguments from
+        ``sys.argv``.
+
+    Returns
+    -------
+    int
+        Process exit status, with ``0`` for success and ``1`` for expected
+        operational failures.
+
+    Raises
+    ------
+    SystemExit
+        Command-line arguments are invalid.
+    """
+
     def run() -> int:
         parser = build_parser()
         args = parser.parse_args(argv)
@@ -157,7 +191,18 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def ensure_snapper() -> Path:
-    """Return the local snapper executable, installing it when missing."""
+    """Return the local snapper executable, installing it when missing.
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the repository-local snapper executable.
+
+    Raises
+    ------
+    RuntimeError
+        Snapper cannot be installed or no executable is found afterward.
+    """
 
     snapper = _find_snapper_executable()
     if snapper is not None:
@@ -174,7 +219,18 @@ def ensure_snapper() -> Path:
 
 
 def install_snapper() -> None:
-    """Install or refresh snapper-fmt inside the repository-local lib directory."""
+    """Install or refresh snapper-fmt inside the repository-local lib directory.
+
+    Returns
+    -------
+    None
+        The repository-local snapper installation is created or updated.
+
+    Raises
+    ------
+    RuntimeError
+        The pip install process exits with a nonzero status.
+    """
 
     install_root = _snapper_install_root()
     install_root.mkdir(parents=True, exist_ok=True)

@@ -85,8 +85,7 @@ Use this section order:
 1. Summary, required.
 2. Extended summary, optional.
 3. Parameters, required when the callable accepts public parameters.
-4. Returns, required when the callable returns a public value or when `None` is
-   part of the contract.
+4. Returns, required when the callable returns a public value.
 5. Raises, required for intentional exceptions raised by the callable.
 6. Notes, optional.
 7. Examples, required for substantive public APIs and optional for trivial
@@ -159,8 +158,6 @@ type
     Description of the returned value.
 ```
 
-Use `None` only when the no-value return is part of the public contract or the
-schema requires an explicit return section.
 
 ### Methods
 

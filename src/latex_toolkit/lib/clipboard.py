@@ -38,6 +38,11 @@ def write_clipboard_text(text: str) -> None:
     text : str
         Text to place in the system clipboard.
 
+    Returns
+    -------
+    None
+        The system clipboard is replaced with ``text``.
+
     Raises
     ------
     RuntimeError

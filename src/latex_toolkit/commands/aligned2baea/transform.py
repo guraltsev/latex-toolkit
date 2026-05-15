@@ -31,26 +31,78 @@ _REPLACEMENTS: tuple[tuple[str, str], ...] = (
 
 
 def convert_tex_file(source: str | Path | TexFile, *, reverse: bool = False) -> TexFile:
-    """Convert ``source`` and return an anonymous :class:`TexFile`."""
+    """Convert ``source`` and return an anonymous TeX buffer.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+    reverse : bool
+        ``False`` compresses exact ``aligned[t]`` blocks. ``True`` expands
+        ``\\ba`` / ``\\ea`` shorthand back to explicit environments.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with converted aligned-block source.
+    """
 
     tex_file = _coerce_to_tex_file(source)
     return TexFile.anonymous(convert_text(tex_file.code, reverse=reverse))
 
 
 def aligned_to_baea(source: str | Path | TexFile) -> TexFile:
-    """Compress explicit ``aligned`` environments into ``\\ba`` / ``\\ea``."""
+    """Compress explicit ``aligned`` environments into ``\\ba`` / ``\\ea``.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with exact ``aligned[t]`` blocks compressed.
+    """
 
     return convert_tex_file(source, reverse=False)
 
 
 def baea_to_aligned(source: str | Path | TexFile) -> TexFile:
-    """Expand ``\\ba`` / ``\\ea`` shorthands into ``aligned`` environments."""
+    """Expand ``\\ba`` / ``\\ea`` shorthands into ``aligned`` environments.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with shorthand forms expanded to ``aligned[t]``.
+    """
 
     return convert_tex_file(source, reverse=True)
 
 
 def convert_text(text: str, *, reverse: bool = False) -> str:
-    """Convert raw LaTeX text between the two representations."""
+    """Convert raw LaTeX text between aligned-block representations.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to transform.
+    reverse : bool
+        ``False`` compresses exact ``aligned[t]`` blocks. ``True`` expands
+        ``\\ba`` / ``\\ea`` shorthand back to explicit environments.
+
+    Returns
+    -------
+    str
+        Source text with the document body converted when a balanced
+        ``document`` environment exists, otherwise with the whole buffer
+        converted.
+    """
 
     preamble, begin_doc, body, end_doc, postamble = split_document_regions(text)
     converted = _expand_shorthand(body if begin_doc and end_doc else text) if reverse else _compress_aligned(body if begin_doc and end_doc else text)

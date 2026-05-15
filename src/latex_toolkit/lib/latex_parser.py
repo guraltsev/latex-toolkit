@@ -73,7 +73,30 @@ _STRUCTURAL_TOKEN_KINDS = frozenset(
 
 @dataclass(frozen=True, slots=True)
 class LatexToken:
-    """Exact token emitted by :func:`tokenize_latex`."""
+    """Represent an exact source token emitted by ``tokenize_latex``.
+
+    Parameters
+    ----------
+    kind : str
+        Token category such as ``TEXT``, ``COMMENT``, or ``BEGIN_ENV``.
+    value : str
+        Exact source text covered by the token.
+    start : int
+        Inclusive character offset where the token begins.
+    end : int
+        Exclusive character offset where the token ends.
+
+    Attributes
+    ----------
+    kind : str
+        Token category such as ``TEXT``, ``COMMENT``, or ``BEGIN_ENV``.
+    value : str
+        Exact source text covered by the token.
+    start : int
+        Inclusive character offset where the token begins.
+    end : int
+        Exclusive character offset where the token ends.
+    """
 
     kind: str
     value: str
@@ -83,7 +106,34 @@ class LatexToken:
 
 @dataclass(frozen=True, slots=True)
 class TransformRegion:
-    """Contiguous span suitable for literal rewriting decisions."""
+    """Represent a contiguous span for source-preserving rewrites.
+
+    Parameters
+    ----------
+    kind : str
+        Region category, usually ``mutable`` for text that may be rewritten.
+    text : str
+        Exact source text covered by the region.
+    start : int
+        Inclusive character offset where the region begins.
+    end : int
+        Exclusive character offset where the region ends.
+    in_math : bool
+        Whether the region begins inside tracked math context.
+
+    Attributes
+    ----------
+    kind : str
+        Region category, usually ``mutable`` for text that may be rewritten.
+    text : str
+        Exact source text covered by the region.
+    start : int
+        Inclusive character offset where the region begins.
+    end : int
+        Exclusive character offset where the region ends.
+    in_math : bool
+        Whether the region begins inside tracked math context.
+    """
 
     kind: str
     text: str
@@ -94,7 +144,30 @@ class TransformRegion:
 
 @dataclass(frozen=True, slots=True)
 class DisplayMathBlock:
-    """Balanced ``\\[ ... \\]`` block discovered in a token stream."""
+    """Describe a balanced ``\\[ ... \\]`` block in a token stream.
+
+    Parameters
+    ----------
+    open_token_index : int
+        Index of the opening display-math token.
+    close_token_index : int
+        Index of the matching closing display-math token.
+    body_start : int
+        Inclusive character offset where the block body begins.
+    body_end : int
+        Exclusive character offset where the block body ends.
+
+    Attributes
+    ----------
+    open_token_index : int
+        Index of the opening display-math token.
+    close_token_index : int
+        Index of the matching closing display-math token.
+    body_start : int
+        Inclusive character offset where the block body begins.
+    body_end : int
+        Exclusive character offset where the block body ends.
+    """
 
     open_token_index: int
     close_token_index: int
@@ -104,7 +177,34 @@ class DisplayMathBlock:
 
 @dataclass(frozen=True, slots=True)
 class EnvironmentBlock:
-    """Balanced ``\\begin{...}`` / ``\\end{...}`` block discovered in tokens."""
+    """Describe a balanced LaTeX environment block in a token stream.
+
+    Parameters
+    ----------
+    env_name : str
+        Name of the matched environment.
+    open_token_index : int
+        Index of the opening environment token.
+    close_token_index : int
+        Index of the matching closing environment token.
+    body_start : int
+        Inclusive character offset where the environment body begins.
+    body_end : int
+        Exclusive character offset where the environment body ends.
+
+    Attributes
+    ----------
+    env_name : str
+        Name of the matched environment.
+    open_token_index : int
+        Index of the opening environment token.
+    close_token_index : int
+        Index of the matching closing environment token.
+    body_start : int
+        Inclusive character offset where the environment body begins.
+    body_end : int
+        Exclusive character offset where the environment body ends.
+    """
 
     env_name: str
     open_token_index: int
@@ -114,7 +214,18 @@ class EnvironmentBlock:
 
 
 def tokenize_latex(text: str) -> tuple[LatexToken, ...]:
-    """Tokenize LaTeX source into exact source-preserving tokens."""
+    """Tokenize LaTeX source into exact source-preserving tokens.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to tokenize.
+
+    Returns
+    -------
+    tuple of LatexToken
+        Tokens in source order with exact character spans.
+    """
 
     tokens: list[LatexToken] = []
     index = 0
@@ -193,7 +304,18 @@ def tokenize_latex(text: str) -> tuple[LatexToken, ...]:
 
 
 def extract_environment_name(token: LatexToken) -> str | None:
-    """Extract the environment name from a begin/end environment token."""
+    """Extract the environment name from a begin or end token.
+
+    Parameters
+    ----------
+    token : LatexToken
+        Token to inspect.
+
+    Returns
+    -------
+    str or None
+        Environment name for valid begin/end tokens, otherwise ``None``.
+    """
 
     if token.kind not in {"BEGIN_ENV", "END_ENV"}:
         return None
@@ -202,7 +324,20 @@ def extract_environment_name(token: LatexToken) -> str | None:
 
 
 def split_document_regions(text: str) -> tuple[str, str, str, str, str]:
-    """Split a document into preamble, body, and postamble regions."""
+    """Split source text around a balanced ``document`` environment.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to split.
+
+    Returns
+    -------
+    tuple of str
+        ``(preamble, begin_doc, body, end_doc, postamble)``. If a balanced
+        document environment is not found, the original text is returned as
+        the preamble and the other fields are empty strings.
+    """
 
     tokens = tokenize_latex(text)
     begin_token: LatexToken | None = None
@@ -238,7 +373,20 @@ def iter_transform_regions(
     *,
     math_environment_names: Iterable[str] | None = None,
 ) -> tuple[TransformRegion, ...]:
-    """Group tokenized text into mutable and immutable transform regions."""
+    """Group tokenized text into mutable and immutable transform regions.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to group.
+    math_environment_names : collections.abc.Iterable of str, optional
+        Environment names that should mark their bodies as math context.
+
+    Returns
+    -------
+    tuple of TransformRegion
+        Source-ordered regions that preserve every input character exactly.
+    """
 
     active_math_envs = frozenset(math_environment_names or MATH_ENVIRONMENT_NAMES)
     tokens = tokenize_latex(text)
@@ -299,7 +447,23 @@ def find_matching_environment_block(
     *,
     body_start: int | None = None,
 ) -> EnvironmentBlock | None:
-    """Find the balanced environment block starting at ``open_token_index``."""
+    """Find the balanced environment block starting at an opening token.
+
+    Parameters
+    ----------
+    tokens : collections.abc.Sequence of LatexToken
+        Token stream to inspect.
+    open_token_index : int
+        Index expected to point at a ``BEGIN_ENV`` token.
+    body_start : int or None
+        Optional override for the returned body start offset.
+
+    Returns
+    -------
+    EnvironmentBlock or None
+        Matched block, or ``None`` when the opening token is invalid or no
+        balanced closing token exists.
+    """
 
     if open_token_index < 0 or open_token_index >= len(tokens):
         return None
@@ -329,7 +493,21 @@ def find_matching_environment_block(
 
 
 def find_matching_displaymath_block(tokens: Sequence[LatexToken], open_token_index: int) -> DisplayMathBlock | None:
-    """Find the balanced ``\\[ ... \\]`` block starting at ``open_token_index``."""
+    """Find the balanced ``\\[ ... \\]`` block starting at an opening token.
+
+    Parameters
+    ----------
+    tokens : collections.abc.Sequence of LatexToken
+        Token stream to inspect.
+    open_token_index : int
+        Index expected to point at a ``DISPLAY_OPEN`` token.
+
+    Returns
+    -------
+    DisplayMathBlock or None
+        Matched block, or ``None`` when the opening token is invalid or no
+        balanced closing token exists.
+    """
 
     if open_token_index < 0 or open_token_index >= len(tokens):
         return None
@@ -356,7 +534,19 @@ def find_matching_displaymath_block(tokens: Sequence[LatexToken], open_token_ind
 
 
 def requires_control_word_boundary(source: str) -> bool:
-    """Return whether a replacement source needs a trailing letter boundary."""
+    """Return whether source text needs a trailing control-word boundary.
+
+    Parameters
+    ----------
+    source : str
+        Replacement source text to inspect.
+
+    Returns
+    -------
+    bool
+        ``True`` when ``source`` ends with a LaTeX control word and should not
+        be followed immediately by a letter.
+    """
 
     return bool(_CONTROL_WORD_SUFFIX_RE.match(source))
 

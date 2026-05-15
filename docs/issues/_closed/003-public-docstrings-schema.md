@@ -2,7 +2,8 @@
 
 ## Status
 
-Open.
+Resolved. Public shared helpers and command entrypoints now use NumPy-style
+contract docstrings.
 
 ## Problem
 
@@ -45,3 +46,14 @@ should include required NumPy-style sections where the schema calls for them.
 - Docstrings describe observable behavior, inputs, outputs, side effects,
   guarantees, and intentional exceptions.
 - No docstrings use source-navigation language forbidden by the schema.
+
+## Resolution
+
+- Added NumPy-style contract sections to public shared library classes,
+  functions, and methods in `lib/core.py`, `lib/latex.py`, and
+  `lib/latex_parser.py`.
+- Documented command `build_parser(...)`, `transform_text(...)`, `main(...)`,
+  and command-owned transform helpers where public Python callers can use
+  them directly.
+- Captured intentional exceptions for include expansion, parser exits,
+  clipboard access, and snapper installation or execution failures.

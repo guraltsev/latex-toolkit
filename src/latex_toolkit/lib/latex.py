@@ -37,17 +37,62 @@ class IncludeCycleError(RuntimeError):
 
 @dataclass(frozen=True, slots=True)
 class IncludeReference:
-    """A lightweight include command reference found in TeX source."""
+    """Describe a supported include command found in TeX source.
+
+    Parameters
+    ----------
+    kind : str
+        Include command name without the leading backslash.
+    target : str
+        Raw include target captured from the command argument.
+
+    Attributes
+    ----------
+    kind : str
+        Include command name without the leading backslash.
+    target : str
+        Raw include target captured from the command argument.
+    """
 
     kind: str
     target: str
 
 
 def read_text(path: str | Path) -> str:
+    """Read a TeX file from disk as UTF-8 text.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        File path to expand, resolve, and read.
+
+    Returns
+    -------
+    str
+        Contents of the TeX file.
+    """
+
     return read_tex_file(path).code
 
 
 def write_text(path: str | Path, content: str) -> None:
+    """Write UTF-8 text to a TeX file path.
+
+    Parent directories are created as needed.
+
+    Parameters
+    ----------
+    path : str or pathlib.Path
+        Destination path to expand and resolve before writing.
+    content : str
+        Text to write.
+
+    Returns
+    -------
+    None
+        The destination file is replaced with ``content``.
+    """
+
     write_tex_file(TexFile(content, None), path)
 
 
@@ -73,6 +118,17 @@ def split_comment(line: str) -> tuple[str, str]:
 
     A percent sign starts a comment only when preceded by an even number of
     consecutive backslashes.
+
+    Parameters
+    ----------
+    line : str
+        Single source line, with or without a trailing line ending.
+
+    Returns
+    -------
+    tuple of str
+        Pair ``(code, comment)``. ``comment`` is empty when the line has no
+        unescaped percent comment.
     """
 
     for index, char in enumerate(line):
@@ -92,6 +148,22 @@ def split_comment(line: str) -> tuple[str, str]:
 
 
 def strip_comments_from_line(line: str) -> str:
+    """Remove an unescaped percent comment from one line.
+
+    Escaped percent signs are preserved, and a removed comment's line ending is
+    kept so the surrounding line structure remains stable.
+
+    Parameters
+    ----------
+    line : str
+        Single source line, with or without a trailing line ending.
+
+    Returns
+    -------
+    str
+        Line with the comment body removed.
+    """
+
     code, comment = split_comment(line)
     if not comment:
         return line
@@ -99,10 +171,49 @@ def strip_comments_from_line(line: str) -> str:
 
 
 def strip_comments_from_text(text: str) -> str:
+    """Remove unescaped percent comments from LaTeX source text.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to strip.
+
+    Returns
+    -------
+    str
+        Source text with comment bodies removed and original line endings
+        preserved.
+    """
+
     return "".join(strip_comments_from_line(line) for line in text.splitlines(keepends=True))
 
 
 def resolve_tex_input(base_file: str | Path, target: str) -> Path:
+    """Resolve an include target relative to a TeX file.
+
+    Targets without a suffix are tried both as written and with a ``.tex``
+    suffix.
+
+    Parameters
+    ----------
+    base_file : str or pathlib.Path
+        Including file whose parent directory anchors relative targets.
+    target : str
+        Raw include target captured from an include command.
+
+    Returns
+    -------
+    pathlib.Path
+        Resolved path to an existing include file.
+
+    Raises
+    ------
+    ValueError
+        ``target`` is empty after stripping whitespace.
+    FileNotFoundError
+        No candidate include file exists.
+    """
+
     base_path = Path(base_file).expanduser().resolve()
     raw_target = target.strip()
     if not raw_target:
@@ -124,6 +235,20 @@ def resolve_tex_input(base_file: str | Path, target: str) -> Path:
 
 
 def extract_include_references(text: str) -> list[IncludeReference]:
+    """Extract supported include commands from uncommented TeX source.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to inspect.
+
+    Returns
+    -------
+    list of IncludeReference
+        Include commands in source order, excluding commands that appear only
+        inside comments.
+    """
+
     references: list[IncludeReference] = []
     for line in text.splitlines(keepends=True):
         code, _comment = split_comment(line)
@@ -136,6 +261,19 @@ def extract_include_references(text: str) -> list[IncludeReference]:
 
 
 def extract_include_targets(text: str) -> list[str]:
+    """Extract supported include targets from uncommented TeX source.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to inspect.
+
+    Returns
+    -------
+    list of str
+        Raw include targets in source order.
+    """
+
     return [reference.target for reference in extract_include_references(text)]
 
 
@@ -202,6 +340,29 @@ def _require_filename(tex_file: TexFile) -> Path:
 
 
 def walk_tex_documents(root_file: str | Path | TexFile) -> list[TexFile]:
+    """Return the root document and reachable include documents in visit order.
+
+    Subfile includes contribute only their document body when recognizable.
+    Files already visited through another include edge are returned once.
+
+    Parameters
+    ----------
+    root_file : str, pathlib.Path, or TexFile
+        Root TeX file path or named source buffer to inspect.
+
+    Returns
+    -------
+    list of TexFile
+        Named source buffers in root-first traversal order.
+
+    Raises
+    ------
+    ValueError
+        ``root_file`` or a reachable buffer has no filename metadata.
+    FileNotFoundError
+        A reachable include target cannot be resolved.
+    """
+
     root_tex = _coerce_to_tex_file(root_file)
     visited: set[Path] = set()
     ordered: list[TexFile] = []
@@ -223,10 +384,56 @@ def walk_tex_documents(root_file: str | Path | TexFile) -> list[TexFile]:
 
 
 def walk_tex_sources(root_file: str | Path | TexFile) -> list[Path]:
+    """Return resolved source paths reachable from a root TeX document.
+
+    Parameters
+    ----------
+    root_file : str, pathlib.Path, or TexFile
+        Root TeX file path or named source buffer to inspect.
+
+    Returns
+    -------
+    list of pathlib.Path
+        Resolved source paths in root-first traversal order.
+
+    Raises
+    ------
+    ValueError
+        ``root_file`` or a reachable buffer has no filename metadata.
+    FileNotFoundError
+        A reachable include target cannot be resolved.
+    """
+
     return [_require_filename(tex_file).resolve() for tex_file in walk_tex_documents(root_file)]
 
 
 def expand_includes(root_file: str | Path | TexFile) -> TexFile:
+    """Inline supported include commands into one anonymous TeX buffer.
+
+    Full-line includes preserve surrounding line endings and trailing comments
+    where possible. Subfile includes contribute only their document body when
+    recognizable.
+
+    Parameters
+    ----------
+    root_file : str, pathlib.Path, or TexFile
+        Root TeX file path or named source buffer to expand.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer containing the expanded source text.
+
+    Raises
+    ------
+    ValueError
+        ``root_file`` or a reachable buffer has no filename metadata.
+    FileNotFoundError
+        A reachable include target cannot be resolved.
+    IncludeCycleError
+        Include expansion encounters a recursive include cycle.
+    """
+
     root_tex = _coerce_to_tex_file(root_file)
 
     def expand_file(current: TexFile, stack: tuple[Path, ...], include_kind: str | None) -> str:
@@ -267,6 +474,19 @@ def expand_includes(root_file: str | Path | TexFile) -> TexFile:
 
 
 def extract_graphics_targets(text: str) -> list[str]:
+    """Extract ``includegraphics`` targets from uncommented TeX source.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to inspect.
+
+    Returns
+    -------
+    list of str
+        Raw graphics targets in source order.
+    """
+
     results: list[str] = []
     for line in text.splitlines(keepends=True):
         code, _comment = split_comment(line)

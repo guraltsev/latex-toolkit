@@ -24,26 +24,80 @@ _EQNUM_TOKEN = r"\eqnum"
 
 
 def convert_tex_file(source: str | Path | TexFile, *, reverse: bool = False) -> TexFile:
-    """Convert ``source`` and return an anonymous :class:`TexFile`."""
+    """Convert ``source`` and return an anonymous TeX buffer.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+    reverse : bool
+        ``False`` rewrites ``equation`` environments as numbered display math.
+        ``True`` rewrites standalone ``\\eqnum`` display math back to
+        ``equation``.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with converted numbered display-math source.
+    """
 
     tex_file = _coerce_to_tex_file(source)
     return TexFile.anonymous(convert_text(tex_file.code, reverse=reverse))
 
 
 def equation_to_eqnum_displaymath(source: str | Path | TexFile) -> TexFile:
-    r"""Rewrite ``equation`` environments as ``\[\eqnum ... \]`` blocks."""
+    r"""Rewrite ``equation`` environments as ``\[\eqnum ... \]`` blocks.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with ``equation`` environments rewritten.
+    """
 
     return convert_tex_file(source, reverse=False)
 
 
 def eqnum_displaymath_to_equation(source: str | Path | TexFile) -> TexFile:
-    r"""Rewrite ``\[\eqnum ... \]`` blocks as ``equation`` environments."""
+    r"""Rewrite ``\[\eqnum ... \]`` blocks as ``equation`` environments.
+
+    Parameters
+    ----------
+    source : str, pathlib.Path, or TexFile
+        Source file path or already loaded TeX buffer.
+
+    Returns
+    -------
+    TexFile
+        Anonymous buffer with standalone ``\eqnum`` display math rewritten.
+    """
 
     return convert_tex_file(source, reverse=True)
 
 
 def convert_text(text: str, *, reverse: bool = False) -> str:
-    r"""Convert raw LaTeX text between ``equation`` and ``\[\eqnum ... \]``."""
+    r"""Convert raw LaTeX text between ``equation`` and ``\[\eqnum ... \]``.
+
+    Parameters
+    ----------
+    text : str
+        LaTeX source text to transform.
+    reverse : bool
+        ``False`` rewrites ``equation`` environments as numbered display math.
+        ``True`` rewrites standalone ``\eqnum`` display math back to
+        ``equation``.
+
+    Returns
+    -------
+    str
+        Source text with the document body converted when a balanced
+        ``document`` environment exists, otherwise with the whole buffer
+        converted.
+    """
 
     preamble, begin_doc, body, end_doc, postamble = split_document_regions(text)
     active_text = body if begin_doc and end_doc else text
