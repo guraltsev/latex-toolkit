@@ -16,7 +16,7 @@ python -m latex_toolkit.commands.ltae2aligned paper.tex -B
 
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the converted document to a different path.
-- A timestamped backup is created in `.backup` through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Row markers are added only after top-level `\\` row separators.
 - Nested environments such as `cases` are preserved without adding `&` to their rows.
 - When a balanced `document` environment is present, only the document body is rewritten.

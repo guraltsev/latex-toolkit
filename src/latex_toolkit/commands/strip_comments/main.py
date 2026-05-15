@@ -10,8 +10,6 @@ from latex_toolkit.lib.backup import DEFAULT_BACKUP_DIR, backup_file
 from latex_toolkit.lib.latex import strip_comments_from_text, read_text, write_text
 from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
 
-# This command overwrites source files unless output or clipboard mode is used.
-OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser() -> argparse.ArgumentParser:

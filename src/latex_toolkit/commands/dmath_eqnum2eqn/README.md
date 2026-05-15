@@ -16,6 +16,6 @@ python -m latex_toolkit.commands.dmath_eqnum2eqn paper.tex -B
 - This command delegates to `eqn2dmath-eqnum --reverse`.
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the converted document to a different path.
-- A timestamped backup is created in `.backup` through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Plain `\[ ... \]` display-math blocks are intentionally left untouched.
 - When a balanced `document` environment is present, only the document body is rewritten.

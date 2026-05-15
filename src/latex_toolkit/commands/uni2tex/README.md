@@ -16,7 +16,7 @@ python -m latex_toolkit.commands.uni2tex paper.tex -B
 - This command delegates to `tex2uni --reverse`.
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the converted document to a different path.
-- A timestamped backup is created in `.backup` through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Conversion only affects mutable math-mode content.
 - `%` comments are preserved verbatim.
 - When a balanced `document` environment is present, only the document body is rewritten.

@@ -12,8 +12,6 @@ from latex_toolkit.lib.latex import read_text, split_comment, write_text
 from latex_toolkit.lib.latex_parser import split_document_regions
 from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
 
-# This command overwrites source files unless output or clipboard mode is used.
-OVERWRITES_SOURCE_TEX = True
 
 # Left-sized delimiter controls should use the left double-bar delimiter.
 _LEFT_DELIMITER_CONTROLS = frozenset({"left", "bigl", "Bigl", "biggl", "Biggl"})

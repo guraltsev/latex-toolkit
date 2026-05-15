@@ -15,6 +15,6 @@ python -m latex_toolkit.commands.tmscript2substack paper.tex -B
 
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the converted document to a different path.
-- A timestamped backup is created in `.backup` through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Only `\tmscript{\begin{array}{c} ... \end{array}}` is converted.
 - When a balanced `document` environment is present, only the document body is rewritten.

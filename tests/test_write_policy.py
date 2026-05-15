@@ -1,123 +1,117 @@
-"""Tests for shared command-line write policy across public commands.
+"""Tests for observable command write and clipboard behavior.
 
-The tests inspect real command parsers and command entrypoint source files.
-They do not assert internal call graphs beyond the public backup import that
-marks a command as participating in the shared overwrite policy.
+The tests exercise public command behavior through real CLI invocations or the
+public command entrypoint with the system clipboard boundary mocked. Parser
+internals, import choices, source layout, and package metadata are out of
+scope.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest import TestCase
-import ast
-import importlib
+from unittest.mock import patch
+import os
+import subprocess
 import sys
-import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-COMMANDS_ROOT = SRC / "latex_toolkit" / "commands"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-
-def _available_commands() -> tuple[str, ...]:
-    """Return command names that expose a ``python -m`` package entrypoint."""
-
-    command_names = [
-        entry.name
-        for entry in COMMANDS_ROOT.iterdir()
-        if entry.is_dir() and (entry / "__main__.py").is_file()
-    ]
-    return tuple(sorted(command_names))
+from latex_toolkit.commands.strip_comments import main as strip_comments_command  # noqa: E402
 
 
-def _load_command_module(command_name: str) -> object:
-    """Import a command implementation module for parser inspection."""
+def _pythonpath_env() -> dict[str, str]:
+    """Return an environment that imports package modules from ``src``."""
 
-    return importlib.import_module(f"latex_toolkit.commands.{command_name}.main")
-
-
-def _command_entrypoint(command_name: str) -> Path:
-    """Return the source path for a command entrypoint under test."""
-
-    return COMMANDS_ROOT / command_name / "main.py"
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(SRC)
+    return env
 
 
-def _imports_backup_file(command_name: str) -> bool:
-    """Return whether a command entrypoint imports the shared backup helper."""
+class ObservableWritePolicyTests(TestCase):
+    def run_cli(self, *args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+        """Run a public command package with source-checkout imports."""
 
-    tree = ast.parse(_command_entrypoint(command_name).read_text(encoding="utf-8"))
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.ImportFrom):
-            continue
-        if node.module != "latex_toolkit.lib.backup":
-            continue
-        if any(alias.name == "backup_file" for alias in node.names):
-            return True
-    return False
+        command_name, *command_args = args
+        return subprocess.run(
+            [sys.executable, "-m", f"latex_toolkit.commands.{command_name}", *command_args],
+            cwd=str(cwd) if cwd is not None else None,
+            env=_pythonpath_env(),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
 
+    def test_default_file_mode_overwrites_input_and_keeps_backup(self) -> None:
+        """Default file mode replaces the input file and saves its original contents."""
 
-def _parser_option_strings(command_name: str) -> set[str]:
-    """Return all public option strings exposed by a command parser."""
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            source = work / "paper.tex"
+            original = "keep \\% literal % drop me\n"
+            source.write_text(original, encoding="utf-8")
 
-    module = _load_command_module(command_name)
-    parser = module.build_parser()
-    option_strings: set[str] = set()
-    for action in parser._actions:
-        option_strings.update(action.option_strings)
-    return option_strings
+            result = self.run_cli("strip_comments", str(source))
 
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(source.read_text(encoding="utf-8"), "keep \\% literal \n")
+            backups = sorted((work / ".backup").iterdir())
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), original)
 
-class WritePolicyTests(TestCase):
-    def test_package_metadata_does_not_expose_shared_dispatcher(self) -> None:
-        """Package metadata does not install a shared command dispatcher."""
+    def test_output_aliases_preserve_input_and_skip_backup(self) -> None:
+        """Each documented output spelling writes elsewhere without backing up."""
 
-        pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        for option in ("-o", "--output", "--output-file"):
+            with self.subTest(option=option), TemporaryDirectory() as temp_dir:
+                work = Path(temp_dir)
+                source = work / "paper.tex"
+                output = work / "clean.tex"
+                original = "keep % drop me\n"
+                source.write_text(original, encoding="utf-8")
 
-        self.assertNotIn("scripts", pyproject["project"])
-        self.assertNotIn("py-modules", pyproject["tool"]["setuptools"])
-        self.assertFalse((SRC / "lt_cli.py").exists())
+                result = self.run_cli("strip_comments", str(source), option, str(output))
 
-    def test_read_only_commands_opt_out_explicitly(self) -> None:
-        """Read-only commands declare that they do not overwrite source TeX."""
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(source.read_text(encoding="utf-8"), original)
+                self.assertEqual(output.read_text(encoding="utf-8"), "keep \n")
+                self.assertFalse((work / ".backup").exists())
 
-        module = _load_command_module("list_graphics")
-        self.assertIs(getattr(module, "OVERWRITES_SOURCE_TEX", True), False)
+    def test_no_backup_overwrites_without_creating_backup_directory(self) -> None:
+        """The no-backup option leaves only the rewritten source file behind."""
 
-    def test_commands_expose_clipboard_mode(self) -> None:
-        """Every public command exposes the README-documented clipboard mode."""
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            source = work / "paper.tex"
+            source.write_text("keep % drop me\n", encoding="utf-8")
 
-        for command_name in _available_commands():
-            with self.subTest(command=command_name):
-                option_strings = _parser_option_strings(command_name)
-                self.assertIn("--clipboard", option_strings)
+            result = self.run_cli("strip_comments", str(source), "-B")
 
-    def test_commands_expose_text_transform_function(self) -> None:
-        """Every public command exposes a callable text transform function."""
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(source.read_text(encoding="utf-8"), "keep \n")
+            self.assertFalse((work / ".backup").exists())
 
-        for command_name in _available_commands():
-            with self.subTest(command=command_name):
-                module = _load_command_module(command_name)
-                self.assertTrue(callable(getattr(module, "transform_text", None)))
+    def test_clipboard_mode_replaces_clipboard_text_without_files(self) -> None:
+        """Clipboard mode transforms clipboard text through the clipboard boundary."""
 
-    def test_mutating_commands_follow_shared_write_policy(self) -> None:
-        """Mutating commands expose backup and output controls consistently."""
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="keep % drop me\n"),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
+        ):
+            result = strip_comments_command.main(["--clipboard"])
 
-        for command_name in _available_commands():
-            module = _load_command_module(command_name)
-            if getattr(module, "OVERWRITES_SOURCE_TEX", True) is False:
-                continue
+        self.assertEqual(result, 0)
+        copy.assert_called_once_with("keep \n")
 
-            with self.subTest(command=command_name):
-                self.assertTrue(
-                    _imports_backup_file(command_name),
-                    f"{command_name} must import backup_file from latex_toolkit.lib.backup",
-                )
-                option_strings = _parser_option_strings(command_name)
-                self.assertIn("-B", option_strings)
-                self.assertIn("--no-backup", option_strings)
-                self.assertIn("-o", option_strings)
-                self.assertIn("--output", option_strings)
-                self.assertIn("--output-file", option_strings)
-                self.assertNotIn("--in-place", option_strings)
+    def test_clipboard_mode_rejects_input_paths_with_parser_error(self) -> None:
+        """Clipboard mode reports a concise parser error when combined with a file."""
+
+        result = self.run_cli("strip_comments", "--clipboard", "paper.tex")
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--clipboard cannot be combined with input or output paths.", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)

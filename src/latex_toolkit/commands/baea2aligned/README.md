@@ -16,6 +16,6 @@ python -m latex_toolkit.commands.baea2aligned paper.tex -B
 - This command delegates to `aligned2baea --reverse`.
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the converted document to a different path.
-- A timestamped backup is created in `.backup` through `lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Comments are preserved verbatim.
 - When a balanced `document` environment is present, only the document body is rewritten.

@@ -15,4 +15,4 @@ python -m latex_toolkit.commands.list_graphics thesis.tex --no-recursive
 
 - By default, it scans the root file and recursively included `\input`, `\include`, `\subfile`, and `\subfileinclude` sources.
 - Graphics directives inside `%` comments are ignored.
-- This is a read-only command and opts out of the write-policy tests with `OVERWRITES_SOURCE_TEX = False`.
+- This is a read-only command: it prints graphics targets and does not rewrite source files.

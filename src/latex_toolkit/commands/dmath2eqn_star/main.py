@@ -4,11 +4,7 @@
 from __future__ import annotations
 
 from latex_toolkit.commands.eqn_star2dmath import main as eqn_star2dmath_command
-from latex_toolkit.lib.backup import backup_file  # Imported to keep mutating-command policy explicit.
 from latex_toolkit.lib.logging_config import run_command
-
-# This alias overwrites source files through the delegated eqn-star2dmath command.
-OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser():

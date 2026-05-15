@@ -13,8 +13,6 @@ from latex_toolkit.lib.backup import DEFAULT_BACKUP_DIR, backup_file
 from latex_toolkit.lib.latex import read_text, write_text
 from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
 
-# This command overwrites source files unless output or clipboard mode is used.
-OVERWRITES_SOURCE_TEX = True
 
 SNAPPER_PACKAGE = "snapper-fmt"
 SNAPPER_EXECUTABLE_NAMES = ("snapper.exe", "snapper.cmd", "snapper.bat", "snapper")

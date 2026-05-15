@@ -16,6 +16,6 @@ python -m latex_toolkit.commands.expand_includes main.tex -B
 
 - By default, the command overwrites the input file.
 - Use `-o/--output` to write the flattened document to a different path.
-- A timestamped backup is created in `.backup` through `latex_toolkit.lib.backup.backup_file()` before overwriting unless `-B/--no-backup` is supplied.
+- A timestamped backup is created in `.backup` before overwriting unless `-B/--no-backup` is supplied.
 - Include directives inside `%` comments are ignored.
 - `\subfile{...}` and `\subfileinclude{...}` are handled using the `subfiles` package inclusion rules.

@@ -2,7 +2,8 @@
 
 ## Status
 
-Open.
+Resolved. Permanent write-policy tests now exercise observable CLI and
+clipboard behavior instead of source layout or helper imports.
 
 ## Problem
 
@@ -44,3 +45,14 @@ source layout or internal implementation choices.
 - Architecture constraints live in docs rather than permanent tests.
 - The command package rename can proceed without tests preserving the old file
   layout.
+
+## Resolution
+
+- Replaced `tests/test_write_policy.py` with observable CLI and clipboard
+  tests for overwrite behavior, backup creation, output aliases, no-backup
+  mode, clipboard transformation, and concise parser errors.
+- Documented the command write contract in `docs/development_guide.md`,
+  including which details belong in tests and which belong in architecture
+  guidance.
+- Removed marker constants and alias-only backup imports that existed for the
+  old implementation-policy tests.

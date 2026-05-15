@@ -52,3 +52,24 @@ For example, a reverse command may call the direct command's parser,
 moving command-family implementation code into `lib`. Shared command-family
 code should live near the commands that own it unless it becomes meaningful
 shared infrastructure for unrelated command families.
+
+## Command Write Behavior
+
+File-transforming commands share an observable write contract. By default, a
+command called with an input path overwrites that input after saving its
+original contents in a timestamped backup under `.backup`. The `-B` and
+`--no-backup` options skip backup creation. The `-o`, `--output`, and
+`--output-file` options write the transformed text to a separate path, preserve
+the source file, and do not create a backup.
+
+Clipboard mode is also part of the user-facing command contract. Commands with
+`--clipboard` read text from the system clipboard, write transformed text back
+to the system clipboard, and reject simultaneous input or output paths with a
+parser error.
+
+Permanent tests should protect those user-visible effects by invoking the CLI
+or a public command entrypoint and mocking only real boundaries such as the
+system clipboard. Do not add permanent tests for helper imports, package
+metadata, marker constants, dispatcher absence, or other implementation choices.
+Use this guide and local source comments for architecture constraints that are
+important but not directly observable.

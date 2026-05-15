@@ -4,11 +4,7 @@
 from __future__ import annotations
 
 from latex_toolkit.commands.dollar2bracket import main as dollar2bracket_command
-from latex_toolkit.lib.backup import backup_file  # Imported to keep mutating-command policy explicit.
 from latex_toolkit.lib.logging_config import run_command
-
-# This alias overwrites source files through the delegated dollar2bracket command.
-OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser():

@@ -11,8 +11,6 @@ from latex_toolkit.lib.core import TexFile, write_tex_file
 from latex_toolkit.lib.latex import expand_includes
 from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
 
-# This command overwrites source files unless output or clipboard mode is used.
-OVERWRITES_SOURCE_TEX = True
 
 
 def build_parser() -> argparse.ArgumentParser:

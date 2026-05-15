@@ -11,8 +11,6 @@ from latex_toolkit.lib.core import read_tex_file
 from latex_toolkit.lib.latex import extract_graphics_targets, walk_tex_documents
 from latex_toolkit.lib.logging_config import run_clipboard_transform, run_command
 
-# This command reports targets and never overwrites source TeX files.
-OVERWRITES_SOURCE_TEX = False
 
 
 def build_parser() -> argparse.ArgumentParser:
