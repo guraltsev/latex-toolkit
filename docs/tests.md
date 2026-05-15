@@ -91,4 +91,12 @@ When using an LLM to write or revise tests:
 * do not preserve accidental behavior unless it is intentionally user-visible
 * prefer fewer clear tests over many narrow tests that lock down code shape
 
+## Development tests
+
+`tests/` is the default pytest target and covers stable user-facing behavior.
+`tests/devel/` can contain temporary refactor scaffolding. It is excluded from default pytest discovery and should be run only by explicit path during the refactor that needs it. `tests/devel/` is available for procedural deep-analysis tests that report useful facts without becoming CI or regression tests. Use dedicated subdirectories and put a local `README.md` in that subdirectory, run those tests explicitly with `-s`, and keep their assertions limited to light sanity checks that let the report complete.
+
+
+
+
 # Project-Specific Guidelines
