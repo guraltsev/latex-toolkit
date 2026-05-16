@@ -28,6 +28,11 @@ The current intentional shared library modules are:
   transforms.
 - `logging_config`: command execution wrappers and logging setup.
 
+The `src/latex_toolkit/lib/snapper-fmt/` directory is not shared toolkit
+source. It is the ignored repository-local install prefix for the external
+`snapper-fmt` command used by `snapper_format`, and only its `README.md` and
+`.gitignore` should be tracked.
+
 Command-family transforms live under `src/latex_toolkit/commands/` with the
 command packages that own them. Public command-level text transforms are
 exposed through each command package's `main.transform_text(...)` when a direct

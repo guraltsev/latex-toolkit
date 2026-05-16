@@ -298,8 +298,9 @@ python -m latex_toolkit.commands.llm_latex_to_texmacs_latex --macros-file C:\pat
 
 Formats LaTeX prose with the external `snapper` semantic line break formatter
 so each emitted prose line contains at most one sentence. The first formatting
-run downloads `snapper-fmt` into `local_lib/snapper-fmt`; that directory is kept
-in git with `.gitkeep`, while the installed runtime is ignored.
+run downloads `snapper-fmt` into `src/latex_toolkit/lib/snapper-fmt`; that
+directory is kept in git with `README.md`, while the installed runtime is
+ignored.
 
 ```powershell
 python -m latex_toolkit.commands.snapper_format .\paper.tex

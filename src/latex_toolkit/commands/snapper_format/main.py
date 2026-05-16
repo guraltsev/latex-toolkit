@@ -265,8 +265,8 @@ def _snapper_install_root() -> Path:
     command_file = Path(__file__).resolve()
     for parent in command_file.parents:
         if (parent / "pyproject.toml").is_file() and (parent / "src").is_dir():
-            return parent / "local_lib" / "snapper-fmt"
-    return command_file.parents[4] / "local_lib" / "snapper-fmt"
+            return parent / "src" / "latex_toolkit" / "lib" / "snapper-fmt"
+    return command_file.parents[2] / "lib" / "snapper-fmt"
 
 
 def _find_snapper_executable() -> Path | None:
