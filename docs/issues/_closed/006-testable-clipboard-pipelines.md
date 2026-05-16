@@ -2,7 +2,8 @@
 
 ## Status
 
-Open.
+Resolved. Clipboard pipeline orchestration now lives in Python command
+packages, with Windows `.cmd` files kept as checkout launchers.
 
 ## Problem
 
@@ -43,3 +44,15 @@ files as thin Windows launchers.
 - `.cmd` files contain only environment setup and command launching.
 - Pipeline ordering is visible in Python code rather than duplicated in batch
   control flow.
+
+## Resolution
+
+- Added `texmacs_latex_to_llm_latex`, `llm_latex_to_texmacs_latex`, and
+  `tm2tm` command packages with explicit ordered pipeline steps.
+- Added a shared clipboard pipeline runner that updates the clipboard after
+  each successful changing step and stops on expected step failures.
+- Added permanent clipboard-boundary tests for pipeline output, macro-file
+  argument handling, invalid configuration failure, and stop-on-failure
+  behavior.
+- Reduced the root `.cmd` files to environment setup plus `python -m` command
+  launching.

@@ -8,4 +8,3 @@ changing the implementation unless the guide is intentionally amended first.
 ## Issues
 
 - [005: Fill command documentation gaps](005-command-documentation-gaps.md)
-- [006: Make clipboard pipelines testable Python commands](006-testable-clipboard-pipelines.md)

@@ -208,12 +208,13 @@ python -m latex_toolkit.commands.tm_alignedt2ltae .\paper.tm -o .\paper.converte
 python -m latex_toolkit.commands.tm_alignedt2ltae --clipboard
 ```
 
-### `tm2tm.cmd`
+### `tm2tm`
 
 Runs a clipboard normalization pipeline for TeXmacs snippets:
 `tm_alignedt2ltae`.
 
 ```powershell
+python -m latex_toolkit.commands.tm2tm
 .\tm2tm.cmd
 ```
 
@@ -271,21 +272,24 @@ python -m latex_toolkit.commands.texmacs_vert_delimiters .\paper.tex -o .\paper.
 python -m latex_toolkit.commands.texmacs_vert_delimiters --clipboard
 ```
 
-### `texmacs_latex_to_llm_latex.cmd`
+### `texmacs_latex_to_llm_latex`
 
 Runs a clipboard pipeline for TeXmacs-generated LaTeX: `dollar2bracket`,
 `ltae2aligned`, `tmscript2substack`, `proofstar2proof`, then `uni2tex`.
 
 ```powershell
+python -m latex_toolkit.commands.texmacs_latex_to_llm_latex
 .\texmacs_latex_to_llm_latex.cmd
 ```
 
-### `llm_latex_to_texmacs_latex.cmd`
+### `llm_latex_to_texmacs_latex`
 
 Runs a clipboard conversion for LLM-friendly LaTeX headed back to TeXmacs:
 `brace_unary_macros`, `texmacs_vert_delimiters`, then `proof2proofstar`.
 
 ```powershell
+python -m latex_toolkit.commands.llm_latex_to_texmacs_latex
+python -m latex_toolkit.commands.llm_latex_to_texmacs_latex --macros-file C:\path\macros.toml
 .\llm_latex_to_texmacs_latex.cmd
 .\llm_latex_to_texmacs_latex.cmd --macros-file C:\path\macros.toml
 ```
