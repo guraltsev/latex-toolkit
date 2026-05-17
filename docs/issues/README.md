@@ -7,4 +7,8 @@ changing the implementation unless the guide is intentionally amended first.
 
 ## Issues
 
-- [005: Fill command documentation gaps](005-command-documentation-gaps.md)
+No open issues.
+
+## Resolved
+
+- [005: Fill command documentation gaps](_closed/005-command-documentation-gaps.md)
