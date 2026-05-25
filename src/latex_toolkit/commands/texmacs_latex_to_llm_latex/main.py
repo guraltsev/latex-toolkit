@@ -17,17 +17,6 @@ from latex_toolkit.lib.logging_config import (
 )
 
 
-# The sequence mirrors the historical Windows launcher and is the user-visible
-# order in which clipboard text is normalized.
-PIPELINE_STEPS: tuple[ClipboardPipelineStep, ...] = (
-    ("dollar2bracket", dollar2bracket_command.transform_text),
-    ("ltae2aligned", ltae2aligned_command.transform_text),
-    ("tmscript2substack", tmscript2substack_command.transform_text),
-    ("proofstar2proof", proofstar2proof_command.transform_text),
-    ("uni2tex", uni2tex_command.transform_text),
-)
-
-
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line argument parser.
 
@@ -43,6 +32,26 @@ def build_parser() -> argparse.ArgumentParser:
             "Run the TeXmacs-generated LaTeX clipboard pipeline: dollar2bracket, "
             "ltae2aligned, tmscript2substack, proofstar2proof, then uni2tex."
         ),
+    )
+
+
+def pipeline_steps() -> tuple[ClipboardPipelineStep, ...]:
+    """Return the configured TeXmacs-to-LLM clipboard pipeline steps.
+
+    Returns
+    -------
+    tuple of tuple
+        Ordered ``(step_name, transform)`` pairs for the clipboard pipeline.
+    """
+
+    # The sequence mirrors the historical Windows launcher and is the
+    # user-visible order in which clipboard text is normalized.
+    return (
+        ("dollar2bracket", dollar2bracket_command.transform_text),
+        ("ltae2aligned", ltae2aligned_command.transform_text),
+        ("tmscript2substack", tmscript2substack_command.transform_text),
+        ("proofstar2proof", proofstar2proof_command.transform_text),
+        ("uni2tex", uni2tex_command.transform_text),
     )
 
 
@@ -63,7 +72,7 @@ def transform_text(text: str) -> str:
     # Apply the same ordered transforms used by the clipboard command so Python
     # callers can reuse the pipeline without touching the system clipboard.
     transformed = text
-    for _, transform in PIPELINE_STEPS:
+    for _, transform in pipeline_steps():
         transformed = transform(transformed)
     return transformed
 
@@ -92,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     def run() -> int:
         parser = build_parser()
         parser.parse_args(argv)
-        run_clipboard_pipeline("texmacs_latex_to_llm_latex", PIPELINE_STEPS)
+        run_clipboard_pipeline("texmacs_latex_to_llm_latex", pipeline_steps())
         return 0
 
     return run_command("texmacs_latex_to_llm_latex", run)

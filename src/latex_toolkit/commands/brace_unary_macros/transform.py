@@ -10,9 +10,12 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 import re
-import tomllib
 
 from latex_toolkit.lib.core import TexFile, read_tex_file
+from latex_toolkit.lib.latex_macro_config import (
+    load_macro_commands as load_configured_macro_commands,
+    normalize_macro_commands as normalize_configured_macro_commands,
+)
 from latex_toolkit.lib.latex_parser import split_document_regions
 
 # Default unary macros cover the local Fourier-transform shorthand and common
@@ -48,7 +51,6 @@ DEFAULT_UNARY_MACROS: tuple[str, ...] = (
 )
 
 _CONTROL_WORD_RE = re.compile(r"\\[A-Za-z@]+")
-_BARE_CONTROL_WORD_RE = re.compile(r"[A-Za-z@]+")
 _NON_ARGUMENT_STARTS = frozenset("{}[]&#$^_")
 
 
@@ -95,7 +97,7 @@ def convert_text(text: str, *, commands: Iterable[str] | None = None) -> str:
         such as ``\bar x`` to ``\bar{x}``.
     """
 
-    active_commands = normalize_macro_commands(DEFAULT_UNARY_MACROS if commands is None else commands)
+    active_commands = normalize_configured_macro_commands(DEFAULT_UNARY_MACROS if commands is None else commands)
     if not active_commands:
         return text
 
@@ -126,17 +128,7 @@ def load_macro_commands(path: str | Path) -> tuple[str, ...]:
         The path is not absolute or the TOML structure is invalid.
     """
 
-    config_path = Path(path).expanduser()
-    if not config_path.is_absolute():
-        raise ValueError(f"Macro command file path must be absolute: {path}")
-
-    data = tomllib.loads(config_path.read_text(encoding="utf-8"))
-    command_values = data.get("commands", data.get("macros"))
-    if command_values is None:
-        raise ValueError("Macro command TOML must define a top-level 'commands' array.")
-    if not isinstance(command_values, list) or not all(isinstance(item, str) for item in command_values):
-        raise ValueError("Macro command TOML 'commands' value must be an array of strings.")
-    return normalize_macro_commands(command_values)
+    return load_configured_macro_commands(path)
 
 
 def normalize_macro_commands(commands: Iterable[str]) -> tuple[str, ...]:
@@ -158,24 +150,7 @@ def normalize_macro_commands(commands: Iterable[str]) -> tuple[str, ...]:
         A value is empty or is not a LaTeX control-word command.
     """
 
-    normalized: list[str] = []
-    seen: set[str] = set()
-
-    # Accept bare names for convenience, but validate the normalized command so
-    # TOML typos fail before any source text is rewritten.
-    for command in commands:
-        stripped = command.strip()
-        if not stripped:
-            raise ValueError("Macro command names must not be empty.")
-        if _BARE_CONTROL_WORD_RE.fullmatch(stripped):
-            stripped = f"\\{stripped}"
-        if _CONTROL_WORD_RE.fullmatch(stripped) is None:
-            raise ValueError(f"Invalid LaTeX control-word command: {command!r}")
-        if stripped not in seen:
-            normalized.append(stripped)
-            seen.add(stripped)
-
-    return tuple(normalized)
+    return normalize_configured_macro_commands(commands)
 
 
 def _coerce_to_tex_file(source: str | Path | TexFile) -> TexFile:

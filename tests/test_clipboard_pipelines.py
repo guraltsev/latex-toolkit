@@ -19,6 +19,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from latex_toolkit.commands.llm_latex_to_texmacs_latex import main as llm_to_texmacs_command  # noqa: E402
+from latex_toolkit.commands.texmacs_latex_to_latex import main as texmacs_to_latex_command  # noqa: E402
 from latex_toolkit.commands.texmacs_latex_to_llm_latex import main as texmacs_to_llm_command  # noqa: E402
 from latex_toolkit.commands.tm2tm import main as tm2tm_command  # noqa: E402
 from latex_toolkit.lib.logging_config import run_clipboard_pipeline  # noqa: E402
@@ -104,6 +105,46 @@ class ClipboardPipelineTests(TestCase):
         self.assertEqual(result, 1)
         paste.assert_not_called()
         copy.assert_not_called()
+
+    def test_texmacs_to_latex_pipeline_deletes_default_macros_after_normalization(self) -> None:
+        """The TeXmacs-to-LaTeX pipeline applies the base steps and then deletes wrappers."""
+
+        source = (
+            "\\hide-preamble{\\usepackage{foo}}\n"
+            "$\\alpha$\n"
+            "\\begin{proof*}{Idea}Done.\\end{proof*}\n"
+        )
+        expected = "\n\\(\\alpha\\)\n\\begin{proof}[Idea]Done.\\end{proof}\n"
+        writes: list[str] = []
+
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value=source),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy", side_effect=writes.append),
+        ):
+            result = texmacs_to_latex_command.main([])
+
+        self.assertEqual(result, 0)
+        self.assertEqual(writes[-1], expected)
+
+    def test_texmacs_to_latex_macros_file_controls_delete_step(self) -> None:
+        """A custom macro file changes which final delete step rewrites are visible."""
+
+        with TemporaryDirectory() as temp_dir:
+            macros_file = Path(temp_dir) / "macros.toml"
+            macros_file.write_text("commands = ['\\drop-me']\n", encoding="utf-8")
+            writes: list[str] = []
+
+            with (
+                patch(
+                    "latex_toolkit.lib.clipboard.pyperclip.paste",
+                    return_value="\\drop-me{A}\n\\hide-preamble{B}\n",
+                ),
+                patch("latex_toolkit.lib.clipboard.pyperclip.copy", side_effect=writes.append),
+            ):
+                result = texmacs_to_latex_command.main(["--macros-file", str(macros_file)])
+
+        self.assertEqual(result, 0)
+        self.assertEqual(writes[-1], "\n\\hide-preamble{B}\n")
 
     def test_tm2tm_pipeline_replaces_clipboard_with_texmacs_normalization(self) -> None:
         """The TeXmacs snippet pipeline normalizes strict aligned tables."""
