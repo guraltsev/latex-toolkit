@@ -1,75 +1,33 @@
-# ==============================================================================
-# 1. OUTER INDENTATION SETTINGS (Flush-Left Document Structure)
-# ==============================================================================
 defaultIndent: ""
 
-indentAfterItems:
-  itemize: 0
-  itemize*: 0
-  enumerate: 0
-  enumerate*: 0
-  description: 0
-  description*: 0
-  list: 0
-
-indentAfterHeadings:
-  part:
-    indentAfterThisHeading: 0
-    level: 1
-  chapter:
-    indentAfterThisHeading: 0
-    level: 2
-  section:
-    indentAfterThisHeading: 0
-    level: 3
-  subsection:
-    indentAfterThisHeading: 0
-    level: 4
-  subsection*:
-    indentAfterThisHeading: 0
-    level: 4
-  subsubsection:
-    indentAfterThisHeading: 0
-    level: 5
-  paragraph:
-    indentAfterThisHeading: 0
-    level: 6
-  subparagraph:
-    indentAfterThisHeading: 0
-    level: 7
-
-# Keep environments flush-left by default, then opt a few math structures into
-# a readable two-space internal indent.
 noAdditionalIndentGlobal:
   environments: 1
-
-indentRules:
-  cases: "  "
-  matrix: "  "
-  pmatrix: "  "
-  bmatrix: "  "
-  split: "  "
-  aligned: "  "
+  commands: 1
+  optionalArguments: 1
+  mandatoryArguments: 1
+  ifElseFi: 1
+  items: 1
+  keyEqualsValuesBracesBrackets: 1
+  namedGroupingBracesBrackets: 1
+  UnNamedGroupingBracesBrackets: 1
+  specialBeginEnd: 1
+  afterHeading: 1
+  filecontents: 1
 
 lookForAlignDelims:
-  align: 1
-  align*: 1
-  gather: 1
-  gather*: 1
-  multline: 1
-  cases: 1
-  matrix: 1
-  pmatrix: 1
-  bmatrix: 1
-  split: 1
-  aligned: 1
-
-# ==============================================================================
-# 2. LINE BREAK MODIFICATIONS & PARAGRAPH FLATTENING
-# ==============================================================================
-modifyLineBreaks:
-  textWrapOptions:
-    columns: -1
-    removeBlockLineBreaks: 1
-    multipleSpacesToSingle: 1
-    when: before
+  align: 0
+  align*: 0
+  alignat: 0
+  alignat*: 0
+  aligned: 0
+  alignedat: 0
+  bmatrix: 0
+  Bmatrix: 0
+  cases: 0
+  flalign: 0
+  flalign*: 0
+  matrix: 0
+  pmatrix: 0
+  split: 0
+  vmatrix: 0
+  Vmatrix: 0
