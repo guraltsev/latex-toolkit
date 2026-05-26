@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI for formatting LaTeX with latexindent and snapper in sequence."""
+"""CLI for formatting LaTeX with snapper and latexindent in sequence."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from pathlib import Path
 import argparse
 
 from latex_toolkit.commands.latex_indent import main as latex_indent_command
+from latex_toolkit.commands.snapper_format import main as snapper_format_command
 from latex_toolkit.lib.backup import DEFAULT_BACKUP_DIR, backup_file
 from latex_toolkit.lib.latex import read_text, write_text
 from latex_toolkit.lib.logging_config import (
@@ -28,7 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="latex_format",
         description=(
-            "Format LaTeX by running latex_indent, then snapper_format. "
+            "Format LaTeX by running snapper_format, then latex_indent. "
             "Without input or output paths, the command formats clipboard text."
         ),
     )
@@ -81,8 +82,16 @@ def pipeline_steps(*, max_width: int = 0) -> tuple[ClipboardPipelineStep, ...]:
     tuple of tuple
         Ordered ``(step_name, transform)`` pairs for the formatting pipeline.
     """
-    del max_width
-    return (("latex_indent", latex_indent_command.transform_text),)
+
+    # Keep the pipeline order aligned with the CLI contract: prose sentence
+    # splitting first, then structural LaTeX formatting.
+    return (
+        (
+            "snapper_format",
+            lambda text: snapper_format_command.transform_text(text, max_width=max_width),
+        ),
+        ("latex_indent", latex_indent_command.transform_text),
+    )
 
 
 def transform_text(text: str, *, max_width: int = 0) -> str:

@@ -21,14 +21,40 @@ from latex_toolkit.commands.latex_format.main import transform_text  # noqa: E40
 
 
 class LatexFormatTransformTests(TestCase):
-    def test_transform_text_returns_latexindent_output(self) -> None:
-        """Latex format currently behaves like a pure latexindent transform."""
+    def test_transform_text_runs_snapper_then_latexindent(self) -> None:
+        """Latex format runs snapper sentence formatting before indentation."""
 
-        with patch(
-            "latex_toolkit.commands.latex_indent.main.transform_text",
-            return_value="indented\n",
-        ) as indent:
+        with (
+            patch(
+                "latex_toolkit.commands.latex_indent.main.transform_text",
+                return_value="indented\n",
+            ) as indent,
+            patch(
+                "latex_toolkit.commands.snapper_format.main.transform_text",
+                return_value="snapped\n",
+            ) as snapper,
+        ):
             converted = transform_text("raw\n")
 
-        indent.assert_called_once_with("raw\n")
+        snapper.assert_called_once_with("raw\n", max_width=0)
+        indent.assert_called_once_with("snapped\n")
+        self.assertEqual(converted, "indented\n")
+
+    def test_transform_text_passes_requested_sentence_width_to_snapper(self) -> None:
+        """Latex format forwards the max-width option to snapper formatting."""
+
+        with (
+            patch(
+                "latex_toolkit.commands.latex_indent.main.transform_text",
+                return_value="indented\n",
+            ) as indent,
+            patch(
+                "latex_toolkit.commands.snapper_format.main.transform_text",
+                return_value="snapped\n",
+            ) as snapper,
+        ):
+            converted = transform_text("raw\n", max_width=88)
+
+        snapper.assert_called_once_with("raw\n", max_width=88)
+        indent.assert_called_once_with("snapped\n")
         self.assertEqual(converted, "indented\n")

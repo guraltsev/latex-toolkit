@@ -106,6 +106,7 @@ def transform_text(text: str, *, max_width: int = 0) -> str:
 
     snapper = ensure_snapper()
     snapper_input, wrapped_fragment = _snapper_input(text)
+    trailing_newlines = _trailing_newline_suffix(text)
     command = [
         str(snapper),
         "--format",
@@ -125,7 +126,8 @@ def transform_text(text: str, *, max_width: int = 0) -> str:
         raise RuntimeError(_format_process_failure("snapper formatting failed", completed))
 
     if wrapped_fragment:
-        return _unwrap_snapper_output(completed.stdout)
+        unwrapped = _unwrap_snapper_output(completed.stdout)
+        return _restore_trailing_newlines(unwrapped, trailing_newlines)
     return completed.stdout
 
 
@@ -320,6 +322,23 @@ def _unwrap_snapper_output(text: str) -> str:
     if lines and lines[-1].strip() == DOCUMENT_END:
         lines = lines[:-1]
     return "".join(lines)
+
+
+def _trailing_newline_suffix(text: str) -> str:
+    """Return the exact trailing newline run from the original input."""
+
+    match = re.search(r"((?:\r\n|\r|\n)+)\Z", text)
+    if match is None:
+        return ""
+    return match.group(1)
+
+
+def _restore_trailing_newlines(text: str, trailing_newlines: str) -> str:
+    """Return snapper output with the original trailing newline run restored."""
+
+    if not trailing_newlines:
+        return text.rstrip("\r\n")
+    return text.rstrip("\r\n") + trailing_newlines
 
 
 def _format_process_failure(message: str, completed: subprocess.CompletedProcess[str]) -> str:

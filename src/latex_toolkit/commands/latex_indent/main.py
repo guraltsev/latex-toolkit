@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import argparse
+import os
 import shutil
 import subprocess
 
@@ -86,32 +87,40 @@ def transform_text(text: str) -> str:
             "Install latexindent to use latex_indent."
         )
 
+    preferred_line_ending = _preferred_line_ending(text)
+    normalized_text = _normalize_line_endings(text)
+
     with TemporaryDirectory() as temp_dir:
         work = Path(temp_dir)
         input_path = work / "input.tex"
 
         # Run latexindent inside a temporary workspace so any auxiliary files it
         # chooses to emit stay out of the user's project tree.
-        input_path.write_text(text, encoding="utf-8")
+        input_path.write_text(normalized_text, encoding="utf-8")
         command = [
             executable,
             "-m",
-            "-l",
-            str(_default_config_path()),
+            f"-l={_default_config_path()}",
             str(input_path),
         ]
         completed = subprocess.run(
             command,
             cwd=str(work),
+            env=_isolated_latexindent_env(work),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            encoding="utf-8",
             check=False,
         )
 
     if completed.returncode != 0:
         raise RuntimeError(_format_process_failure("latexindent formatting failed", completed))
-    return completed.stdout
+
+    # Keep the wrapper transport-only: normalize line endings for latexindent,
+    # then restore the caller's original convention on the formatter output.
+    normalized_output = _normalize_line_endings(completed.stdout)
+    return _apply_line_ending(normalized_output, preferred_line_ending)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -175,6 +184,43 @@ def _default_config_path() -> Path:
     """Return the bundled latexindent configuration file path."""
 
     return Path(__file__).with_name("latexindent.yaml")
+
+
+def _normalize_line_endings(text: str) -> str:
+    """Return text with all line endings normalized to ``\\n``."""
+
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _preferred_line_ending(text: str) -> str:
+    """Return the dominant line ending style from the original input text."""
+
+    if "\r\n" in text:
+        return "\r\n"
+    if "\r" in text:
+        return "\r"
+    return "\n"
+
+
+def _apply_line_ending(text: str, line_ending: str) -> str:
+    """Return text rewritten to the requested line-ending style."""
+
+    if line_ending == "\n":
+        return text
+    return text.replace("\n", line_ending)
+
+
+def _isolated_latexindent_env(work: Path) -> dict[str, str]:
+    """Return a process environment that ignores user latexindent config files."""
+
+    env = os.environ.copy()
+    isolated_home = str(work)
+
+    # Keep latexindent deterministic by preventing user-scoped config discovery
+    # from changing indentation or enabling line-break rewrites.
+    for variable in ("HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "XDG_CONFIG_HOME"):
+        env[variable] = isolated_home
+    return env
 
 
 def _format_process_failure(message: str, completed: subprocess.CompletedProcess[str]) -> str:

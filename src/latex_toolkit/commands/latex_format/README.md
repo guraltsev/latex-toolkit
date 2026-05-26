@@ -1,6 +1,6 @@
 # `latex_format`
 
-Run the toolkit's LaTeX formatting pipeline: `latex_indent` followed by `snapper_format`.
+Run the toolkit's LaTeX formatting pipeline: `snapper_format` followed by `latex_indent`.
 
 ## Usage
 

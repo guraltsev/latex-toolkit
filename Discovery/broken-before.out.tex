@@ -1,0 +1,91 @@
+﻿\section{Generalities}\label{sec:generalities}
+
+\begin{itemize}
+\item We write \(\R^{d + 1}_+ \eqd \R^d \times (0, \infty)\).
+\item We write \(\langle x \rangle \eqd \sqrt{1 + | x |^2}\).
+\item All \(L^p (\R^{d + 1}_+)\)-norms below are taken with respect to \(\dd x \frac{\dd t}{t}\).
+\item We write \(\{\alpha\} \eqd \alpha - \lfloor \alpha \rfloor \in [0, 1)\).
+\item A set \(\mathcal{B} \subset \Sch (\R^d)\) is bounded in \(\Sch (\R^d)\) if for every nonnegative integer \(M\),
+      \[
+      \sup_{\varphi \in \mathcal{B}} \sup_{z \in \R^d}
+      \sup_{| \beta | \leq M}
+      \langle z \rangle^M | \partial^{\beta} \varphi (z) | < \infty .
+      \]
+\item The Fourier transform operator \(\Fourier\) is normalized by
+      \[
+      \FT{\varphi} (\xi) = (\Fourier \varphi) (\xi)
+      \eqd \int_{\R^d} \varphi (x) e^{- 2 \pi ix \cdot \xi} \dd x .
+      \]
+\end{itemize}
+
+\begin{definition}[Cancellation classes] \label{def:psi-classes} The set \(\Psi (\R^d) \subset \Sch (\R^d)\) is the set of Schwartz functions whose Fourier transform is supported away from the origin:
+\begin{equation} \label{eq:psi-fourier-support}
+\Psi (\R^d) \eqd \left\{ f \in \Sch (\R^d) \st 0 \not\in \spt \FT{f} \right\}.
+\end{equation}
+For a nonnegative integer \(m\), the set \(\Psi^m (\R^d) \subset \Sch (\R^d)\) is the set of Schwartz functions with vanishing moments up to order \(m\):
+
+\begin{equation} \label{eq:psi-vanishing-moments}
+\Psi^m (\R^d) \eqd \left\{ f \in \Sch (\R^d) \st \int_{\R^d} f(x) P(x) \dd x = 0
+\quad \text{for every polynomial } P \text{ with } \deg(P) \le m \right\}.
+\end{equation}
+In particular, \(\Psi(\R^d) \subset \Psi^m(\R^d)\) for every nonnegative integer \(m\).
+\end{definition}
+
+\begin{definition}[H{\"o}lder spaces] \label{def:holder-spaces}
+Let \(\alpha > 0\) be noninteger and set \(n\eqd \lfloor \alpha \rfloor\).
+
+For \(f \in C^n(\R^d)\), define the homogeneous H{\"o}lder seminorm by
+\begin{equation}
+\label{eq:holder-homogeneous-seminorm}
+\|f\|_{\dot{\mathcal{C}}^{\alpha}(\R^d)} \eqd \max_{|\gamma|=n} \sup_{x \neq x'} \frac{| \partial^\gamma f(x') - \partial^\gamma f(x) |} {|x'-x|^{\{\alpha\}}}.
+\end{equation}
+This is a seminorm; it does not see polynomials of degree at most \(n\).
+
+For \(t_0>0\), define the nonhomogeneous H{\"o}lder norm at top scale \(t_0\) by
+\begin{equation} \label{eq:holder-nonhomogeneous-top-scale-norm}
+\|f\|_{\mathcal{C}^{\alpha}_{t_0}(\R^d)} \eqd \sum_{|\gamma|\le n} t_0^{|\gamma|} \|\partial^\gamma f\|_{L^\infty} + t_0^\alpha \max_{|\gamma|=n} \sup_{\substack{x\neq x' \\ |x'-x|<t_0 }} \frac{| \partial^\gamma f(x')-\partial^\gamma f(x)|} {|x'-x|^{\{\alpha\}}}.
+\end{equation}
+When \(t_0=1\) this is the usual nonhomogeneous H{\"o}lder norm used in the unit-scale formulation.
+\end{definition}
+\begin{remark}[Homogeneity of the nonhomogeneous class] Although the nonhomogeneous H{\"o}lder norm is not scale-invariant for a fixed $t_0$, the spaces are homogeneous as a class.
+Specifically, spatial scaling simply shifts the top scale parameter.
+
+If we define the rescaled function $f_\lambda(x) = f(x/Î»)$ for $\lambda > 0$, applying the chain rule $\partial^\gamma f_\lambda(x) = \lambda^{-|\gamma|} (\partial^\gamma f)( x/Î»)$ yields:
+\[
+\|f_\lambda\|_{\mathcal{C}^{\alpha}_{Î» t_0}(\R^d)} = \|f\|_{\mathcal{C}^{\alpha}_{t_0}(\R^d)}.
+\]
+Thus, while any individual norm depends strictly on a chosen scale, the parameter family $\{\mathcal{C}^{\alpha}_{t_0}\}_{t_0>0}$ behaves covariantly under dilations, preserving homogeneity at the level of the class.
+\end{remark}
+
+\begin{definition}[Wavelet Operators] \label{def:wavelet-operators} For $x \in \R^d$ and $t > 0$, let the translation and dilation operators acting on a fixed test function $\varphi \in \Sch(\R^d)$ be defined respectively by
+\[
+\Tr_x\varphi(y) \eqd \varphi(y-x) \quad \text{and} \quad \Dil_t\varphi(y) \eqd t^{-d}\varphi(y/t).
+\]
+\begin{enumerate}[(i)] \item \textbf{Wavelet Coefficient Operator:} For a function $f$ of at most polynomial growth, define
+      \begin{equation} \label{eq:wavelet-coefficient-fixed-test}
+      \Em_{\varphi}[f](x,t) \eqd \int_{\R^d} f(y)\Tr_x\Dil_t\varphi(y)\dd y.
+      \end{equation}
+
+\item \textbf{Continuous Reconstruction Operator:} Let $F:\R^{d+1}_+\to\C$.
+      Whenever the integral is absolutely convergent, define
+
+      \begin{equation} \label{eq:reconstruction-operator}
+      (\dot{\mc{R}}_{\varphi}[F])(x) \eqd \int_0^\infty \int_{\R^d} F(y,t)\Tr_y\Dil_t\varphi(x) \dd y\frac{\dd t}{t}.
+      \end{equation}
+
+\item \textbf{Top-Scale Synthesis Operator:} For $t_0>0$ and a function $a:\R^d\to\C$, define
+
+      \begin{equation} \label{eq:top-scale-synthesis-operator}
+      (\mc{R}_{\varphi,t_0}[a])(x) \eqd \int_{\R^d} a(y)\Tr_y\Dil_{t_0}\varphi(x)\dd y.
+      \end{equation}
+\end{enumerate}
+\end{definition}
+
+\begin{remark} \label{rem:variable-test-functions} One can more generally consider these operators when the test functions are allowed to depend on the space and scale parameters, provided they remain uniformly bounded in the Schwartz topology.
+Specifically:
+\begin{itemize}
+\item In the continuous reconstruction operator \eqref{eq:reconstruction-operator}, the fixed function $\varphi$ can be replaced by a bounded family of test functions $\varphi: \R^{d+1}_+ \to \Sch(\R^d)$, modifying the integrand to use $\varphi_{(y,t)}$.
+\item In the top-scale synthesis operator \eqref{eq:top-scale-synthesis-operator}, $\varphi$ can be replaced by a bounded spatial family $\varphi: \R^d \to \Sch(\R^d)$, modifying the integrand to use $\varphi_y$.
+\end{itemize}
+The standard definitions presented in Definition~\ref{def:wavelet-operators} are recovered by identifying a fixed Schwartz function $\varphi$ with the respective constant families.
+\end{remark}

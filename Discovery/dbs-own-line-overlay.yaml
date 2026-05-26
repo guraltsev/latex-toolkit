@@ -1,0 +1,49 @@
+﻿defaultIndent: ''
+indentRules:
+  item: 0
+  aligned: '  '
+  alignedat: '  '
+  split: '  '
+lookForAlignDelims:
+  align: 1
+  align*: 1
+  alignat: 1
+  alignat*: 1
+  aligned:
+    delims: 1
+    alignDoubleBackSlash: 0
+    spacesBeforeDoubleBackSlash: 0
+    alignContentAfterDoubleBackSlash: 1
+    spacesAfterDoubleBackSlash: 0
+  alignedat:
+    delims: 1
+    alignDoubleBackSlash: 0
+    spacesBeforeDoubleBackSlash: 0
+    alignContentAfterDoubleBackSlash: 1
+    spacesAfterDoubleBackSlash: 0
+  split:
+    delims: 1
+    alignDoubleBackSlash: 0
+    spacesBeforeDoubleBackSlash: 0
+    alignContentAfterDoubleBackSlash: 1
+    spacesAfterDoubleBackSlash: 0
+modifyLineBreaks:
+  preserveBlankLines: 0
+  condenseMultipleBlankLinesInto: 1
+  environments:
+    DBSFinishesWithLineBreak: 1
+    aligned:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    alignedat:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    split:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1

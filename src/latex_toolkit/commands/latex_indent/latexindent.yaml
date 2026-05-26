@@ -1,5 +1,11 @@
 defaultIndent: ""
 
+indentRules:
+  item: 0
+  aligned: "  "
+  alignedat: "  "
+  split: "  "
+
 noAdditionalIndentGlobal:
   environments: 1
   commands: 1
@@ -15,19 +21,62 @@ noAdditionalIndentGlobal:
   filecontents: 1
 
 lookForAlignDelims:
-  align: 0
-  align*: 0
-  alignat: 0
-  alignat*: 0
-  aligned: 0
-  alignedat: 0
-  bmatrix: 0
-  Bmatrix: 0
-  cases: 0
-  flalign: 0
-  flalign*: 0
-  matrix: 0
-  pmatrix: 0
-  split: 0
-  vmatrix: 0
-  Vmatrix: 0
+  align: 1
+  align*: 1
+  alignat: 1
+  alignat*: 1
+  aligned: 1
+  alignedat: 1
+  bmatrix: 1
+  Bmatrix: 1
+  cases: 1
+  flalign: 1
+  flalign*: 1
+  matrix: 1
+  pmatrix: 1
+  split: 1
+  vmatrix: 1
+  Vmatrix: 1
+
+modifyLineBreaks:
+  preserveBlankLines: 0
+  condenseMultipleBlankLinesInto: 1
+  items:
+    ItemStartsOnOwnLine: 1
+  environments:
+    DBSFinishesWithLineBreak: 1
+    itemize:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    itemize*:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    enumerate:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    enumerate*:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    aligned:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    alignedat:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
+    split:
+      BeginStartsOnOwnLine: 1
+      BodyStartsOnOwnLine: 1
+      EndStartsOnOwnLine: 1
+      EndFinishesWithLineBreak: 1
