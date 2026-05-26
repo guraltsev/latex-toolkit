@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import call, patch
 import os
 import subprocess
 import sys
@@ -22,6 +22,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from latex_toolkit.commands.strip_comments import main as strip_comments_command  # noqa: E402
+from latex_toolkit.commands.latex_format import main as latex_format_command  # noqa: E402
+from latex_toolkit.commands.latex_indent import main as latex_indent_command  # noqa: E402
 from latex_toolkit.commands.snapper_format import main as snapper_format_command  # noqa: E402
 
 
@@ -107,6 +109,86 @@ class ObservableWritePolicyTests(TestCase):
 
         self.assertEqual(result, 0)
         copy.assert_called_once_with("keep \n")
+
+    def test_latex_indent_overwrites_input_and_keeps_backup(self) -> None:
+        """Latex indent rewrites the source file in place and preserves a backup."""
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            source = work / "paper.tex"
+            original = "\\begin{align}\na&=b\n\\end{align}\n"
+            source.write_text(original, encoding="utf-8")
+
+            with patch(
+                "latex_toolkit.commands.latex_indent.main.transform_text",
+                return_value="formatted\n",
+            ) as transform:
+                result = latex_indent_command.main([str(source)])
+
+            self.assertEqual(result, 0)
+            transform.assert_called_once_with(original)
+            self.assertEqual(source.read_text(encoding="utf-8"), "formatted\n")
+            backups = sorted((work / ".backup").iterdir())
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), original)
+
+    def test_latex_indent_clipboard_mode_replaces_clipboard_text(self) -> None:
+        """Latex indent clipboard mode writes the formatted text back to the clipboard."""
+
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="raw\n"),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
+            patch(
+                "latex_toolkit.commands.latex_indent.main.transform_text",
+                return_value="formatted\n",
+            ) as transform,
+        ):
+            result = latex_indent_command.main(["--clipboard"])
+
+        self.assertEqual(result, 0)
+        transform.assert_called_once_with("raw\n")
+        copy.assert_called_once_with("formatted\n")
+
+    def test_latex_format_defaults_to_clipboard_without_input(self) -> None:
+        """Latex format uses clipboard mode when no input or output path is given."""
+
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="raw\n"),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
+            patch(
+                "latex_toolkit.commands.latex_indent.main.transform_text",
+                return_value="indented\n",
+            ) as indent,
+        ):
+            result = latex_format_command.main([])
+
+        self.assertEqual(result, 0)
+        indent.assert_called_once_with("raw\n")
+        self.assertEqual(copy.call_args_list, [call("indented\n")])
+
+    def test_latex_format_overwrites_input_and_keeps_backup(self) -> None:
+        """Latex format rewrites the source file in place and preserves a backup."""
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            source = work / "paper.tex"
+            original = "raw\n"
+            source.write_text(original, encoding="utf-8")
+
+            with (
+                patch(
+                    "latex_toolkit.commands.latex_indent.main.transform_text",
+                    return_value="indented\n",
+                ) as indent,
+            ):
+                result = latex_format_command.main([str(source)])
+
+            self.assertEqual(result, 0)
+            indent.assert_called_once_with(original)
+            self.assertEqual(source.read_text(encoding="utf-8"), "indented\n")
+            backups = sorted((work / ".backup").iterdir())
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), original)
 
     def test_snapper_format_defaults_to_clipboard_without_input(self) -> None:
         """Snapper format uses clipboard mode when no input or output path is given."""

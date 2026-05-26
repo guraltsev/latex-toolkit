@@ -19,4 +19,4 @@ where = ["src"]
 include = ["latex_toolkit*"]
 
 [tool.setuptools.package-data]
-"latex_toolkit.commands" = ["*/*.md"]
+"latex_toolkit.commands" = ["*/*.md", "*/*.yaml"]
