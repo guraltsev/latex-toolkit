@@ -1,6 +1,7 @@
 # `latex_format`
 
-Run the toolkit's LaTeX formatting pipeline: `snapper_format` followed by `latex_indent`.
+Run the toolkit's LaTeX formatting pipeline: `dollar2bracket`, `uni2tex`,
+`brace_unary_macros`, `snapper_format`, then `latex_indent`.
 
 ## Usage
 

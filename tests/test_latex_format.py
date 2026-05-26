@@ -1,7 +1,7 @@
 """Tests for observable latex_format text-pipeline behavior.
 
 The tests exercise the public ``transform_text`` entrypoint while mocking the
-formatter subprocess boundaries. Latexindent internals, snapper implementation
+command-level formatter boundaries. Snapper internals, delimiter parsing
 details, and exact subprocess invocation mechanics are out of scope.
 """
 
@@ -21,10 +21,18 @@ from latex_toolkit.commands.latex_format.main import transform_text  # noqa: E40
 
 
 class LatexFormatTransformTests(TestCase):
-    def test_transform_text_runs_snapper_then_latexindent(self) -> None:
-        """Latex format runs snapper sentence formatting before indentation."""
+    def test_transform_text_runs_normalization_then_formatting(self) -> None:
+        """Latex format normalizes math syntax before the formatter stages."""
 
         with (
+            patch(
+                "latex_toolkit.commands.brace_unary_macros.main.transform_text",
+                return_value="braced\n",
+            ) as brace,
+            patch(
+                "latex_toolkit.commands.dollar2bracket.main.transform_text",
+                return_value="dollar\n",
+            ) as dollar,
             patch(
                 "latex_toolkit.commands.latex_indent.main.transform_text",
                 return_value="indented\n",
@@ -33,10 +41,17 @@ class LatexFormatTransformTests(TestCase):
                 "latex_toolkit.commands.snapper_format.main.transform_text",
                 return_value="snapped\n",
             ) as snapper,
+            patch(
+                "latex_toolkit.commands.uni2tex.main.transform_text",
+                return_value="unicode\n",
+            ) as unicode,
         ):
             converted = transform_text("raw\n")
 
-        snapper.assert_called_once_with("raw\n", max_width=0)
+        dollar.assert_called_once_with("raw\n")
+        unicode.assert_called_once_with("dollar\n")
+        brace.assert_called_once_with("unicode\n")
+        snapper.assert_called_once_with("braced\n", max_width=0)
         indent.assert_called_once_with("snapped\n")
         self.assertEqual(converted, "indented\n")
 
@@ -45,6 +60,14 @@ class LatexFormatTransformTests(TestCase):
 
         with (
             patch(
+                "latex_toolkit.commands.brace_unary_macros.main.transform_text",
+                return_value="braced\n",
+            ),
+            patch(
+                "latex_toolkit.commands.dollar2bracket.main.transform_text",
+                return_value="dollar\n",
+            ),
+            patch(
                 "latex_toolkit.commands.latex_indent.main.transform_text",
                 return_value="indented\n",
             ) as indent,
@@ -52,9 +75,13 @@ class LatexFormatTransformTests(TestCase):
                 "latex_toolkit.commands.snapper_format.main.transform_text",
                 return_value="snapped\n",
             ) as snapper,
+            patch(
+                "latex_toolkit.commands.uni2tex.main.transform_text",
+                return_value="unicode\n",
+            ),
         ):
             converted = transform_text("raw\n", max_width=88)
 
-        snapper.assert_called_once_with("raw\n", max_width=88)
+        snapper.assert_called_once_with("braced\n", max_width=88)
         indent.assert_called_once_with("snapped\n")
         self.assertEqual(converted, "indented\n")

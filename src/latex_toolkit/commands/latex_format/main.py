@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""CLI for formatting LaTeX with snapper and latexindent in sequence."""
+"""CLI for normalizing and formatting LaTeX with a shared pipeline."""
 
 from __future__ import annotations
 
 from pathlib import Path
 import argparse
 
+from latex_toolkit.commands.brace_unary_macros import main as brace_unary_macros_command
+from latex_toolkit.commands.dollar2bracket import main as dollar2bracket_command
 from latex_toolkit.commands.latex_indent import main as latex_indent_command
 from latex_toolkit.commands.snapper_format import main as snapper_format_command
+from latex_toolkit.commands.uni2tex import main as uni2tex_command
 from latex_toolkit.lib.backup import DEFAULT_BACKUP_DIR, backup_file
 from latex_toolkit.lib.latex import read_text, write_text
 from latex_toolkit.lib.logging_config import (
@@ -29,7 +32,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="latex_format",
         description=(
-            "Format LaTeX by running snapper_format, then latex_indent. "
+            "Normalize LaTeX math syntax, then run snapper_format and latex_indent. "
             "Without input or output paths, the command formats clipboard text."
         ),
     )
@@ -83,9 +86,13 @@ def pipeline_steps(*, max_width: int = 0) -> tuple[ClipboardPipelineStep, ...]:
         Ordered ``(step_name, transform)`` pairs for the formatting pipeline.
     """
 
-    # Keep the pipeline order aligned with the CLI contract: prose sentence
-    # splitting first, then structural LaTeX formatting.
+    # Normalize math syntax before sentence wrapping so snapper formats a more
+    # consistent LaTeX surface.
     return (
+        ("dollar2bracket", dollar2bracket_command.transform_text),
+        ("uni2tex", uni2tex_command.transform_text),
+        ("brace_unary_macros", brace_unary_macros_command.transform_text),
+        # Keep the formatter stages after syntax normalization.
         (
             "snapper_format",
             lambda text: snapper_format_command.transform_text(text, max_width=max_width),
@@ -107,7 +114,7 @@ def transform_text(text: str, *, max_width: int = 0) -> str:
     Returns
     -------
     str
-        Text after every enabled formatting step has run.
+        Text after every normalization and formatting step has run.
     """
 
     # Apply the same ordered transforms used by the CLI so Python callers can

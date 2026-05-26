@@ -156,14 +156,13 @@ class ObservableWritePolicyTests(TestCase):
             patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="raw\n"),
             patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
             patch(
-                "latex_toolkit.commands.latex_indent.main.transform_text",
-                return_value="indented\n",
-            ) as indent,
+                "latex_toolkit.commands.latex_format.main.pipeline_steps",
+                return_value=(("format", lambda text: "indented\n"),),
+            ),
         ):
             result = latex_format_command.main([])
 
         self.assertEqual(result, 0)
-        indent.assert_called_once_with("raw\n")
         self.assertEqual(copy.call_args_list, [call("indented\n")])
 
     def test_latex_format_overwrites_input_and_keeps_backup(self) -> None:
@@ -177,14 +176,14 @@ class ObservableWritePolicyTests(TestCase):
 
             with (
                 patch(
-                    "latex_toolkit.commands.latex_indent.main.transform_text",
+                    "latex_toolkit.commands.latex_format.main.transform_text",
                     return_value="indented\n",
-                ) as indent,
+                ) as transform,
             ):
                 result = latex_format_command.main([str(source)])
 
             self.assertEqual(result, 0)
-            indent.assert_called_once_with(original)
+            transform.assert_called_once_with(original, max_width=0)
             self.assertEqual(source.read_text(encoding="utf-8"), "indented\n")
             backups = sorted((work / ".backup").iterdir())
             self.assertEqual(len(backups), 1)
