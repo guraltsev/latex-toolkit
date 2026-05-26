@@ -22,6 +22,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from latex_toolkit.commands.strip_comments import main as strip_comments_command  # noqa: E402
+from latex_toolkit.commands.snapper_format import main as snapper_format_command  # noqa: E402
 
 
 def _pythonpath_env() -> dict[str, str]:
@@ -106,6 +107,23 @@ class ObservableWritePolicyTests(TestCase):
 
         self.assertEqual(result, 0)
         copy.assert_called_once_with("keep \n")
+
+    def test_snapper_format_defaults_to_clipboard_without_input(self) -> None:
+        """Snapper format uses clipboard mode when no input or output path is given."""
+
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="Alpha. Beta.\n"),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
+            patch(
+                "latex_toolkit.commands.snapper_format.main.transform_text",
+                return_value="Alpha.\nBeta.\n",
+            ) as transform,
+        ):
+            result = snapper_format_command.main([])
+
+        self.assertEqual(result, 0)
+        transform.assert_called_once_with("Alpha. Beta.\n", max_width=0)
+        copy.assert_called_once_with("Alpha.\nBeta.\n")
 
     def test_clipboard_mode_rejects_input_paths_with_parser_error(self) -> None:
         """Clipboard mode reports a concise parser error when combined with a file."""

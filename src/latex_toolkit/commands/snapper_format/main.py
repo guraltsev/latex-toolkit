@@ -163,7 +163,13 @@ def main(argv: list[str] | None = None) -> int:
             install_snapper()
             return 0
 
-        if args.clipboard:
+        # Treat a missing input path as clipboard mode so the Windows launcher
+        # can format copied snippets without requiring an extra flag.
+        use_clipboard = args.clipboard or (
+            args.input is None and args.output is None and not args.install
+        )
+
+        if use_clipboard:
             if args.input is not None or args.output is not None:
                 parser.error("--clipboard cannot be combined with input or output paths.")
             run_clipboard_transform(
@@ -171,9 +177,6 @@ def main(argv: list[str] | None = None) -> int:
                 lambda text: transform_text(text, max_width=args.max_width),
             )
             return 0
-
-        if args.input is None:
-            parser.error("the following arguments are required: input")
 
         input_path = Path(args.input).expanduser().resolve()
         formatted = transform_text(read_text(input_path), max_width=args.max_width)
