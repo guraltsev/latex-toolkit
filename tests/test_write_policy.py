@@ -24,6 +24,7 @@ if str(SRC) not in sys.path:
 from latex_toolkit.commands.strip_comments import main as strip_comments_command  # noqa: E402
 from latex_toolkit.commands.latex_format import main as latex_format_command  # noqa: E402
 from latex_toolkit.commands.latex_indent import main as latex_indent_command  # noqa: E402
+from latex_toolkit.commands.manual_latex_reformat import main as manual_latex_reformat_command  # noqa: E402
 from latex_toolkit.commands.snapper_format import main as snapper_format_command  # noqa: E402
 
 
@@ -205,6 +206,23 @@ class ObservableWritePolicyTests(TestCase):
         self.assertEqual(result, 0)
         transform.assert_called_once_with("Alpha. Beta.\n", max_width=0)
         copy.assert_called_once_with("Alpha.\nBeta.\n")
+
+    def test_manual_latex_reformat_defaults_to_clipboard_without_input(self) -> None:
+        """Manual LaTeX reformat uses clipboard mode when no input or output path is given."""
+
+        with (
+            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="raw\n"),
+            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
+            patch(
+                "latex_toolkit.commands.manual_latex_reformat.main.transform_text",
+                return_value="formatted\n",
+            ) as transform,
+        ):
+            result = manual_latex_reformat_command.main([])
+
+        self.assertEqual(result, 0)
+        transform.assert_called_once_with("raw\n", max_width=95)
+        copy.assert_called_once_with("formatted\n")
 
     def test_clipboard_mode_rejects_input_paths_with_parser_error(self) -> None:
         """Clipboard mode reports a concise parser error when combined with a file."""
