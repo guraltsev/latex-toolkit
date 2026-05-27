@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 import argparse
 import importlib.util
+import importlib
 import subprocess
 import sys
 
@@ -178,6 +179,7 @@ def ensure_pylatexenc() -> None:
     if completed.returncode != 0:
         raise RuntimeError(_format_process_failure(f"could not install {PYLATEXENC_PACKAGE}", completed))
 
+    importlib.invalidate_caches()
     if importlib.util.find_spec(PYLATEXENC_PACKAGE) is None:
         raise RuntimeError(
             f"{PYLATEXENC_PACKAGE} was installed into {install_root}, but the package is still not importable."
@@ -218,6 +220,10 @@ def _collect_proof_spans(nodes: object) -> list[tuple[int, int]]:
             continue
         start = getattr(node, "pos", None)
         end = getattr(node, "pos_end", None)
+        if not isinstance(end, int):
+            node_len = getattr(node, "len", None)
+            if isinstance(start, int) and isinstance(node_len, int):
+                end = start + node_len
         if isinstance(start, int) and isinstance(end, int) and start <= end:
             spans.append((start, end))
     return spans

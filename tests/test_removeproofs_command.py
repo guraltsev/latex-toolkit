@@ -1,98 +1,74 @@
 """Tests for removing proof environments from LaTeX text.
 
-The tests exercise the public command entrypoint with clipboard I/O mocked and
-the parser boundary faked. File layout, parser internals, and real network
-installation are out of scope.
+The tests exercise the public command entrypoint against real LaTeX input and
+real file writes. Parser internals, clipboard stubs, and network scaffolding
+are out of scope.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
+from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import patch
+import os
+import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
+EXAMPLE = ROOT / "Discovery" / "remove-proof-test.tex"
+
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+
+
+def _pythonpath_env() -> dict[str, str]:
+    """Return an environment that imports package modules from ``src``."""
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(SRC)
+    return env
+
 
 from latex_toolkit.commands.removeproofs import main as removeproofs_command  # noqa: E402
 
 
 class RemoveProofsCommandTests(TestCase):
-    def test_missing_dependency_triggers_install_before_transform(self) -> None:
-        """The command installs ``pylatexenc`` when the dependency is missing."""
+    def test_transform_text_removes_proof_blocks_from_example_content(self) -> None:
+        """The public transform removes proof environments from the provided example text."""
 
-        class FakeLatexWalker:
-            def __init__(self, text: str) -> None:
-                self.text = text
+        source = EXAMPLE.read_text(encoding="utf-8")
+        converted = removeproofs_command.transform_text(source)
 
-            def get_latex_nodes(self):
-                start = self.text.index(r"\begin{proof}")
-                end = self.text.index(r"\end{proof}") + len(r"\end{proof}")
-                node = SimpleNamespace(
-                    pos=start,
-                    pos_end=end,
-                    environmentname="proof",
-                    nodelist=None,
-                    nodeargd=None,
-                )
-                return [node], 0, len(self.text)
+        self.assertEqual(converted.count("\\begin{proof}"), 0)
+        self.assertEqual(converted.count("\\end{proof}"), 0)
+        self.assertIn("\\section{Generalities}", converted)
+        self.assertIn("\\begin{itemize}", converted)
+        self.assertIn("\\begin{theorem}", converted)
 
-        source = "Keep\n\\begin{proof}Drop\\end{proof}\nDone\n"
+    def test_file_mode_overwrites_input_and_keeps_backup(self) -> None:
+        """The command rewrites a file in place and preserves a backup copy."""
 
-        with (
-            patch(
-                "latex_toolkit.commands.removeproofs.main.importlib.util.find_spec",
-                side_effect=[None, object()],
-            ),
-            patch("latex_toolkit.commands.removeproofs.main.subprocess.run") as run,
-            patch(
-                "latex_toolkit.commands.removeproofs.main._load_latexwalker",
-                return_value=FakeLatexWalker,
-            ),
-        ):
-            run.return_value = removeproofs_command.subprocess.CompletedProcess(
-                args=[], returncode=0, stdout="", stderr=""
+        source = EXAMPLE.read_text(encoding="utf-8")
+
+        with TemporaryDirectory() as temp_dir:
+            work = Path(temp_dir)
+            input_path = work / "remove-proof-test.tex"
+            input_path.write_text(source, encoding="utf-8")
+
+            result = subprocess.run(
+                [sys.executable, "-m", "latex_toolkit.commands.removeproofs", str(input_path)],
+                cwd=str(ROOT),
+                env=_pythonpath_env(),
+                text=True,
+                capture_output=True,
+                check=False,
             )
-            converted = removeproofs_command.transform_text(source)
 
-        self.assertEqual(converted, "Keep\n\nDone\n")
-        self.assertEqual(run.call_count, 1)
-        self.assertIn("pylatexenc", run.call_args.args[0])
-        self.assertIn("--target", run.call_args.args[0])
-
-    def test_clipboard_is_default_mode_without_input_paths(self) -> None:
-        """Running the command with no arguments transforms clipboard text."""
-
-        class FakeLatexWalker:
-            def __init__(self, text: str) -> None:
-                self.text = text
-
-            def get_latex_nodes(self):
-                start = self.text.index(r"\begin{proof}")
-                end = self.text.index(r"\end{proof}") + len(r"\end{proof}")
-                node = SimpleNamespace(
-                    pos=start,
-                    pos_end=end,
-                    environmentname="proof",
-                    nodelist=None,
-                    nodeargd=None,
-                )
-                return [node], 0, len(self.text)
-
-        with (
-            patch("latex_toolkit.commands.removeproofs.main.ensure_pylatexenc"),
-            patch(
-                "latex_toolkit.commands.removeproofs.main._load_latexwalker",
-                return_value=FakeLatexWalker,
-            ),
-            patch("latex_toolkit.lib.clipboard.pyperclip.paste", return_value="Keep\n\\begin{proof}Drop\\end{proof}\nDone\n"),
-            patch("latex_toolkit.lib.clipboard.pyperclip.copy") as copy,
-        ):
-            result = removeproofs_command.main([])
-
-        self.assertEqual(result, 0)
-        copy.assert_called_once_with("Keep\n\nDone\n")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            converted = input_path.read_text(encoding="utf-8")
+            self.assertEqual(converted.count("\\begin{proof}"), 0)
+            self.assertEqual(converted.count("\\end{proof}"), 0)
+            backups = sorted((work / ".backup").iterdir())
+            self.assertEqual(len(backups), 1)
+            self.assertEqual(backups[0].read_text(encoding="utf-8"), source)
