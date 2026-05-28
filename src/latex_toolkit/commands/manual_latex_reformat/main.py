@@ -760,11 +760,11 @@ def _render_nested_environment(node: object, *, max_width: int) -> str:
     if environment_name is None:
         return node.latex_verbatim()
 
-    pieces = [rf"\begin{{{environment_name}}}"]
+    begin_parts = [rf"\begin{{{environment_name}}}"]
     for arg in _node_args(node):
         opening, closing = _argument_delimiters(arg)
-        pieces.append(opening)
-        pieces.append(
+        begin_parts.append(opening)
+        begin_parts.append(
             _render_nodes_to_formatted_string(
                 arg.nodelist,
                 substack=False,
@@ -773,7 +773,7 @@ def _render_nested_environment(node: object, *, max_width: int) -> str:
                 max_width=max_width,
             )
         )
-        pieces.append(closing)
+        begin_parts.append(closing)
 
     body = _render_nodes_to_formatted_string(
         getattr(node, "nodelist", None),
@@ -782,13 +782,34 @@ def _render_nested_environment(node: object, *, max_width: int) -> str:
         literal_text=False,
         max_width=max_width,
     )
+    leading_optional_arg, body = _split_leading_optional_argument(body)
+    if leading_optional_arg:
+        begin_parts.append(leading_optional_arg)
     finalized_body, _ = _finalize_math_body(
         body,
         max_width=max_width,
         normalize_leading_label=False,
     )
-    pieces.extend(["\n", finalized_body, "\n", rf"\end{{{environment_name}}}"])
-    return "".join(pieces)
+    begin_line = "".join(begin_parts)
+    return "".join([begin_line, "\n", finalized_body, "\n", rf"\end{{{environment_name}}}"])
+
+
+def _split_leading_optional_argument(text: str) -> tuple[str, str]:
+    """Return a leading ``[ ... ]`` block and the remaining text."""
+
+    stripped = text.lstrip()
+    if not stripped.startswith("["):
+        return "", text
+
+    depth = 0
+    for index, char in enumerate(stripped):
+        if char == "[":
+            depth += 1
+        elif char == "]":
+            depth -= 1
+            if depth == 0:
+                return stripped[: index + 1], stripped[index + 1 :].lstrip(" \t\r\n")
+    return "", text
 
 
 def _collapse_nonstructural_line_breaks(formatted: str) -> str:

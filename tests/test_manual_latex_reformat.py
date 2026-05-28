@@ -205,6 +205,24 @@ class ManualLatexReformatTests(TestCase):
         self.assertNotIn("& \n\\lesssim", transformed)
         self.assertNotIn("&\n\\lesssim", transformed)
 
+    def test_aligned_optional_argument_stays_on_begin_line(self) -> None:
+        """An aligned optional argument stays attached to ``\\begin{aligned}``."""
+
+        source = (
+            "\\[\n"
+            "\\begin{aligned}[t]\n"
+            "  a&=b+c\\\\\n"
+            "  &\\lesssim d\n"
+            "\\end{aligned}\n"
+            "\\]\n"
+        )
+
+        transformed = transform_text(source)
+
+        self.assertIn("\\begin{aligned}[t]\n", transformed)
+        self.assertNotIn("\\begin{aligned}\n[t]", transformed)
+        self.assertNotIn("\\begin{aligned}\n[t]\n", transformed)
+
     def test_relation_priority_beats_addition_priority(self) -> None:
         """Long lines split at relation symbols before falling back to ``+``."""
 
