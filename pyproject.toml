@@ -17,6 +17,11 @@ include-package-data = true
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["latex_toolkit*"]
+exclude = [
+    "latex_toolkit.commands.test*",
+    "latex_toolkit.commands.*.test*",
+    "latex_toolkit.commands.*.test.*",
+]
 
 [tool.setuptools.package-data]
 "latex_toolkit.commands" = ["*/*.md", "*/*.yaml"]
