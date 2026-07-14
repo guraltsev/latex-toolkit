@@ -1,6 +1,6 @@
 # Command Documentation Guide
 
-Each public command package under `src/latex_toolkit/commands/` owns a local
+Each public command package under `src/` owns a local
 `README.md`. The local README is the user-facing contract for that command:
 it should explain how to run the command and what observable behavior remains
 stable without requiring users to inspect Python docstrings or source files.
