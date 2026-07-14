@@ -3,25 +3,25 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "latex-toolkit"
+name = "latex-transformer-template"
 version = "0.1.0"
-description = "Small, composable LaTeX command toolkit with python -m command modules."
+description = "A documented pylatexenc template for file and clipboard transforms."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["pyperclip>=1.9"]
+dependencies = [
+    "pylatexenc>=3.0a33",
+    "pyperclip>=1.9",
+]
+
+[project.scripts]
+latex-transformer = "latex_transformer_template.latex_transformer_template:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["latex_toolkit*"]
-exclude = [
-    "latex_toolkit.commands.test*",
-    "latex_toolkit.commands.*.test*",
-    "latex_toolkit.commands.*.test.*",
-]
+include = ["latex_transformer_template*"]
 
-[tool.setuptools.package-data]
-"latex_toolkit.commands" = ["*/*.md", "*/*.yaml"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
