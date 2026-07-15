@@ -3,25 +3,26 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "latex-transformer-template"
+name = "sentence-per-line-transformer"
 version = "0.1.0"
-description = "A documented pylatexenc template for file and clipboard transforms."
+description = "A preservation-focused sentence-per-line formatter for LaTeX."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "pylatexenc>=3.0a33",
     "pyperclip>=1.9",
+    "snapper-fmt==0.7.9",
 ]
 
 [project.scripts]
-latex-transformer = "latex_transformer_template.latex_transformer_template:main"
+sentence-per-line = "sentence_per_line_transformer.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["latex_transformer_template*"]
+include = ["sentence_per_line_transformer*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

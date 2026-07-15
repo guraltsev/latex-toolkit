@@ -1,26 +1,18 @@
-# LaTeX transformer template
+# Sentence-per-line LaTeX transformer
 
-A small, production-shaped starting point for syntax-aware LaTeX rewrites.
-It parses source with `pylatexenc`, applies visitor methods only inside the
-top-level `document` environment, and renders the complete source again.
+This command formats LaTeX prose so every sentence begins on its own physical
+source line. It preserves comments, existing intra-sentence newlines, math,
+verbatim-like content, structural blocks, the input newline convention, and
+the exact trailing newline run.
 
-The included example rewrites `\emph{...}` as `\textbf{...}`. It is meant to
-be replaced with the rules for your own command.
+Captions and footnotes are formatted recursively. Footnote invocations are
+also placed on separate source-line blocks, with `%`-terminated newlines when
+needed to avoid introducing a TeX space.
 
-## What the template provides
+## Installation
 
-- A focused `DocumentTransformer` visitor with an obvious customization point.
-- A `DependencyManager` that owns fallback installation and re-imports.
-- File mode that preserves the input and writes a separate output file.
-- Explicit clipboard mode that never runs merely because an input was omitted.
-- A public `transform_text()` API for composition and testing.
-- Installable `python -m` and console-script entry points.
-- UTF-8 file I/O and comments preserved by the LaTeX renderer.
-
-## Requirements and installation
-
-Python 3.11 or newer is required. Create a virtual environment and install the
-project in editable mode from the repository root:
+Python 3.11 or newer is required. Install the project and its pinned Snapper
+binary in a virtual environment:
 
 ```powershell
 python -m venv .venv
@@ -28,131 +20,58 @@ python -m venv .venv
 python -m pip install --editable .
 ```
 
-Dependencies are declared in `pyproject.toml`, so a normal project install
-fetches them up front. When the template is run directly from a source checkout,
-`DependencyManager` imports each dependency, installs it with the active
-interpreter's `pip` only when it is absent, invalidates import caches, and
-re-imports it into the current process. Clipboard support remains lazily loaded
-until `--clipboard` is selected.
+The `snapper-fmt==0.7.9` distribution installs an executable named `snapper`.
+The transformer reports a clear runtime error if that executable is missing.
 
 ## Usage
 
-Transform a file and let the command choose a sibling output path:
+Format a file to the default sibling path, `paper_sentences.tex`:
 
 ```powershell
-python -m latex_transformer_template .\paper.tex
-# Writes .\paper_modified.tex
+python -m sentence_per_line_transformer .\paper.tex
 ```
 
-Choose the output path explicitly:
+Choose an output path or transform the clipboard explicitly:
 
 ```powershell
-python -m latex_transformer_template .\paper.tex -o .\revised.tex
+sentence-per-line .\paper.tex --output .\revised.tex
+python -m sentence_per_line_transformer --clipboard
 ```
 
-After installation, the equivalent console command is:
-
-```powershell
-latex-transformer .\paper.tex --output .\revised.tex
-```
-
-Clipboard access is always explicit:
-
-```powershell
-python -m latex_transformer_template --clipboard
-```
-
-File mode never overwrites the input. Clipboard mode rejects input and output
-paths, and an empty clipboard is left unchanged.
-
-## Example
-
-Given this source:
-
-```latex
-\newcommand{\term}[1]{\emph{#1}}
-
-\begin{document}
-An \emph{important} result.
-\end{document}
-```
-
-the example transform produces:
-
-```latex
-\newcommand{\term}[1]{\emph{#1}}
-
-\begin{document}
-An \textbf{important} result.
-\end{document}
-```
-
-The preamble remains unchanged because traversal starts inside `document`.
-
-## Customize the transformation
-
-Edit `DocumentTransformer` in
-`src/latex_transformer_template/latex_transformer_template.py`. The example
-macro rule is deliberately small:
-
-```python
-def visit_LatexMacroNode(self, node: LatexMacroNode) -> None:
-    if node.macroname == "emph":
-        node.macroname = "textbf"
-```
-
-Add methods such as `visit_LatexEnvironmentNode` for the other node types your
-transform needs. The template dispatches each node to its matching method, then
-descends into macro arguments and nested content.
-
-The `pylatexenc` parser represents LaTeX syntax, not TeX execution. A visitor
-can inspect and rewrite parsed commands and environments, but it does not
-expand user macros or reproduce the behavior of a TeX engine.
-
-## Dependency bootstrapping
-
-The dependency manager, mapping, parser loader, CLI helpers, and clipboard
-boundary all live in the clearly marked auxiliary section at the end of the
-single template file:
-
-```python
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-```
-
-Add a package there when a derived transformer needs another runtime module,
-then call `RUNTIME_DEPENDENCIES.require("import_name")` at the boundary that
-first uses it. A missing top-level module is installed and re-imported. An import
-failure caused by one of an already installed package's own missing imports is
-allowed to surface instead of being misdiagnosed as an absent package.
+File mode preserves its input. Clipboard mode rejects file and output paths,
+and it leaves an empty clipboard unchanged.
 
 ## Python API
 
-Use `transform_text()` when another program owns I/O:
-
 ```python
-from latex_transformer_template import transform_text
+from sentence_per_line_transformer import transform_text
 
-source = r"\begin{document}\emph{Important}\end{document}"
-result = transform_text(source)
+result = transform_text("First sentence. Second sentence.")
 print(result)
 ```
 
-Use `process_file(input_path, output_path)` with `pathlib.Path` objects for the
-same UTF-8 file behavior as the CLI.
+Output:
+
+```text
+First sentence.
+Second sentence.
+```
+
+`transform_text()` accepts complete documents and fragments. For complete
+documents, only top-level `document` bodies are formatted; preambles remain
+unchanged. `process_file(input_path, output_path)` provides the UTF-8 file
+workflow.
 
 ## Development
 
-Install test tooling and run the observable behavior tests:
+Run the observable behavior suite with the real pylatexenc parser and pinned
+Snapper formatter:
 
 ```powershell
 python -m pip install --editable . pytest
 python -m pytest
 ```
 
-Repository-wide authoring rules live under `docs/`; `AGENTS.md` links to the
-applicable testing, docstring, Python style, and architecture guidance.
+The implementation design is in
+`src/sentence-per-line-transformer/DESIGN.md`. Repository authoring rules are
+linked from `AGENTS.md`.
