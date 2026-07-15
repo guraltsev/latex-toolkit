@@ -28,6 +28,19 @@ def test_sentences_and_paragraphs_use_independent_physical_lines() -> None:
     )
 
 
+def test_wrapped_prose_is_joined_within_its_sentence() -> None:
+    """Ordinary source wrapping is removed without joining separate sentences."""
+    source = (
+        "One way to see this without choosing\n"
+        "  coordinates on the constrained hyperplanes is the following. Next."
+    )
+
+    assert transform_text(source) == (
+        "One way to see this without choosing coordinates on the constrained "
+        "hyperplanes is the following.\nNext."
+    )
+
+
 def test_transformation_is_idempotent() -> None:
     """A second complete formatting pass produces byte-identical source."""
     once = transform_text(
@@ -203,6 +216,10 @@ def test_proof_fixture_formats_around_display_math_without_losing_wrappers() -> 
 
     assert "zero-sum hyperplane.\nWrite" in transformed
     assert "Write $u_j = (x_j, t_j) \\in \\mathbb{R}^d \\times \\mathbb{R}$." in transformed
+    assert (
+        "One way to see this without choosing coordinates on the constrained "
+        "hyperplanes is the following."
+    ) in transformed
     assert "proves the claim.\nThe distributional statement" in transformed
     assert transformed.count("\\begin{proof}") == 1
     assert transformed.count("\\end{proof}") == 1

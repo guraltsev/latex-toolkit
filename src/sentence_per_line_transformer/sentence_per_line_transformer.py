@@ -1,7 +1,7 @@
 r"""Format LaTeX prose with one sentence on each physical source line.
 
 Call ``transform_text(...)`` for fragments or complete documents. Comments,
-existing newlines, math, verbatim-like content, structural environments, and
+paragraph breaks, math, verbatim-like content, structural environments, and
 text outside document environments retain their original source spelling.
 """
 
@@ -488,7 +488,11 @@ def _format_scope(
             for range_start, range_end, kind in inline_ranges
             if cursor <= range_start and range_end <= start
         )
-        output.append(_format_piece(masked[cursor:start], newline, piece_ranges))
+        output.append(
+            _format_piece(
+                masked[cursor:start], newline, piece_ranges, tuple(child_tokens)
+            )
+        )
         output.append(masked[start:end])
         cursor = end
     piece_ranges = tuple(
@@ -496,7 +500,9 @@ def _format_scope(
         for range_start, range_end, kind in inline_ranges
         if cursor <= range_start and range_end <= len(masked)
     )
-    output.append(_format_piece(masked[cursor:], newline, piece_ranges))
+    output.append(
+        _format_piece(masked[cursor:], newline, piece_ranges, tuple(child_tokens))
+    )
     result = "".join(output)
     return _restore_tokens(result, protected)
 
@@ -582,24 +588,26 @@ def _format_piece(
     source: str,
     newline: str,
     protected_ranges: tuple[tuple[int, int, str], ...],
+    child_tokens: tuple[tuple[str, str], ...],
 ) -> str:
     """Send one non-block prose slice through Snapper with immutable tokens."""
     if not source or not source.strip():
         return source
 
-    # Preserve ordinary source wrapping, but let whitespace immediately beside
-    # inline math flow through Snapper so the formula stays in its sentence.
+    # Ordinary single newlines are source wrapping for Snapper to collapse.
+    # Keep edge layout and boundaries beside processed child macro scopes,
+    # whose punctuation is hidden inside opaque placeholders during this pass.
     ranges = [(start, end) for start, end, _ in protected_ranges]
-    math_ranges = [
-        (start, end) for start, end, kind in protected_ranges if kind == "math"
-    ]
+    fixed_line_tokens = tuple(token for token, _ in child_tokens)
     for match in re.finditer(r"\r?\n[ \t]*", source):
-        if any(
-            match.end() == math_start or match.start() == math_end
-            for math_start, math_end in math_ranges
-        ):
-            continue
-        ranges.append(match.span())
+        at_source_edge = match.start() == 0 or match.end() == len(source)
+        beside_fixed_line_token = any(
+            source.startswith(token, match.end())
+            or source[: match.start()].endswith(token)
+            for token in fixed_line_tokens
+        )
+        if at_source_edge or beside_fixed_line_token:
+            ranges.append(match.span())
     leading = re.match(r"[ \t]+", source)
     trailing = re.search(r"[ \t]+$", source)
     if leading:
