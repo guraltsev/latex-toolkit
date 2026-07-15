@@ -20,7 +20,61 @@ if TYPE_CHECKING:
     from pylatexenc.latexnodes.nodes import LatexMacroNode
 
 
-# Public workflows
+class DocumentTransformer:
+    r"""Apply customizable edits within a parsed document environment.
+
+    Add methods named after pylatexenc node classes, such as
+    ``visit_LatexEnvironmentNode``, to define other transformations. Traversal
+    begins at a document environment's children, so this class does not need to
+    distinguish body nodes from preamble nodes.
+
+    Methods
+    -------
+    transform
+        Traverse parsed nodes and apply matching visitor methods.
+    visit_LatexMacroNode
+        Replace ``\emph`` macro names with ``\textbf``.
+    """
+
+    def transform(self, nodes: Any) -> None:
+        """Apply visitor methods recursively to a parsed LaTeX node list.
+
+        Parameters
+        ----------
+        nodes : pylatexenc.latexnodes.nodes.LatexNodeList
+            Parsed nodes belonging to a LaTeX document body.
+        """
+        for node in nodes:
+            self._visit_node(node)
+
+    def visit_LatexMacroNode(self, node: LatexMacroNode) -> None:
+        r"""Replace an ``\emph`` macro name with ``\textbf``."""
+        # This branch is the example transformation. Replace it with the macro
+        # rule needed by the derived command, or add other visitor methods.
+        if node.macroname == "emph":
+            node.macroname = "textbf"
+
+    def _visit_node(self, node: Any) -> None:
+        """Apply a matching visitor method and descend into child nodes."""
+        # A node class maps directly to its optional visitor method.
+        visitor = getattr(self, f"visit_{type(node).__name__}", None)
+        if visitor is not None:
+            visitor(node)
+
+        # Macro and environment arguments are separate from body node lists.
+        parsed_arguments = getattr(node, "nodeargd", None)
+        for argument in getattr(parsed_arguments, "argnlist", ()) or ():
+            if argument is not None:
+                self._visit_node(argument)
+
+        # Groups, math nodes, and environments expose nested content here.
+        for child in getattr(node, "nodelist", ()) or ():
+            if child is not None:
+                self._visit_node(child)
+
+
+# Auxiliary implementation
+# ------------------------
 
 
 def transform_text(source: str) -> str:
@@ -135,63 +189,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     process_file(input_path, output_path)
     print(f"Transformed file written to: {output_path}")
     return 0
-
-
-class DocumentTransformer:
-    r"""Apply customizable edits within a parsed document environment.
-
-    Add methods named after pylatexenc node classes, such as
-    ``visit_LatexEnvironmentNode``, to define other transformations. Traversal
-    begins at a document environment's children, so this class does not need to
-    distinguish body nodes from preamble nodes.
-
-    Methods
-    -------
-    transform
-        Traverse parsed nodes and apply matching visitor methods.
-    visit_LatexMacroNode
-        Replace ``\emph`` macro names with ``\textbf``.
-    """
-
-    def transform(self, nodes: Any) -> None:
-        """Apply visitor methods recursively to a parsed LaTeX node list.
-
-        Parameters
-        ----------
-        nodes : pylatexenc.latexnodes.nodes.LatexNodeList
-            Parsed nodes belonging to a LaTeX document body.
-        """
-        for node in nodes:
-            self._visit_node(node)
-
-    def visit_LatexMacroNode(self, node: LatexMacroNode) -> None:
-        r"""Replace an ``\emph`` macro name with ``\textbf``."""
-        # This branch is the example transformation. Replace it with the macro
-        # rule needed by the derived command, or add other visitor methods.
-        if node.macroname == "emph":
-            node.macroname = "textbf"
-
-    def _visit_node(self, node: Any) -> None:
-        """Apply a matching visitor method and descend into child nodes."""
-        # A node class maps directly to its optional visitor method.
-        visitor = getattr(self, f"visit_{type(node).__name__}", None)
-        if visitor is not None:
-            visitor(node)
-
-        # Macro and environment arguments are separate from body node lists.
-        parsed_arguments = getattr(node, "nodeargd", None)
-        for argument in getattr(parsed_arguments, "argnlist", ()) or ():
-            if argument is not None:
-                self._visit_node(argument)
-
-        # Groups, math nodes, and environments expose nested content here.
-        for child in getattr(node, "nodelist", ()) or ():
-            if child is not None:
-                self._visit_node(child)
-
-
-# Auxiliary implementation
-# ------------------------
 
 
 class DependencyManager:

@@ -617,8 +617,8 @@ def _find_snapper() -> Path:
     if located:
         return Path(located)
 
-    # Windows user and virtual-environment installations commonly place the
-    # console executable beside or one Scripts directory above Python.
+    # Windows Python installations commonly place the console executable beside
+    # or one Scripts directory above Python.
     candidates = [
         Path(sys.executable).with_name("snapper.exe"),
         Path(sys.executable).parent / "Scripts" / "snapper.exe",

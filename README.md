@@ -12,11 +12,9 @@ needed to avoid introducing a TeX space.
 ## Installation
 
 Python 3.11 or newer is required. Install the project and its pinned Snapper
-binary in a virtual environment:
+binary:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 python -m pip install --editable .
 ```
 
