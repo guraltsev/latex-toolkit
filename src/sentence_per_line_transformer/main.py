@@ -8,6 +8,7 @@ text outside document environments retain their original source spelling.
 from __future__ import annotations
 
 import argparse
+import importlib
 import re
 import shutil
 import subprocess
@@ -15,6 +16,7 @@ import sys
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 
@@ -38,6 +40,86 @@ class _Replacement:
     end: int
     text: str
     kind: str
+
+
+class DependencyManager:
+    """Load configured modules and install their distributions when necessary.
+
+    Parameters
+    ----------
+    distributions : dict of str to str
+        Dependency names mapped to requirement strings accepted by ``pip``.
+
+    Methods
+    -------
+    require
+        Import a configured module, installing and re-importing it when absent.
+    require_executable
+        Locate a configured executable, installing its distribution when absent.
+    """
+
+    def __init__(self, distributions: dict[str, str]) -> None:
+        self.distributions = dict(distributions)
+
+    def require(self, import_name: str) -> ModuleType:
+        """Import a configured module, installing it if it is absent."""
+        requirement = self.distributions[import_name]
+
+        # Only absence of the requested top-level module triggers installation.
+        # Errors raised from inside an installed package remain visible.
+        try:
+            return importlib.import_module(import_name)
+        except ModuleNotFoundError as error:
+            if error.name != import_name:
+                raise
+
+        self._install(requirement)
+        importlib.invalidate_caches()
+        for module_name in tuple(sys.modules):
+            if module_name == import_name or module_name.startswith(f"{import_name}."):
+                sys.modules.pop(module_name, None)
+        return importlib.import_module(import_name)
+
+    def require_executable(self, executable_name: str) -> Path:
+        """Locate an executable, installing its configured distribution if absent."""
+        requirement = self.distributions[executable_name]
+        located = self._find_executable(executable_name)
+        if located is None:
+            self._install(requirement)
+            located = self._find_executable(executable_name)
+        if located is None:
+            raise RuntimeError(
+                f"{executable_name} is unavailable after installing {requirement}"
+            )
+        return located
+
+    @staticmethod
+    def _install(requirement: str) -> None:
+        """Install one requirement into the active Python environment."""
+        print(f"{requirement} is not installed; installing {requirement}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
+
+    @staticmethod
+    def _find_executable(executable_name: str) -> Path | None:
+        """Return an executable available on PATH or beside the interpreter."""
+        located = shutil.which(executable_name)
+        if located:
+            return Path(located)
+        for candidate in (
+            Path(sys.executable).with_name(f"{executable_name}.exe"),
+            Path(sys.executable).parent / "Scripts" / f"{executable_name}.exe",
+        ):
+            if candidate.is_file():
+                return candidate
+        return None
+
+
+RUNTIME_DEPENDENCIES = DependencyManager(
+    {
+        "pyperclip": "pyperclip>=1.9",
+        "snapper": "snapper-fmt==0.7.9",
+    }
+)
 
 
 # These environments own source layout or non-prose structure in the initial
@@ -613,23 +695,7 @@ def _run_snapper(source: str) -> str:
 
 def _find_snapper() -> Path:
     """Locate the executable installed by the pinned snapper-fmt distribution."""
-    located = shutil.which("snapper")
-    if located:
-        return Path(located)
-
-    # Windows Python installations commonly place the console executable beside
-    # or one Scripts directory above Python.
-    candidates = [
-        Path(sys.executable).with_name("snapper.exe"),
-        Path(sys.executable).parent / "Scripts" / "snapper.exe",
-    ]
-    for candidate in candidates:
-        if candidate.is_file():
-            return candidate
-    raise RuntimeError(
-        "snapper is unavailable; install the pinned runtime dependency "
-        "with `python -m pip install snapper-fmt==0.7.9`"
-    )
+    return RUNTIME_DEPENDENCIES.require_executable("snapper")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -663,7 +729,7 @@ def _default_output_path(input_path: Path) -> Path:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    import pyperclip
+    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
 
     source = pyperclip.paste()
     if not source.strip():

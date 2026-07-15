@@ -38,6 +38,16 @@ command packages that own them. Public command-level text transforms are
 exposed through each command package's `main.transform_text(...)` when a direct
 Python entrypoint is useful.
 
+## Package Public APIs
+
+Package `__init__.py` files should re-export only intentionally public APIs,
+normally the text transformation entrypoint and any public transformation
+objects such as `DocumentTransformer`. File-processing, clipboard, parser,
+dependency, and other command-internal helpers should not be re-exported from
+the package unless they are deliberately documented as public APIs. A name
+should reflect its visibility: use a leading underscore for helpers and
+classes that are intended to remain private.
+
 ## Command Package Names
 
 Command package directories use underscores, not dashes.

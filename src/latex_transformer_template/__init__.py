@@ -1,15 +1,5 @@
-r"""Provide a customizable LaTeX transformation visitor and public workflows."""
+r"""Provide the template's public LaTeX text transformation."""
 
-from .latex_transformer_template import (
-    DependencyManager,
-    DocumentTransformer,
-    process_file,
-    transform_text,
-)
+from .latex_transformer_template import DocumentTransformer, transform_text
 
-__all__ = [
-    "DependencyManager",
-    "DocumentTransformer",
-    "process_file",
-    "transform_text",
-]
+__all__ = ["DocumentTransformer", "transform_text"]

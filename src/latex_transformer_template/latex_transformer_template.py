@@ -14,10 +14,13 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 from types import ModuleType
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
+# --- Static type-checking imports ---
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pylatexenc.latexnodes.nodes import LatexMacroNode
+# --- END: Static type-checking imports ---
 
 
 class DocumentTransformer:
@@ -102,52 +105,27 @@ def transform_text(source: str) -> str:
     >>> transform_text(source)
     '\\begin{document}\\textbf{Important}\\end{document}'
     """
-    latex_walker, environment_type, recomposer_type = _latex_api()
+
+    RUNTIME_DEPENDENCIES.require("pylatexenc")
+    from pylatexenc.latexnodes import LatexNodesLatexRecomposer
+    from pylatexenc.latexnodes.nodes import LatexEnvironmentNode
+    from pylatexenc.latexwalker import LatexWalker
 
     # Parse the complete source so the renderer can preserve the preamble and
     # every document delimiter alongside the transformed body.
-    walker = latex_walker(source)
-    nodes, _, _ = walker.get_latex_nodes()
+    nodes, _, _ = LatexWalker(source).get_latex_nodes()
 
     # Enter only top-level document environments. Starting traversal at their
     # children keeps package setup and command definitions unchanged.
     transformer = DocumentTransformer()
     for node in nodes:
         if (
-            isinstance(node, environment_type)
+            isinstance(node, LatexEnvironmentNode)
             and node.environmentname == "document"
         ):
             transformer.transform(node.nodelist)
 
-    return recomposer_type().latex_recompose(nodes)
-
-
-def process_file(input_path: Path, output_path: Path) -> Path:
-    """Transform one UTF-8 LaTeX file and write a separate UTF-8 result.
-
-    Parameters
-    ----------
-    input_path : pathlib.Path
-        Source file to read without modifying.
-    output_path : pathlib.Path
-        Destination to create or replace with the transformed source.
-
-    Returns
-    -------
-    pathlib.Path
-        The destination path supplied by the caller.
-
-    Raises
-    ------
-    OSError
-        The source cannot be read or the destination cannot be written.
-    """
-    # Read before opening the destination so an identical input and output path
-    # cannot truncate the source before transformation completes.
-    source = input_path.read_text(encoding="utf-8")
-    transformed = transform_text(source)
-    output_path.write_text(transformed, encoding="utf-8")
-    return output_path
+    return LatexNodesLatexRecomposer().latex_recompose(nodes)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -180,18 +158,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.clipboard and args.output_file is not None:
         parser.error("--output cannot be used with --clipboard")
 
-    if args.clipboard:
-        _transform_clipboard()
-        return 0
+    # Handle the two validated input modes as explicit cases before returning
+    # one shared success status.
+    match args.clipboard:
+        case True:
+            _process_clipboard()
+        case False:
+            input_path = args.input_file
+            output_path = args.output_file or _default_output_path(input_path)
+            _process_file(input_path, output_path)
+            print(f"Transformed file written to: {output_path}")
 
-    input_path = args.input_file
-    output_path = args.output_file or _default_output_path(input_path)
-    process_file(input_path, output_path)
-    print(f"Transformed file written to: {output_path}")
     return 0
 
 
-class DependencyManager:
+class _DependencyManager:
     """Load configured modules and install their distributions when necessary.
 
     Parameters
@@ -213,7 +194,7 @@ class DependencyManager:
     --------
     Loading an available module does not invoke ``pip``:
 
-    >>> manager = DependencyManager({"json": "json"})
+    >>> manager = _DependencyManager({"json": "json"})
     >>> manager.require("json").loads('{"ready": true}')
     {'ready': True}
     """
@@ -269,23 +250,13 @@ class DependencyManager:
         return module
 
 
-RUNTIME_DEPENDENCIES = DependencyManager(
+RUNTIME_DEPENDENCIES = _DependencyManager(
     {
         "pylatexenc": "pylatexenc>=3.0a33",
         "pyperclip": "pyperclip>=1.9",
     }
 )
 
-
-def _latex_api() -> tuple[type[Any], type[Any], type[Any]]:
-    """Load the parser, document-node, and renderer classes on demand."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc")
-
-    from pylatexenc.latexnodes import LatexNodesLatexRecomposer
-    from pylatexenc.latexnodes.nodes import LatexEnvironmentNode
-    from pylatexenc.latexwalker import LatexWalker
-
-    return LatexWalker, LatexEnvironmentNode, LatexNodesLatexRecomposer
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -324,7 +295,35 @@ def _default_output_path(input_path: Path) -> Path:
     return input_path.with_name(f"{stem}_modified{suffix}")
 
 
-def _transform_clipboard() -> None:
+def _process_file(input_path: Path, output_path: Path) -> Path:
+    """Transform one UTF-8 LaTeX file and write a separate UTF-8 result.
+
+    Parameters
+    ----------
+    input_path : pathlib.Path
+        Source file to read without modifying.
+    output_path : pathlib.Path
+        Destination to create or replace with the transformed source.
+
+    Returns
+    -------
+    pathlib.Path
+        The destination path supplied by the caller.
+
+    Raises
+    ------
+    OSError
+        The source cannot be read or the destination cannot be written.
+    """
+    # Read before opening the destination so an identical input and output path
+    # cannot truncate the source before transformation completes.
+    source = input_path.read_text(encoding="utf-8")
+    transformed = transform_text(source)
+    output_path.write_text(transformed, encoding="utf-8")
+    return output_path
+
+
+def _process_clipboard() -> None:
     """Transform nonempty clipboard text and copy the result back."""
     # Delay clipboard installation and import until the user selects that
     # boundary; ordinary text and file transformations do not need it.
