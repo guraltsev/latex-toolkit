@@ -196,6 +196,8 @@ def transform_text(source: str) -> str:
         return source
 
     nodes = _parse(source)
+    if nodes is None:
+        return source
     document_bodies = [
         (node.nodelist.pos, node.nodelist.pos_end, node.nodelist)
         for node in nodes
@@ -311,8 +313,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 # Prose-scope discovery
 
 
-def _parse(source: str) -> Any:
-    """Parse source with explicit text-bearing macro argument specifications."""
+def _parse(source: str) -> Any | None:
+    """Parse source, returning ``None`` when pylatexenc reports incomplete input."""
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker, get_default_latex_context_db
     from pylatexenc.macrospec import MacroSpec
@@ -330,6 +332,34 @@ def _parse(source: str) -> Any:
     )
     walker = LatexWalker(source, latex_context=context)
     nodes, _ = walker.parse_content(LatexGeneralNodesParser())
+
+    # Tolerant parsing represents unmatched closing constructs with no top-level
+    # node list and unterminated environments with child lists lacking spans.
+    # Either state is unsafe for source slicing, so leave that scope opaque.
+    if nodes is None:
+        return None
+    pending = list(nodes)
+    visited: set[int] = set()
+    while pending:
+        node = pending.pop()
+        if id(node) in visited:
+            continue
+        visited.add(id(node))
+
+        child_nodes = getattr(node, "nodelist", None)
+        if child_nodes is not None:
+            if (
+                getattr(child_nodes, "pos", None) is None
+                or getattr(child_nodes, "pos_end", None) is None
+            ):
+                return None
+            pending.extend(child_nodes)
+        parsed_arguments = getattr(node, "nodeargd", None)
+        pending.extend(
+            argument
+            for argument in (getattr(parsed_arguments, "argnlist", ()) or ())
+            if argument is not None
+        )
     return nodes
 
 
@@ -449,13 +479,24 @@ def _format_scope(
     # Structural and display spans divide formatting work without becoming
     # mutable. Formatting resumes on both sides of protected display source.
     boundaries = _boundary_ranges(masked)
+    inline_ranges = _inline_ranges(masked)
     output: list[str] = []
     cursor = 0
     for start, end in boundaries:
-        output.append(_format_piece(masked[cursor:start], newline))
+        piece_ranges = tuple(
+            (range_start - cursor, range_end - cursor, kind)
+            for range_start, range_end, kind in inline_ranges
+            if cursor <= range_start and range_end <= start
+        )
+        output.append(_format_piece(masked[cursor:start], newline, piece_ranges))
         output.append(masked[start:end])
         cursor = end
-    output.append(_format_piece(masked[cursor:], newline))
+    piece_ranges = tuple(
+        (range_start - cursor, range_end - cursor, kind)
+        for range_start, range_end, kind in inline_ranges
+        if cursor <= range_start and range_end <= len(masked)
+    )
+    output.append(_format_piece(masked[cursor:], newline, piece_ranges))
     result = "".join(output)
     return _restore_tokens(result, protected)
 
@@ -464,6 +505,8 @@ def _boundary_ranges(source: str) -> tuple[tuple[int, int], ...]:
     """Locate real paragraph delimiters and opaque block-level source spans."""
     ranges: list[tuple[int, int]] = []
     nodes = _parse(source)
+    if nodes is None:
+        return ((0, len(source)),)
 
     def visit(node: Any) -> None:
         node_type = type(node).__name__
@@ -505,21 +548,23 @@ def _boundary_ranges(source: str) -> tuple[tuple[int, int], ...]:
     return _merge_ranges(ranges)
 
 
-def _format_piece(source: str, newline: str) -> str:
-    """Send one non-block prose slice through Snapper with immutable tokens."""
-    if not source or not source.strip():
-        return source
-
-    ranges: list[tuple[int, int]] = []
+def _inline_ranges(source: str) -> tuple[tuple[int, int, str], ...]:
+    """Locate comments, inline math, and verb macros in one complete scope."""
+    ranges: list[tuple[int, int, str]] = []
     nodes = _parse(source)
+    if nodes is None:
+        return ((0, len(source), "opaque"),)
 
     def visit(node: Any) -> None:
         node_type = type(node).__name__
-        if node_type in {"LatexCommentNode", "LatexMathNode"}:
-            ranges.append((node.pos, node.pos_end))
+        if node_type == "LatexCommentNode":
+            ranges.append((node.pos, node.pos_end, "opaque"))
+            return
+        if node_type == "LatexMathNode":
+            ranges.append((node.pos, node.pos_end, "math"))
             return
         if node_type == "LatexMacroNode" and node.macroname in {"verb", "Verb"}:
-            ranges.append((node.pos, node.pos_end))
+            ranges.append((node.pos, node.pos_end, "opaque"))
             return
         for child in getattr(node, "nodelist", ()) or ():
             visit(child)
@@ -530,10 +575,31 @@ def _format_piece(source: str, newline: str) -> str:
 
     for node in nodes:
         visit(node)
+    return tuple(sorted(ranges))
 
-    # Every pre-existing physical newline is immutable, including indentation
-    # after it. Snapper sees an ordinary opaque word at that logical position.
-    ranges.extend(match.span() for match in re.finditer(r"\r?\n[ \t]*", source))
+
+def _format_piece(
+    source: str,
+    newline: str,
+    protected_ranges: tuple[tuple[int, int, str], ...],
+) -> str:
+    """Send one non-block prose slice through Snapper with immutable tokens."""
+    if not source or not source.strip():
+        return source
+
+    # Preserve ordinary source wrapping, but let whitespace immediately beside
+    # inline math flow through Snapper so the formula stays in its sentence.
+    ranges = [(start, end) for start, end, _ in protected_ranges]
+    math_ranges = [
+        (start, end) for start, end, kind in protected_ranges if kind == "math"
+    ]
+    for match in re.finditer(r"\r?\n[ \t]*", source):
+        if any(
+            match.end() == math_start or match.start() == math_end
+            for math_start, math_end in math_ranges
+        ):
+            continue
+        ranges.append(match.span())
     leading = re.match(r"[ \t]+", source)
     trailing = re.search(r"[ \t]+$", source)
     if leading:
@@ -546,7 +612,7 @@ def _format_piece(source: str, newline: str) -> str:
     piece_protected: dict[str, str] = {}
     masked = _replace_ranges(source, _merge_ranges(ranges), piece_protected)
     formatted = _run_snapper(masked)
-    formatted = formatted.replace("\n", newline)
+    formatted = formatted.replace("\r\n", "\n").replace("\n", newline)
     return _restore_tokens(formatted, piece_protected)
 
 
@@ -684,8 +750,9 @@ def _merge_ranges(ranges: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], .
 def _run_snapper(source: str) -> str:
     """Format a protected LaTeX fragment with the pinned Snapper executable."""
     executable = _find_snapper()
-    prefix = "\\begin{document}\n"
-    suffix = "\n\\end{document}"
+    wrapper_newline = "\r\n" if "\r\n" in source else "\n"
+    prefix = f"\\begin{{document}}{wrapper_newline}"
+    suffix = f"{wrapper_newline}\\end{{document}}"
     completed = subprocess.run(
         [str(executable), "--format", "latex", "--max-width", "0"],
         input=(prefix + source + suffix).encode("utf-8"),

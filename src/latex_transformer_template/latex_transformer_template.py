@@ -109,11 +109,12 @@ def transform_text(source: str) -> str:
     RUNTIME_DEPENDENCIES.require("pylatexenc")
     from pylatexenc.latexnodes import LatexNodesLatexRecomposer
     from pylatexenc.latexnodes.nodes import LatexEnvironmentNode
+    from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
     # Parse the complete source so the renderer can preserve the preamble and
     # every document delimiter alongside the transformed body.
-    nodes, _, _ = LatexWalker(source).get_latex_nodes()
+    nodes, _ = LatexWalker(source).parse_content(LatexGeneralNodesParser())
 
     # Enter only top-level document environments. Starting traversal at their
     # children keeps package setup and command definitions unchanged.

@@ -128,6 +128,24 @@ def test_inline_math_is_unchanged_at_a_sentence_boundary() -> None:
     assert transform_text(transformed) == transformed
 
 
+def test_inline_math_joins_wrapped_sentence_text() -> None:
+    """Inline math follows sentence text on one line while retaining its bytes."""
+    source = "Write\n  $u_j = (x_j, t_j)$\n  and conclude. Next sentence."
+
+    assert transform_text(source) == (
+        "Write $u_j = (x_j, t_j)$ and conclude.\nNext sentence."
+    )
+
+
+def test_inline_math_joins_crlf_wrapping_without_changing_line_endings() -> None:
+    """CRLF beside inline math joins safely and remains the output convention."""
+    source = "Write\r\n  $u_j = (x_j, t_j)$\r\n  and conclude. Next sentence."
+
+    assert transform_text(source) == (
+        "Write $u_j = (x_j, t_j)$ and conclude.\r\nNext sentence."
+    )
+
+
 def test_verbatim_content_is_opaque_while_neighboring_prose_formats() -> None:
     """Verbatim lines stay exact and ordinary prose after the block still splits."""
     source = (
@@ -161,6 +179,34 @@ def test_crlf_and_exact_trailing_newline_run_are_preserved() -> None:
     assert transform_text(source) == (
         "First sentence.\r\nSecond sentence.\r\n\r\n\r\n"
     )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "First sentence. Second sentence. \\end{itemize}",
+        "\\begin{document}First sentence. Second sentence.\\end{itemize}",
+    ],
+    ids=["unmatched-closing-environment", "mismatched-document-environment"],
+)
+def test_incomplete_latex_is_preserved_without_formatting(source: str) -> None:
+    """Incomplete parser scopes remain byte-identical instead of crashing."""
+    assert transform_text(source) == source
+
+
+def test_proof_fixture_formats_around_display_math_without_losing_wrappers() -> None:
+    """A proof with many displays formats fully and retains its environment."""
+    fixture_path = Path(__file__).parent / "fixtures" / "proof.tex"
+    source = fixture_path.read_text(encoding="utf-8")
+
+    transformed = transform_text(source)
+
+    assert "zero-sum hyperplane.\nWrite" in transformed
+    assert "Write $u_j = (x_j, t_j) \\in \\mathbb{R}^d \\times \\mathbb{R}$." in transformed
+    assert "proves the claim.\nThe distributional statement" in transformed
+    assert transformed.count("\\begin{proof}") == 1
+    assert transformed.count("\\end{proof}") == 1
+    assert transform_text(transformed) == transformed
 
 
 def test_process_failure_leaves_existing_destination_unchanged(

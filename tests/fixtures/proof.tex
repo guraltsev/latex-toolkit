@@ -1,0 +1,66 @@
+\begin{proof}
+  We first record the change of variables on the zero-sum hyperplane. Write
+  $u_j = (x_j, t_j) \in \mathbb{R}^d \times \mathbb{R}$. Set
+  \[ u_{d + 2} = (- z, - v), \qquad u_i = (w_i z + a_i, w_i v), \qquad 1 \leq
+     i \leq d + 1. \]
+  Then
+  \[ \sum_{j = 1}^{d + 2} u_j = 0 \quad \Longleftrightarrow \quad \sum_{i =
+     1}^{d + 1} a_i = 0, \qquad \sum_{i = 1}^{d + 1} w_i = 1. \]
+  Indeed,
+  \[ \sum_{i = 1}^{d + 1} u_i = \left( \left( \sum_{i = 1}^{d + 1} w_i \right)
+     z + \sum_{i = 1}^{d + 1} a_i,  \left( \sum_{i = 1}^{d + 1}
+     w_i \right) v \right), \]
+  and this is equal to $(z, v) = - u_{d + 2}$ precisely under the two
+  displayed constraints.
+
+  The Jacobian factor is $|v|^d$. One way to see this without choosing
+  coordinates on the constrained hyperplanes is the following. Put $x_i = w_i
+  z + a_i$ and $t_i = w_i v$. The change $a_i \mapsto x_i$ has determinant
+  $1$, while $w_i \mapsto t_i = w_i v$ contributes $|v|^{- (d + 1)}$.
+  Moreover,
+  \[ \delta_0  \left( \sum_{i = 1}^{d + 1} w_i - 1 \right) = |v| 
+      \delta_0  \left( \sum_{i = 1}^{d + 1} t_i - v \right), \]
+  and
+  \[ \delta_0 \left( \sum_{i = 1}^{d + 1} a_i \right) = \delta_0  \left(
+     \sum_{i = 1}^{d + 1} x_i - z \right) \]
+  on the hyperplane $\sum_i w_i = 1$. Thus the factor $|v|^d$ converts the
+  constrained measure in the variables $(a_i, w_i, z, v)$ into the measure
+  \[ \delta_0 \left( \sum_{j = 1}^{d + 2} u_j \right)  \prod_{j = 1}^{d + 2}
+     \dd u_j . \]
+  It remains to compute the determinant. Add the first $d + 1$ columns of the
+  affine determinant matrix to the last column. Since $\sum_{i = 1}^{d + 1}
+  u_i = (z, v)$ and $u_{d + 2} = (- z, - v)$, the last column becomes $(0,
+  \ldots, 0, d + 2)^T$. Expanding along this column gives
+  \[ D^{(d+1)} (u_1, \ldots, u_{d + 2}) = (d + 2) \det (u_1, \ldots, u_{d +
+     1}) . \]
+  Now
+  \[ \det (u_1, \ldots, u_{d + 1}) = \det \left( \begin{matrix}
+       a_1 + w_1 z & \cdots & a_{d + 1} + w_{d + 1} z\\
+       w_1 v & \cdots & w_{d + 1} v
+     \end{matrix} \right) . \]
+  Subtracting $z / v$ times the last row from the first $d$ rows, and then
+  factoring $v$ from the last row, gives, for $v \neq 0$,
+  \[ \det (u_1, \ldots, u_{d + 1}) = v \det \left( \begin{matrix}
+       a_1 & \cdots & a_{d + 1}\\
+       w_1 & \cdots & w_{d + 1}
+     \end{matrix} \right) . \]
+  The same identity holds for all $v$ by polynomial continuation. Since
+  $\sum_i a_i = 0$, the determinant in the last display is a linear function
+  of the final row which vanishes on $\{\rho \in \mathbb{R}^{d + 1} : \sum_i
+  \rho_i = 0\}$. Therefore, using $\sum_i w_i = 1$,
+  \[ \det \left( \begin{matrix}
+       a_1 & \cdots & a_{d + 1}\\
+       w_1 & \cdots & w_{d + 1}
+     \end{matrix} \right) = \frac{1}{d + 1} \det \left( \begin{matrix}
+       a_1 & \cdots & a_{d + 1}\\
+       1 & \cdots & 1
+     \end{matrix} \right) = \frac{1}{d + 1} D^{(d)} (a_1, \ldots, a_{d + 1})
+     . \]
+  Hence
+  \[ D^{(d+1)} (u_1, \ldots, u_{d + 2}) = \frac{d + 2}{d + 1}  \hspace{0.17em}
+     v  D^{(d)} (a_1, \ldots, a_{d + 1}), \]
+  which is the determinant appearing in the stated formula. Substituting the
+  change of variables and the determinant identity into the regularized form
+  proves the claim. The distributional statement follows by passing to the
+  regularized limit.
+\end{proof}
