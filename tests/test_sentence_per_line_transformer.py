@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import pytest
 
 from sentence_per_line_transformer import process_file, transform_text
-from sentence_per_line_transformer import main as command
+from sentence_per_line_transformer import sentence_per_line_transformer as command
 
 
 def test_sentences_and_paragraphs_use_independent_physical_lines() -> None:

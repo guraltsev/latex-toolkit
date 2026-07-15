@@ -63,8 +63,8 @@ pipelines.
 
 ## Python API
 
-Mention public callable entrypoints when useful, usually
-`main.transform_text(...)`. For pipeline commands, mention whether the Python
+Mention public callable entrypoints when useful, usually the command module's
+`transform_text(...)`. For pipeline commands, mention whether the Python
 API accepts configuration such as `macros_file`.
 
 ## Related Commands

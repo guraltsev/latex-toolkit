@@ -29,7 +29,8 @@ Format a file to the default sibling path, `paper_sentences.tex`:
 python -m sentence_per_line_transformer .\paper.tex
 ```
 
-Choose an output path or transform the clipboard explicitly:
+With no arguments, transform the clipboard. File mode accepts an output path;
+clipboard mode can also be selected explicitly:
 
 ```powershell
 sentence-per-line .\paper.tex --output .\revised.tex

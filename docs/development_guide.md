@@ -35,7 +35,7 @@ source. It is the ignored repository-local install prefix for the external
 
 Command-family transforms live under `src/latex_toolkit/commands/` with the
 command packages that own them. Public command-level text transforms are
-exposed through each command package's `main.transform_text(...)` when a direct
+exposed through each command package's transformation module when a direct
 Python entrypoint is useful.
 
 ## Package Public APIs

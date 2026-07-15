@@ -264,7 +264,9 @@ def process_file(input_path: Path, output_path: Path) -> Path:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the formatter in explicit file or clipboard mode.
+    """Run the formatter in file or clipboard mode.
+
+    With no arguments, the command transforms the system clipboard.
 
     Parameters
     ----------
@@ -279,11 +281,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     Raises
     ------
     SystemExit
-        Arguments do not select exactly one input mode or combine clipboard
-        mode with an output path.
+        Arguments select both input modes or combine clipboard mode with an
+        output path.
     """
     parser = _build_parser()
     args = parser.parse_args(argv)
+
+    # Default to clipboard mode when the caller does not provide an input file
+    # or an explicit mode flag.
+    if args.input_file is None and not args.clipboard:
+        args.clipboard = True
+
+    # Reject ambiguous input modes before performing any transformation.
     if bool(args.input_file) == args.clipboard:
         parser.error("provide an input file or --clipboard, but not both")
     if args.clipboard and args.output_file is not None:

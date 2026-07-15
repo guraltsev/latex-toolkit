@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-sentence-per-line = "sentence_per_line_transformer.main:main"
+sentence-per-line = "sentence_per_line_transformer.sentence_per_line_transformer:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
