@@ -27,3 +27,4 @@ include = ["sentence_per_line_transformer*", "syntax_regularizer*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = [".", "src"]
