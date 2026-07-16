@@ -16,13 +16,14 @@ dependencies = [
 
 [project.scripts]
 sentence-per-line = "sentence_per_line_transformer.sentence_per_line_transformer:main"
+latex-syntax-regularizer = "syntax_regularizer.syntax_regularizer:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["sentence_per_line_transformer*"]
+include = ["sentence_per_line_transformer*", "syntax_regularizer*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
