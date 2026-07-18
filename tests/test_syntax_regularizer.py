@@ -7,7 +7,7 @@ are outside this module's scope.
 
 import pytest
 
-from syntax_regularizer import transform_text
+from latex_toolkit.syntax_regularizer import transform_text
 
 
 @pytest.mark.parametrize(
@@ -222,6 +222,13 @@ def test_every_environment_opener_is_on_its_own_line(
 ) -> None:
     """A begin command and its optional title occupy an isolated source line."""
     assert transform_text(source) == expected
+
+
+def test_proof_opener_keeps_its_optional_heading_on_the_same_line() -> None:
+    """A proof heading stays with its opener while proof content moves below."""
+    source = r"Before \begin{proof}[Sketch]Body.\end{proof}"
+
+    assert transform_text(source) == "Before\n\\begin{proof}[Sketch]\nBody.\\end{proof}"
 
 
 def test_environment_label_moves_to_the_following_line() -> None:

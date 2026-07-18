@@ -106,7 +106,7 @@ def transform_text(source: str) -> str:
     '\\begin{document}\\textbf{Important}\\end{document}'
     """
 
-    RUNTIME_DEPENDENCIES.require("pylatexenc")
+    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes import LatexNodesLatexRecomposer
     from pylatexenc.latexnodes.nodes import LatexEnvironmentNode
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
@@ -180,86 +180,37 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 class _DependencyManager:
-    """Load configured modules and install their distributions when necessary.
-
-    Parameters
-    ----------
-    distributions : dict of str to str
-        Import names mapped to requirement strings accepted by ``pip``.
-
-    Methods
-    -------
-    require
-        Import a module, installing and re-importing it when absent.
-
-    Attributes
-    ----------
-    distributions : dict of str to str
-        An independent copy of the import-to-requirement mapping.
-
-    Examples
-    --------
-    Loading an available module does not invoke ``pip``:
-
-    >>> manager = _DependencyManager({"json": "json"})
-    >>> manager.require("json").loads('{"ready": true}')
-    {'ready': True}
-    """
+    """Load configured modules and install their distributions when unavailable."""
 
     def __init__(self, distributions: dict[str, str]) -> None:
         self.distributions = dict(distributions)
 
     def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing and re-importing it if absent.
-
-        Parameters
-        ----------
-        import_name : str
-            Top-level module name configured when the manager was constructed.
-
-        Returns
-        -------
-        types.ModuleType
-            The imported module object.
-
-        Raises
-        ------
-        KeyError
-            The requested module was not configured for this manager.
-        ModuleNotFoundError
-            An installed module is missing one of its own dependencies.
-        subprocess.CalledProcessError
-            ``pip`` could not install the configured distribution.
-        """
+        """Import a configured module, installing it when unavailable."""
         requirement = self.distributions[import_name]
-
-        # Only absence of the requested top-level module triggers installation.
-        # Errors raised from inside an installed package must remain visible.
         try:
             return importlib.import_module(import_name)
         except ModuleNotFoundError as error:
-            if error.name != import_name:
+            missing_requested_path = error.name == import_name or import_name.startswith(
+                f"{error.name}."
+            )
+            if not missing_requested_path:
                 raise
 
-        # Install into the active interpreter, then clear every partial import
-        # entry before loading the new package into the current process.
-        print(f"{import_name} is not installed; installing {requirement}...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
         importlib.invalidate_caches()
+        package_name = import_name.partition(".")[0]
         for module_name in tuple(sys.modules):
-            if module_name == import_name or module_name.startswith(
-                f"{import_name}."
+            if module_name == package_name or module_name.startswith(
+                f"{package_name}."
             ):
                 sys.modules.pop(module_name, None)
-
-        module = importlib.import_module(import_name)
-        print(f"Installed and imported {import_name}.")
-        return module
+        return importlib.import_module(import_name)
 
 
 RUNTIME_DEPENDENCIES = _DependencyManager(
     {
-        "pylatexenc": "pylatexenc>=3.0a33",
+        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
         "pyperclip": "pyperclip>=1.9",
     }
 )

@@ -3,9 +3,9 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sentence-per-line-transformer"
+name = "latex-toolkit"
 version = "0.1.0"
-description = "A preservation-focused sentence-per-line formatter for LaTeX."
+description = "Preservation-focused command-line transformations for LaTeX source."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -15,15 +15,21 @@ dependencies = [
 ]
 
 [project.scripts]
-sentence-per-line = "sentence_per_line_transformer.sentence_per_line_transformer:main"
-latex-syntax-regularizer = "syntax_regularizer.syntax_regularizer:main"
+dollar-math-to-latex-delimiters = "latex_toolkit.dollar_math_to_latex_delimiters.dollar_math_to_latex_delimiters:main"
+latex-delimiters-to-dollar-math = "latex_toolkit.latex_delimiters_to_dollar_math.latex_delimiters_to_dollar_math:main"
+latex-transformer-template = "latex_toolkit.latex_transformer_template.latex_transformer_template:main"
+sentence-per-line-transformer = "latex_toolkit.sentence_per_line_transformer.sentence_per_line_transformer:main"
+syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
+syntax-then-sentence-transformer = "latex_toolkit.syntax_then_sentence_transformer.syntax_then_sentence_transformer:main"
+sentence-per-line = "latex_toolkit.sentence_per_line_transformer.sentence_per_line_transformer:main"
+latex-syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["sentence_per_line_transformer*", "syntax_regularizer*"]
+include = ["latex_toolkit*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -8,13 +8,49 @@ workflow and clipboard mode.
 from __future__ import annotations
 
 import argparse
+import importlib
+import subprocess
+import sys
 from collections.abc import Sequence
 from pathlib import Path
+from types import ModuleType
 
 from ..sentence_per_line_transformer import (
     transform_text as transform_sentences,
 )
 from ..syntax_regularizer import transform_text as regularize_syntax
+
+
+class _DependencyManager:
+    """Load configured modules and install their distributions when unavailable."""
+
+    def __init__(self, distributions: dict[str, str]) -> None:
+        self.distributions = dict(distributions)
+
+    def require(self, import_name: str) -> ModuleType:
+        """Import a configured module, installing it when unavailable."""
+        requirement = self.distributions[import_name]
+        try:
+            return importlib.import_module(import_name)
+        except ModuleNotFoundError as error:
+            missing_requested_path = error.name == import_name or import_name.startswith(
+                f"{error.name}."
+            )
+            if not missing_requested_path:
+                raise
+
+        subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
+        importlib.invalidate_caches()
+        package_name = import_name.partition(".")[0]
+        for module_name in tuple(sys.modules):
+            if module_name == package_name or module_name.startswith(
+                f"{package_name}."
+            ):
+                sys.modules.pop(module_name, None)
+        return importlib.import_module(import_name)
+
+
+RUNTIME_DEPENDENCIES = _DependencyManager({"pyperclip": "pyperclip>=1.9"})
 
 
 def transform_text(source: str) -> str:
@@ -149,7 +185,7 @@ def _default_output_path(input_path: Path) -> Path:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    import pyperclip
+    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
 
     source = pyperclip.paste()
     if not source.strip():

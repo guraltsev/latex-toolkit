@@ -194,7 +194,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when it has unsafe incomplete nodes."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc")
+    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
@@ -562,26 +562,39 @@ def _protected_ranges(nodes: Iterable[Any]) -> tuple[tuple[int, int], ...]:
 
 
 class _DependencyManager:
-    """Load configured modules and install their distributions when absent."""
+    """Load configured modules and install their distributions when unavailable."""
 
     def __init__(self, distributions: dict[str, str]) -> None:
         self.distributions = dict(distributions)
 
     def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing it when absent."""
+        """Import a configured module, installing it when unavailable."""
         requirement = self.distributions[import_name]
         try:
             return importlib.import_module(import_name)
         except ModuleNotFoundError as error:
-            if error.name != import_name:
+            missing_requested_path = error.name == import_name or import_name.startswith(
+                f"{error.name}."
+            )
+            if not missing_requested_path:
                 raise
+
         subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
         importlib.invalidate_caches()
+        package_name = import_name.partition(".")[0]
+        for module_name in tuple(sys.modules):
+            if module_name == package_name or module_name.startswith(
+                f"{package_name}."
+            ):
+                sys.modules.pop(module_name, None)
         return importlib.import_module(import_name)
 
 
 RUNTIME_DEPENDENCIES = _DependencyManager(
-    {"pylatexenc": "pylatexenc>=3.0a33", "pyperclip": "pyperclip>=1.9"}
+    {
+        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
+        "pyperclip": "pyperclip>=1.9",
+    }
 )
 
 

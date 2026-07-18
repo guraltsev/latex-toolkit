@@ -5,7 +5,7 @@ pinned Snapper formatter. CLI boundary behavior and internal call structure
 are outside this module's scope.
 """
 
-from src.syntax_then_sentence_transformer import transform_text
+from latex_toolkit.syntax_then_sentence_transformer import transform_text
 
 
 def test_pipeline_regularizes_syntax_before_formatting_sentences() -> None:

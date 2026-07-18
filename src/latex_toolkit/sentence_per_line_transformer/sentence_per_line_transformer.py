@@ -43,45 +43,35 @@ class _Replacement:
 
 
 class DependencyManager:
-    """Load configured modules and install their distributions when necessary.
-
-    Parameters
-    ----------
-    distributions : dict of str to str
-        Dependency names mapped to requirement strings accepted by ``pip``.
-
-    Methods
-    -------
-    require
-        Import a configured module, installing and re-importing it when absent.
-    require_executable
-        Locate a configured executable, installing its distribution when absent.
-    """
+    """Load configured modules and executables, installing them when unavailable."""
 
     def __init__(self, distributions: dict[str, str]) -> None:
         self.distributions = dict(distributions)
 
     def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing it if it is absent."""
+        """Import a configured module, installing it when unavailable."""
         requirement = self.distributions[import_name]
-
-        # Only absence of the requested top-level module triggers installation.
-        # Errors raised from inside an installed package remain visible.
         try:
             return importlib.import_module(import_name)
         except ModuleNotFoundError as error:
-            if error.name != import_name:
+            missing_requested_path = error.name == import_name or import_name.startswith(
+                f"{error.name}."
+            )
+            if not missing_requested_path:
                 raise
 
         self._install(requirement)
         importlib.invalidate_caches()
+        package_name = import_name.partition(".")[0]
         for module_name in tuple(sys.modules):
-            if module_name == import_name or module_name.startswith(f"{import_name}."):
+            if module_name == package_name or module_name.startswith(
+                f"{package_name}."
+            ):
                 sys.modules.pop(module_name, None)
         return importlib.import_module(import_name)
 
     def require_executable(self, executable_name: str) -> Path:
-        """Locate an executable, installing its configured distribution if absent."""
+        """Locate a configured executable, installing it when unavailable."""
         requirement = self.distributions[executable_name]
         located = self._find_executable(executable_name)
         if located is None:
@@ -96,7 +86,6 @@ class DependencyManager:
     @staticmethod
     def _install(requirement: str) -> None:
         """Install one requirement into the active Python environment."""
-        print(f"{requirement} is not installed; installing {requirement}...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
 
     @staticmethod
@@ -116,6 +105,7 @@ class DependencyManager:
 
 RUNTIME_DEPENDENCIES = DependencyManager(
     {
+        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
         "pyperclip": "pyperclip>=1.9",
         "snapper": "snapper-fmt==0.7.9",
     }
@@ -315,6 +305,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when pylatexenc reports incomplete input."""
+    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker, get_default_latex_context_db
     from pylatexenc.macrospec import MacroSpec
