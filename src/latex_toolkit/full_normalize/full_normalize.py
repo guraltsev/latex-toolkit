@@ -1,8 +1,8 @@
-r"""Regularize LaTeX syntax before formatting prose one sentence per line.
+r"""Fully normalize LaTeX syntax and prose sentence layout.
 
-Call ``transform_text(...)`` to run the two transformations in their required
-order. The command-line interface provides the template's separate-output file
-workflow and clipboard mode.
+Call ``transform_text(...)`` to regularize syntax, format prose one sentence
+per line, then regularize syntax again. The command-line interface provides
+the template's separate-output file workflow and clipboard mode.
 """
 
 from __future__ import annotations
@@ -54,7 +54,7 @@ RUNTIME_DEPENDENCIES = _DependencyManager({"pyperclip": "pyperclip>=1.9"})
 
 
 def transform_text(source: str) -> str:
-    r"""Regularize LaTeX syntax and then format prose sentence by sentence.
+    r"""Fully normalize LaTeX syntax and prose sentence layout.
 
     Parameters
     ----------
@@ -64,8 +64,8 @@ def transform_text(source: str) -> str:
     Returns
     -------
     str
-        Source after syntax regularization followed by sentence-per-line
-        formatting.
+        Source after syntax regularization, sentence-per-line formatting, and
+        final syntax regularization.
 
     Raises
     ------
@@ -79,8 +79,11 @@ def transform_text(source: str) -> str:
     >>> transform_text("  First with $1+\\n1=2$. Second.")
     'First with $1+1=2$.\nSecond.'
     """
+    # Normalize the source before splitting prose, then reapply syntax rules
+    # to the sentence-formatted layout.
     regularized = regularize_syntax(source)
-    return transform_sentences(regularized)
+    sentences = transform_sentences(regularized)
+    return regularize_syntax(sentences)
 
 
 def process_file(input_path: Path, output_path: Path) -> Path:
@@ -91,7 +94,7 @@ def process_file(input_path: Path, output_path: Path) -> Path:
     input_path : pathlib.Path
         Source file to read without modifying.
     output_path : pathlib.Path
-        Destination to create or replace after both transformations succeed.
+        Destination to create or replace after all transformations succeed.
 
     Returns
     -------
@@ -105,7 +108,7 @@ def process_file(input_path: Path, output_path: Path) -> Path:
     RuntimeError
         Sentence-per-line formatting fails before the destination is opened.
     """
-    # Finish both stages before opening the destination, preserving any
+    # Finish every stage before opening the destination, preserving any
     # existing output when either transformation fails.
     source = input_path.read_text(encoding="utf-8")
     transformed = transform_text(source)
@@ -114,7 +117,7 @@ def process_file(input_path: Path, output_path: Path) -> Path:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the combined transformer in file or clipboard mode.
+    """Run complete LaTeX normalization in file or clipboard mode.
 
     With no arguments, the command transforms the system clipboard.
 
@@ -153,10 +156,11 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    """Build the command-line interface for the combined workflow."""
+    """Build the command-line interface for complete normalization."""
     parser = argparse.ArgumentParser(
         description=(
-            "Regularize LaTeX syntax, then put each prose sentence on its own line."
+            "Regularize LaTeX syntax, put each prose sentence on its own line, "
+            "then regularize syntax again."
         )
     )
     parser.add_argument("input_file", nargs="?", type=Path, help="UTF-8 LaTeX file")
@@ -166,7 +170,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--output-file",
         dest="output_file",
         type=Path,
-        help="destination path (default: INPUT_regularized_sentences.tex)",
+        help="destination path (default: INPUT_full_normalized.tex)",
     )
     parser.add_argument(
         "--clipboard",
@@ -177,10 +181,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def _default_output_path(input_path: Path) -> Path:
-    """Return a sibling path marked as regularized and sentence-formatted."""
+    """Return a sibling path marked as fully normalized."""
     suffix = input_path.suffix or ".tex"
     stem = input_path.stem if input_path.suffix else input_path.name
-    return input_path.with_name(f"{stem}_regularized_sentences{suffix}")
+    return input_path.with_name(f"{stem}_full_normalized{suffix}")
 
 
 def _transform_clipboard() -> None:
@@ -192,7 +196,7 @@ def _transform_clipboard() -> None:
         print("Clipboard is empty; nothing was changed.")
         return
     pyperclip.copy(transform_text(source))
-    print("Regularized sentence-per-line LaTeX written back to the clipboard.")
+    print("Fully normalized LaTeX written back to the clipboard.")
 
 
 if __name__ == "__main__":

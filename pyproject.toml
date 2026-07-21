@@ -20,7 +20,7 @@ latex-delimiters-to-dollar-math = "latex_toolkit.latex_delimiters_to_dollar_math
 latex-transformer-template = "latex_toolkit.latex_transformer_template.latex_transformer_template:main"
 sentence-per-line-transformer = "latex_toolkit.sentence_per_line_transformer.sentence_per_line_transformer:main"
 syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
-syntax-then-sentence-transformer = "latex_toolkit.syntax_then_sentence_transformer.syntax_then_sentence_transformer:main"
+full-normalize = "latex_toolkit.full_normalize.full_normalize:main"
 sentence-per-line = "latex_toolkit.sentence_per_line_transformer.sentence_per_line_transformer:main"
 latex-syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
 
