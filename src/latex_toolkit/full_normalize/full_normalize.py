@@ -8,49 +8,14 @@ the template's separate-output file workflow and clipboard mode.
 from __future__ import annotations
 
 import argparse
-import importlib
-import subprocess
-import sys
 from collections.abc import Sequence
 from pathlib import Path
-from types import ModuleType
 
 from ..sentence_per_line_transformer import (
     transform_text as transform_sentences,
 )
 from ..syntax_regularizer import transform_text as regularize_syntax
-
-
-class _DependencyManager:
-    """Load configured modules and install their distributions when unavailable."""
-
-    def __init__(self, distributions: dict[str, str]) -> None:
-        self.distributions = dict(distributions)
-
-    def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing it when unavailable."""
-        requirement = self.distributions[import_name]
-        try:
-            return importlib.import_module(import_name)
-        except ModuleNotFoundError as error:
-            missing_requested_path = error.name == import_name or import_name.startswith(
-                f"{error.name}."
-            )
-            if not missing_requested_path:
-                raise
-
-        subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
-        importlib.invalidate_caches()
-        package_name = import_name.partition(".")[0]
-        for module_name in tuple(sys.modules):
-            if module_name == package_name or module_name.startswith(
-                f"{package_name}."
-            ):
-                sys.modules.pop(module_name, None)
-        return importlib.import_module(import_name)
-
-
-RUNTIME_DEPENDENCIES = _DependencyManager({"pyperclip": "pyperclip>=1.9"})
+from latex_toolkit.lib.dependencies import DependencyManager
 
 
 def transform_text(source: str) -> str:
@@ -86,7 +51,7 @@ def transform_text(source: str) -> str:
     return regularize_syntax(sentences)
 
 
-def process_file(input_path: Path, output_path: Path) -> Path:
+def _process_file(input_path: Path, output_path: Path) -> Path:
     """Run the pipeline for one UTF-8 file and write a separate result.
 
     Parameters
@@ -150,7 +115,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     output_path = args.output_file or _default_output_path(args.input_file)
-    process_file(args.input_file, output_path)
+    _process_file(args.input_file, output_path)
     print(f"Transformed file written to: {output_path}")
     return 0
 
@@ -178,6 +143,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="transform the system clipboard instead of a file",
     )
     return parser
+
+
+# Keep only this command's dependency declarations at its external boundary.
+RUNTIME_DEPENDENCIES = DependencyManager({"pyperclip": "pyperclip>=1.9"})
 
 
 def _default_output_path(input_path: Path) -> Path:

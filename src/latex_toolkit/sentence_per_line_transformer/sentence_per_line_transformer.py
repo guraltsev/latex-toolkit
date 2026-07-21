@@ -8,16 +8,14 @@ text outside document environments retain their original source spelling.
 from __future__ import annotations
 
 import argparse
-import importlib
 import re
-import shutil
 import subprocess
-import sys
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from types import ModuleType
 from typing import Any
+
+from latex_toolkit.lib.dependencies import DependencyManager
 
 
 @dataclass(frozen=True)
@@ -40,67 +38,6 @@ class _Replacement:
     end: int
     text: str
     kind: str
-
-
-class DependencyManager:
-    """Load configured modules and executables, installing them when unavailable."""
-
-    def __init__(self, distributions: dict[str, str]) -> None:
-        self.distributions = dict(distributions)
-
-    def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing it when unavailable."""
-        requirement = self.distributions[import_name]
-        try:
-            return importlib.import_module(import_name)
-        except ModuleNotFoundError as error:
-            missing_requested_path = error.name == import_name or import_name.startswith(
-                f"{error.name}."
-            )
-            if not missing_requested_path:
-                raise
-
-        self._install(requirement)
-        importlib.invalidate_caches()
-        package_name = import_name.partition(".")[0]
-        for module_name in tuple(sys.modules):
-            if module_name == package_name or module_name.startswith(
-                f"{package_name}."
-            ):
-                sys.modules.pop(module_name, None)
-        return importlib.import_module(import_name)
-
-    def require_executable(self, executable_name: str) -> Path:
-        """Locate a configured executable, installing it when unavailable."""
-        requirement = self.distributions[executable_name]
-        located = self._find_executable(executable_name)
-        if located is None:
-            self._install(requirement)
-            located = self._find_executable(executable_name)
-        if located is None:
-            raise RuntimeError(
-                f"{executable_name} is unavailable after installing {requirement}"
-            )
-        return located
-
-    @staticmethod
-    def _install(requirement: str) -> None:
-        """Install one requirement into the active Python environment."""
-        subprocess.check_call([sys.executable, "-m", "pip", "install", requirement])
-
-    @staticmethod
-    def _find_executable(executable_name: str) -> Path | None:
-        """Return an executable available on PATH or beside the interpreter."""
-        located = shutil.which(executable_name)
-        if located:
-            return Path(located)
-        for candidate in (
-            Path(sys.executable).with_name(f"{executable_name}.exe"),
-            Path(sys.executable).parent / "Scripts" / f"{executable_name}.exe",
-        ):
-            if candidate.is_file():
-                return candidate
-        return None
 
 
 RUNTIME_DEPENDENCIES = DependencyManager(
@@ -207,7 +144,7 @@ def transform_text(source: str) -> str:
     return transformed
 
 
-def process_file(input_path: Path, output_path: Path) -> Path:
+def _process_file(input_path: Path, output_path: Path) -> Path:
     """Transform one UTF-8 LaTeX file and write a separate UTF-8 result.
 
     The complete transformation succeeds before the destination is opened, so
@@ -242,7 +179,7 @@ def process_file(input_path: Path, output_path: Path) -> Path:
     ...     source = Path(directory) / "paper.tex"
     ...     output = Path(directory) / "paper_sentences.tex"
     ...     _ = source.write_text("First. Second.", encoding="utf-8")
-    ...     result = process_file(source, output)
+    ...     result = _process_file(source, output)
     ...     print(result.name, output.read_text(encoding="utf-8"))
     paper_sentences.tex First.
     Second.
@@ -295,7 +232,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     output_path = args.output_file or _default_output_path(args.input_file)
-    process_file(args.input_file, output_path)
+    _process_file(args.input_file, output_path)
     print(f"Transformed file written to: {output_path}")
     return 0
 

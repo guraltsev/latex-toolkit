@@ -1,0 +1,1174 @@
+\section{Affine trick}
+
+\subsection{Space-side affine trick}
+
+Let $\Lambda_K^{(d)}$ be the spatial form from
+\eqref{eq:CZ-space-operator} in input dimension $d$. The space-side trick
+has two useful forms. The first simply freezes the last coordinate of every
+input. The second resolves the zero-sum constraint in affine coordinates and
+is better suited to estimates.
+
+For the symmetric form, let
+\[
+ d\mu_\perp(\vec t) \eqd \delta_0\left(\sum_{j=1}^{d+1}t_j\right)  \prod_{j=1}^{d+1}\dd t_j
+\]
+denote Lebesgue measure on $\vec{1}^\perp$ with this normalization.
+
+\begin{proposition}[Space-side affine trick: symmetric slicing]
+\label{prop:symmetric-spatial-affine-trick}
+For Schwartz functions $f_1,\ldots,f_{d+1}$, one has
+\[
+\Lambda_K^{(d)}(f_1,\ldots,f_{d+1})
+\begin{aligned}[t]
+&=\int_{\vec{1}^\perp} \mathcal{S}_{\vec t,K}^{(d-1)} (F_{1,t_1},\ldots,F_{d+1,t_{d+1}}) \dd \mc{L}^{d-1}(\vec t),
+\\
+&=  \int_0^\infty r^{d-1}\int_{\mathbb{S}^{d-1}\cap\vec{1}^\perp}  \mathcal{S}_{\omega,K_r}^{(d-1)} (F_{1,r\omega_1},\ldots,F_{d+1,r\omega_{d+1}}) \dd\sigma^{d-2}(\omega)\dd r.
+\end{aligned}
+\]
+where \(  F_{i,t}(x)\eqd f(x,t)\), \((x,t)∈\R^{d-1}\times\R\), $\dd\sigma^{d-2}$ is the surface measure on
+$\mathbb{S}^{d-1}\cap\vec{1}^\perp$ given by \(\dd\mc{L}^{d-1}(r\omega)=r^{d-1}\dd r\dd\sigma_\perp(\omega)\), and $K_r(s)\eqd K(rs)$.
+\end{proposition}
+
+\begin{proof}
+Write $u_j=(x_j,t_j)\in\mathbb{R}^{d-1}\times\mathbb{R}$.
+The zero-sum constraint in the definition of $\Lambda_K^{(d)}$ is the product of the two constraints $\sum_jx_j=0$ and $\sum_jt_j=0$.
+Moreover,
+\[
+D^{(d)}(u_1,\ldots,u_{d+1})
+=\det\begin{pmatrix}
+x_1&\cdots&x_{d+1}\\
+t_1&\cdots&t_{d+1}\\
+1&\cdots&1
+\end{pmatrix}
+=\mathcal{D}_{\vec t}^{(d-1)}(x_1,\ldots,x_{d+1}).
+\]
+Substitution into the defining integral gives the first identity.
+The second follows from polar coordinates on $\vec{1}^\perp$ and the identity $\mathcal{D}_{r\omega}^{(d-1)}=r\mathcal{D}_{\omega}^{(d-1)}$.
+\end{proof}
+
+\begin{corollary}[Reduction from sliced bounds]
+\label{cor:uniform-sliced-bound-reduction}
+Let $p_1,\ldots,p_{d+1}\in(1,\infty]$ and $q\in[1,\infty]$ satisfy \(\frac{1}{q}+\sum_{j=1}^{d+1}\frac{1}{p_j}=1\).
+Suppose that
+\[
+\bigl|\mathcal{S}_{\omega,K_r}^{(d-1)} (g_1,\ldots,g_{d+1})\bigr| \le C_{\vec p}(r,\omega) \prod_{j=1}^{d+1}\|g_j\|_{L^{p_j}(\R^{d-1})},
+\qquad r>0,\quad \omega\in\mathbb{S}^{d-1}\cap\vec{1}^{\perp},
+\]
+and set
+\[
+\begin{aligned}
+\mathfrak {C}_{\vec p,q}
+&\eqd\left\|r^{d-1}C_{\vec p}(r,\omega) \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j}\right\|_{ L^1_\omega(\mathbb{S}^{d-1}\cap\vec{1}^{\perp};L^q_r(0,\infty))}
+\\
+&= \int_{\mathbb{S}^{d-1}\cap\vec{1}^{\perp}} \bigl\|r^{d-1}C_{\vec p}(r,\omega)\bigr\|_{L^q_r(0,\infty)} \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j} \dd\sigma_\perp(\omega).
+\end{aligned}
+\]
+If \(\mathfrak {C}_{\vec p,q} <\infty\) then
+\[
+\bigl|\Lambda_K^{(d)}(f_1,\ldots,f_{d+1})\bigr| \lesssim_{d,\vec p} \mathfrak {C}_{\vec p,q} \prod_{j=1}^{d+1}\|f_j\|_{L^{p_j}(\R^d)}.
+\]
+\end{corollary}
+
+\begin{proof}
+Put $A_j(t)\eqd\|f_{j,t}\|_{L^{p_j}(\R^{d-1})}$.
+The polar identity and Hölder's inequality in $r$ give, for almost every $\omega$,
+\[
+\begin{aligned}
+& \int_0^\infty r^{d-1}C_{\vec p}(r,\omega) \prod_{j=1}^{d+1}A_j(r\omega_j)\,\dd r
+\le \bigl\|r^{d-1}C_{\vec p}(r,\omega)\bigr\|_{L^q_r(0,\infty)} \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j} \|A_j\|_{L^{p_j}(\R)}.
+\end{aligned}
+\]
+Integration in $\omega$, followed by Fubini and the identity $\|A_j\|_{L^{p_j}(\R)}=\|f_j\|_{L^{p_j}(\R^d)}$, proves the claim.
+\end{proof}
+
+\begin{corollary}[The plane bound from symmetric slicing]
+\label{cor:symmetric-slicing-plane}
+Let $K$ be a smooth Calderón--Zygmund kernel on $\R$ and let $p_1,p_2,p_3\in(2,\infty)$ and \( \frac1{p_1}+\frac1{p_2}+\frac1{p_3}=1 \).
+Assume that, for every smooth Calderón--Zygmund kernel $L$ on $\R$ whose Calderón--Zygmund seminorms are bounded by $1$, one has
+\[
+\left|\pv\int_{\R^2} h_1(x+t)h_2(x+\sigma t)h_3(x)L(t)\,\dd t\dd x\right|
+\lesssim_{\vec p} \prod_{j=1}^3\|h_j\|_{L^{p_j}(\R)},
+\]
+uniformly in $\sigma\in\R$. Then
+\[
+\bigl|\Lambda_K^{(2)}(f_1,f_2,f_3)\bigr| \lesssim_{K,\vec p} \prod_{j=1}^3\|f_j\|_{L^{p_j}(\R^2)}.
+\]
+\end{corollary}
+
+\begin{proof}
+Fix $\omega\in\mathbb{S}^1\cap\vec{1}^{\perp}$ and let
+\[
+\nu\eqd\frac1{\sqrt3} (\omega_2-\omega_3,\omega_3-\omega_1,\omega_1-\omega_2).
+\]
+Then $(\omega,\nu)$ is an orthonormal basis of $\vec{1}^{\perp}$. Writing
+$(x_1,x_2,x_3)=s\omega+t\nu$, one has
+\[
+\mathcal D_\omega^{(1)}(x_1,x_2,x_3)=\sqrt3\,t
+\]
+up to an irrelevant sign. Consequently,
+\[
+\mathcal S_{\omega,K_r}^{(1)}(g_1,g_2,g_3) =\frac1{\sqrt3}\int_{\R^2}\prod_{j=1}^3g_j(s\omega_j+t\nu_j) K(r\sqrt3\,t)\,\dd s\dd t.
+\]
+Away from the measure-zero set where some $\omega_j=0$, put
+\[
+G_j(u)\eqd g_j(\omega_ju),   \qquad \beta_j\eqd\frac{\nu_j}{\omega_j}.
+\]
+After translating and rescaling the $t$-variable, the last display is a
+bilinear Hilbert transform with one free slope parameter.
+The rescaled kernels have Calderón--Zygmund seminorms $O_K(r^{-1})$, uniformly in $\omega$.
+Hence Theorem~\ref{thm:uniform-bht} gives
+\[
+\bigl|\mathcal S_{\omega,K_r}^{(1)}(g_1,g_2,g_3)\bigr| \lesssim_{K,\vec p}r^{-1} \prod_{j=1}^3|\omega_j|^{-1/p_j}\|g_j\|_{L^{p_j}(\R)}.
+\]
+Apply Corollary~\ref{cor:uniform-sliced-bound-reduction} with $q=\infty$ and
+\[
+C_{\vec p}(r,\omega)\lesssim_{K,\vec p} r^{-1}\prod_{j=1}^3|\omega_j|^{-1/p_j}.
+\]
+Since $rC_{\vec p}(r,\omega)$ is independent of $r$, the mixed norm condition becomes
+\[
+\int_{\mathbb{S}^1\cap\vec{1}^{\perp}} \prod_{j=1}^3|\omega_j|^{-2/p_j}\dd\sigma_\perp(\omega)<\infty.
+\]
+Each coordinate $\omega_j$ has only simple zeros on this circle, so the last integral is finite precisely when $2/p_j<1$ for every $j$.
+This is exactly the assumption $p_j>2$.
+\end{proof}
+
+\subsection{Multiplier-side affine trick}
+For each $v\in\R$, the reduced kernel in the decomposition below is the
+one-variable distribution
+\[
+  \mu_v\eqd\mu_{\omega,v},
+  \qquad
+  \mu_v(t)\eqd\FT{K}\left(\frac vt\right),\qquad t\ne0.
+\]
+It is independent of $\omega$; the subscript $\omega$ only records the reduced form
+in which this kernel is used.  For a distributional $K$, this expression,
+as well as the formula below, is understood by regularization.
+
+\begin{proposition}[Multiplier-side affine trick: spherical coarea form]
+\label{prop:multiplier-affine-trick}
+Let $g_1,\ldots,g_{d+1}\in\Sch(\R^d)$.  For
+$\omega\in\mathbb S^{d-1}\cap\vec1^\perp$ and $u\in\R$,
+write
+\[
+  g_{j,u}(x)\eqd g_j(x,u),\qquad x\in\R^{d-1}.
+\]
+Then
+\[
+\mc{M}_K^{(d)}(g_1,\ldots,g_{d+1}) =\frac12\int_\R \int_{\mathbb S^{d-1}\cap\vec1^\perp}\mathcal A_{\omega,\mu_v}^{(d-1)} \bigl(g_{1,\omega_1v},\ldots,g_{d+1,\omega_{d+1}v}\bigr) \dd\sigma_\perp(\omega) \dd v.
+\]
+\end{proposition}
+
+\begin{proof}
+We use the coarea identity
+\[
+\int F(\xi)\prod_{j=1}^{d+1}\dd\xi_j
+    =\frac12\int_{\mathbb S^{d-1}\cap\vec1^\perp}\int F(\xi)\,
+|\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})|\,
+\delta_0\left(\sum_{j=1}^{d+1}\omega_j\xi_j\right)
+\prod_{j=1}^{d+1}\dd\xi_j\dd\sigma_\perp(\omega).
+\]
+Indeed, for a full-rank configuration $(\xi_1,\ldots,\xi_{d+1})$, the
+constraint above has exactly two solutions $\omega\in\mathbb {S}^{d-2}\cap\vec1^\perp$.
+The two points account for the factor $1/2$, while the coarea Jacobian is $|\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})|$.
+The rank-deficient set has measure zero.
+
+  Partial Fourier transformation in $x\in\R^{d-1}$ gives
+  \[
+    \FT{g_{j,\omega_jv}}(\xi_j)
+    =\int_\R\FT{g_j}(\xi_j,\tau_j)
+    e^{2\pi i \omega_jv\tau_j}\dd\tau_j.
+  \]
+  On the support of the delta constraint in \((*)\), elementary row
+  operations give
+  \[
+    D^{(d)}(\zeta_1,\ldots,\zeta_{d+1})
+    =\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})
+    \sum_{j=1}^{d+1}\omega_j\tau_j.
+  \]
+  The one-dimensional scaling identity
+  \[
+    \int_\R\widehat K\left(\frac vt\right)e^{2\pi ivs}\dd v
+    =|t|K(ts),\qquad t\ne0,
+  \]
+  with $t=\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})$ and
+  $s=\sum_j\omega_j\tau_j$, therefore yields
+  \[
+    |\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})|K\left(\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})
+    \sum_{j=1}^{d+1}\omega_j\tau_j\right)
+    =|\mc{D}^{(d-1)}_\omega(\xi_1,\ldots,\xi_{d+1})|
+    K\bigl(D^{(d)}(\zeta_1,\ldots,\zeta_{d+1})\bigr).
+  \]
+  Applying the coarea formula to the remaining $\xi$-integral proves the formula.
+  As usual, distributional kernels are obtained by regularization and a
+  passage to the limit.
+\end{proof}
+
+The formula makes the change in homogeneity transparent.  If $K$ is
+homogeneous of degree $-1$, then $\widehat K$ is homogeneous of degree $0$;
+thus, for fixed $v$,
+\[
+  \mu_v(\lambda t)=\mu_v(t),\qquad \lambda>0.
+\]
+The $(-1)$-homogeneous multiplier is therefore resolved into reduced
+determinantal forms with a $0$-homogeneous kernel.
+\begin{corollary}[Reduction from multiplier slices]
+\label{cor:uniform-multiplier-sliced-bound}
+Let $p_1,\ldots,p_{d+1}\in(1,\infty]$ and $q\in[1,\infty]$ satisfy
+\[
+  \frac{1}{q}+\sum_{j=1}^{d+1}\frac1{p_j}=1.
+\]
+Suppose that
+\[
+  \bigl|\mathcal A_{\omega,\mu_v}^{(d-1)}
+  (h_1,\ldots,h_{d+1})\bigr|
+  \le C_{\vec p}^{\mathrm{mult}}(v,\omega)
+  \prod_{j=1}^{d+1}\|h_j\|_{L^{p_j}(\R^{d-1})}
+\]
+for every $v\in\R$ and $\omega\in\mathbb S^{d-1}\cap\vec1^\perp$.  Set
+\[
+  \mathfrak C_{\vec p,q}^{\mathrm{mult}}
+  \eqd\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \bigl\|C_{\vec p}^{\mathrm{mult}}(\cdot,\omega)\bigr\|_{L^q(\R)}
+  \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j}\,
+  \dd\sigma_\perp(\omega).
+\]
+If $\mathfrak C_{\vec p,q}^{\mathrm{mult}}<\infty$, then
+\[
+  \bigl|\mc M_K^{(d)}(g_1,\ldots,g_{d+1})\bigr|
+  \lesssim_{d,\vec p}
+  \mathfrak C_{\vec p,q}^{\mathrm{mult}}
+  \prod_{j=1}^{d+1}\|g_j\|_{L^{p_j}(\R^d)}.
+\]
+\end{corollary}
+
+\begin{proof}
+Put $A_j(u)\eqd\|g_{j,u}\|_{L^{p_j}(\R^{d-1})}$.  The formula in
+Proposition~\ref{prop:multiplier-affine-trick}, the assumed bound, and
+H\"older's inequality in $v$ give
+\[
+  \bigl|\mc M_K^{(d)}(g_1,\ldots,g_{d+1})\bigr|
+  \lesssim_{d,\vec p}
+  \mathfrak C_{\vec p,q}^{\mathrm{mult}}
+  \prod_{j=1}^{d+1}\|g_j\|_{L^{p_j}(\R^d)}.
+\]
+Here we used $\|A_j\|_{L^{p_j}(\R)}=\|g_j\|_{L^{p_j}(\R^d)}$.
+\end{proof}
+
+\subsection{Projectively normalized slices and weighted norms}
+
+There is a useful way to apply the two slicing reductions simultaneously to
+all the inputs.  For a function \(g\) on
+\(\R^{d-1}\times\R\), define its projectively normalized slices by
+\[
+  G_t(x)\eqd g(tx,t),\qquad t\ne0.
+\]
+Thus \(g_t(x)=g(x,t)=G_t(x/t)\).  Consequently, for
+\(p\in(1,\infty)\),
+\[
+  \|g_t\|_{L^p(\R^{d-1})}
+  =|t|^{(d-1)/p}\|G_t\|_{L^p(\R^{d-1})},
+\]
+and hence
+\[
+  \boxed{
+  \|g\|_{L^p(\R^d)}^p
+  =\int_\R\int_{\R^{d-1}}|G_t(x)|^p\,
+    |t|^{d-1}\dd x\dd t.}
+  \eqnum \label{eq:projective-weighted-norm}
+\]
+For \(p=\infty\), the corresponding statement is
+\(\|g\|_\infty=\operatorname*{ess\,sup}_t\|G_t\|_\infty\).  Thus the ordinary
+\(L^p\)-norm of \(g(x,t)\) is precisely the weighted \(L^p\)-norm of the
+family \(G_t(x)\), with projective measure
+\(|t|^{d-1}\dd x\dd t\).
+
+Apply this construction to every input \(g_j\), and write
+\[
+  G_{j,t}(x)\eqd g_j(tx,t).
+\]
+We now absorb the inverse dilations \(x\mapsto x/(\omega_jv)\) and
+\(x\mapsto x/(r\omega_j)\) into the operators themselves.  Define
+\[
+\begin{aligned}
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  &\eqd
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  \bigl(
+    H_1(\cdot/(\omega_1v)),\ldots,
+    H_{d+1}(\cdot/(\omega_{d+1}v))
+  \bigr),\\
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  &\eqd
+  \mathcal S_{\omega,K_r}^{(d-1)}
+  \bigl(
+    H_1(\cdot/(r\omega_1)),\ldots,
+    H_{d+1}(\cdot/(r\omega_{d+1}))
+  \bigr).
+\end{aligned}
+\eqnum \label{eq:modified-affine-operators}
+\]
+These are the modified affine operators.  They act directly on fibers:
+\[
+  \mc M_K^{(d)}(g_1,\ldots,g_{d+1})
+  =\frac12\int_\R\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  \bigl(
+    G_{1,\omega_1v},\ldots,G_{d+1,\omega_{d+1}v}
+  \bigr)
+  \dd\sigma_\perp(\omega)\dd v,
+\]
+and
+\[
+  \Lambda_K^{(d)}(g_1,\ldots,g_{d+1})
+  =\int_0^\infty r^{d-1}
+  \int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  \bigl(
+    G_{1,r\omega_1},\ldots,G_{d+1,r\omega_{d+1}}
+  \bigr)
+  \dd\sigma_\perp(\omega)\dd r.
+\]
+Thus the arguments of the modified operators are the fibers themselves,
+with no residual dilation in their arguments.
+
+We next make explicit how absorbing the dilations changes the geometry.
+For the multiplier-side operator, set
+\[
+  \mathcal R_\omega^{(d-1)}(\eta_1,\ldots,\eta_{d+1})
+  \eqd
+  \det\begin{pmatrix}
+    \eta_1/\omega_1&\cdots&\eta_{d+1}/\omega_{d+1}\\
+    \omega_1&\cdots&\omega_{d+1}\\
+    1&\cdots&1
+  \end{pmatrix}.
+\]
+The change of frequency variables
+\(\eta_j=\omega_jv\xi_j\) in the definition of
+\(\mathcal A_{\omega,\mu_v}^{(d-1)}\) gives
+\[
+\begin{aligned}
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&|v|^{d-1}
+  \int_{(\R^{d-1})^{d+1}}
+  \prod_{j=1}^{d+1}\widehat H_j(\eta_j)\\
+  &\quad\times
+  \mu_v\left(
+    v^{-(d-1)}\mathcal R_\omega^{(d-1)}
+    (\eta_1,\ldots,\eta_{d+1})
+  \right)\\
+  &\quad\times
+  \delta_0\left(\sum_{j=1}^{d+1}\eta_j\right)
+  \prod_{j=1}^{d+1}\dd\eta_j.
+\end{aligned}
+\eqnum \label{eq:modified-multiplier-scaling-identity}
+\]
+The inverse dilation therefore replaces the weighted linear constraint with
+the ordinary zero-sum constraint and replaces
+\(\mathcal D_\omega^{(d-1)}\) by
+\(\mathcal R_\omega^{(d-1)}\).  Since
+\[
+  \mu_v\left(v^{-(d-1)}s\right)
+  =\widehat K\left(\frac{v^d}s\right),
+\]
+the one-variable multiplier in \eqref{eq:modified-multiplier-scaling-identity} is
+\[
+  \boxed{\qquad
+  \widetilde\mu_v(s)
+  \eqd\widehat K\left(\frac{v^d}s\right),
+  \quad\text{independent of \(\omega\).}
+  \qquad}
+\]
+All \(\omega\)-dependence has been moved into the projective geometry
+\(\mathcal R_\omega^{(d-1)}\); the constraint
+\(\delta_0(\sum_j\eta_j)\) is independent of \(\omega\).  Each family
+\(t\mapsto G_{j,t}\) is defined independently of \(\omega\), and
+\(\omega\) merely selects the member \(G_{j,\omega_jv}\).
+
+There is an analogous physical-space description.  Put
+\[
+  \mathcal P_\omega^{(d-1)}(y_1,\ldots,y_{d+1})
+  \eqd
+  \det\begin{pmatrix}
+    \omega_1y_1&\cdots&\omega_{d+1}y_{d+1}\\
+    \omega_1&\cdots&\omega_{d+1}\\
+    1&\cdots&1
+  \end{pmatrix}.
+\]
+For \(r>0\) and away from the measure-zero set on which some
+\(\omega_j=0\), the changes of variables \(x_j=r\omega_jy_j\) give
+\[
+\begin{aligned}
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&r^{d(d-1)}
+  \prod_{j=1}^{d+1}|\omega_j|^{d-1}
+  \int_{(\R^{d-1})^{d+1}}\prod_{j=1}^{d+1}H_j(y_j)\\
+  &\quad\times
+  K\left(
+    r^d\mathcal P_\omega^{(d-1)}
+    (y_1,\ldots,y_{d+1})
+  \right)\\
+  &\quad\times
+  \delta_0\left(\sum_{j=1}^{d+1}\omega_jy_j\right)
+  \prod_{j=1}^{d+1}\dd y_j.
+\end{aligned}
+\]
+Here the inverse dilation replaces the zero-sum constraint by the
+\(\omega_j\)-weighted constraint and replaces the determinant by
+\(\mathcal P_\omega^{(d-1)}\).  Again, the operator itself receives only
+the undilated fibers \(G_{j,r\omega_j}\).
+
+\begin{corollary}[Uniform bounds for the frozen modified operators]
+\label{cor:frozen-modified-operator-bounds}
+Let \(p_1,\ldots,p_{d+1}\in(1,\infty]\), and put
+\[
+  \alpha\eqd\sum_{j=1}^{d+1}\frac1{p_j}.
+\]
+Denote by \(\|T\|_{\vec p}\) the norm of a \((d+1)\)-linear form from
+\(\prod_jL^{p_j}(\R^{d-1})\) to \(\C\).  For \(v\ne0\), \(r>0\), and
+away from the measure-zero set on which some \(\omega_j=0\), one has
+\[
+\begin{aligned}
+  \bigl\|\widetilde{\mathcal A}_{\omega,v}^{(d-1)}\bigr\|_{\vec p}
+  &={}|v|^{(d-1)\alpha}
+  \prod_{j=1}^{d+1}|\omega_j|^{(d-1)/p_j}
+  \bigl\|\mathcal A_{\omega,\mu_v}^{(d-1)}\bigr\|_{\vec p},\\
+  \bigl\|\widetilde{\mathcal S}_{\omega,r}^{(d-1)}\bigr\|_{\vec p}
+  &={}r^{(d-1)\alpha}
+  \prod_{j=1}^{d+1}|\omega_j|^{(d-1)/p_j}
+  \bigl\|\mathcal S_{\omega,K_r}^{(d-1)}\bigr\|_{\vec p}.
+\end{aligned}
+\]
+In particular, uniform bounds for either family of frozen original
+operators are equivalent to uniform bounds for the corresponding
+scale-normalized modified operators.  Moreover, every frozen modified
+operator has the ordinary diagonal translation symmetry, for every
+\(z\in\R^{d-1}\):
+\[
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (\Tr_zH_1,\ldots,\Tr_zH_{d+1})
+  =
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (H_1,\ldots,H_{d+1}),
+\]
+and
+\[
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  (\Tr_zH_1,\ldots,\Tr_zH_{d+1})
+  =
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  (H_1,\ldots,H_{d+1}).
+\]
+\end{corollary}
+
+\begin{proof}
+The norm identities follow from
+\[
+  \|H(\cdot/t)\|_{L^p(\R^{d-1})}
+  =|t|^{(d-1)/p}\|H\|_{L^p(\R^{d-1})}
+\]
+and the invertibility of the input dilations.  The multiplier translation
+identity follows from the constraint \(\sum_j\eta_j=0\) in
+\eqref{eq:modified-multiplier-scaling-identity}.  The space-side identity
+follows from \(\sum_j\omega_j=0\): simultaneous translation preserves both
+\(\sum_j\omega_jy_j\) and \(\mathcal P_\omega^{(d-1)}(y)\).
+\end{proof}
+
+\begin{corollary}[Integrability of the modified operators in the angular and radial parameters]
+\label{cor:modified-operator-integrability}
+Let \(p_1,\ldots,p_{d+1}\in(1,\infty]\) and \(q\in[1,\infty]\) satisfy
+\[
+  \frac1q+\sum_{j=1}^{d+1}\frac1{p_j}=1,
+  \qquad
+  \alpha\eqd\sum_{j=1}^{d+1}\frac1{p_j}.
+\]
+Suppose that
+\[
+\begin{aligned}
+  \bigl|\widetilde{\mathcal A}_{\omega,v}^{(d-1)}(H_1,\ldots,H_{d+1})\bigr|
+  &\le B_{\mathrm{mult}}(v,\omega)\prod_{j=1}^{d+1}\|H_j\|_{p_j},\\
+  \bigl|\widetilde{\mathcal S}_{\omega,r}^{(d-1)}(H_1,\ldots,H_{d+1})\bigr|
+  &\le B_{\mathrm{sp}}(r,\omega)\prod_{j=1}^{d+1}\|H_j\|_{p_j}.
+\end{aligned}
+\]
+Set
+\[
+\begin{aligned}
+  \widetilde{\mathfrak C}_{\vec p,q}^{\mathrm{mult}}
+  &\eqd
+  \int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \bigl\||v|^{-(d-1)\alpha}B_{\mathrm{mult}}(v,\omega)
+  \bigr\|_{L^q_v(\R)}
+  \prod_{j=1}^{d+1}|\omega_j|^{-d/p_j}
+  \dd\sigma_\perp(\omega),\\
+  \widetilde{\mathfrak C}_{\vec p,q}^{\mathrm{sp}}
+  &\eqd
+  \int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \bigl\|r^{(d-1)(1-\alpha)}B_{\mathrm{sp}}(r,\omega)
+  \bigr\|_{L^q_r(0,\infty)}
+  \prod_{j=1}^{d+1}|\omega_j|^{-d/p_j}
+  \dd\sigma_\perp(\omega).
+\end{aligned}
+\]
+Then
+\[
+\begin{aligned}
+  \bigl|\mc M_K^{(d)}(g_1,\ldots,g_{d+1})\bigr|
+  &\le \frac12\widetilde{\mathfrak C}_{\vec p,q}^{\mathrm{mult}}
+  \prod_{j=1}^{d+1}\|g_j\|_{p_j},\\
+  \bigl|\Lambda_K^{(d)}(g_1,\ldots,g_{d+1})\bigr|
+  &\le \widetilde{\mathfrak C}_{\vec p,q}^{\mathrm{sp}}
+  \prod_{j=1}^{d+1}\|g_j\|_{p_j}.
+\end{aligned}
+\]
+In particular, if the bounds in Corollary~\ref{cor:frozen-modified-operator-bounds}
+come from coefficients \(C_{\mathrm{mult}}(v,\omega)\) and
+\(C_{\mathrm{sp}}(r,\omega)\) for the original frozen operators, the two
+integrability conditions reduce respectively to
+\[
+\begin{aligned}
+  &\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \|C_{\mathrm{mult}}(\cdot,\omega)\|_{L^q(\R)}
+  \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j}\dd\sigma_\perp(\omega)<\infty,\\
+  &\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \|r^{d-1}C_{\mathrm{sp}}(r,\omega)\|_{L^q_r(0,\infty)}
+  \prod_{j=1}^{d+1}|\omega_j|^{-1/p_j}\dd\sigma_\perp(\omega)<\infty.
+\end{aligned}
+\]
+\end{corollary}
+
+\begin{proof}
+For every nonzero \(\omega_j\), the substitution \(t=\omega_jv\) and
+\eqref{eq:projective-weighted-norm} give
+\[
+  \left\||v|^{(d-1)/p_j}
+  \|G_{j,\omega_jv}\|_{p_j}\right\|_{L^{p_j}_v(\R)}
+  =|\omega_j|^{-d/p_j}\|g_j\|_{p_j}.
+\]
+The same substitution on \((0,\infty)\) gives
+\[
+  \left\|r^{(d-1)/p_j}
+  \|G_{j,r\omega_j}\|_{p_j}\right\|_{L^{p_j}_r(0,\infty)}
+  \le |\omega_j|^{-d/p_j}\|g_j\|_{p_j}.
+\]
+Apply H\"older's inequality in \(v\), respectively in \(r\), to the two
+normalized slicing identities, and then integrate in \(\omega\).  The
+last assertion follows from the norm identities in
+Corollary~\ref{cor:frozen-modified-operator-bounds}.
+\end{proof}
+
+\paragraph{Comparison of the original and modified operators.}
+We spell out the four expressions.  The original multiplier-side operator is
+\[
+\begin{aligned}
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&\int_{(\R^{d-1})^{d+1}}
+  \prod_{j=1}^{d+1}\widehat H_j(\xi_j)\,
+  \mu_v\left(
+    \mathcal D_\omega^{(d-1)}
+    (\xi_1,\ldots,\xi_{d+1})
+  \right)\\
+  &\quad\times
+  \delta_0\left(\sum_{j=1}^{d+1}\omega_j\xi_j\right)
+  \prod_{j=1}^{d+1}\dd\xi_j,
+\end{aligned}
+\eqnum \label{eq:original-affine-multiplier-form}
+\]
+whereas the modified operator acting on the fibers is
+\[
+\begin{aligned}
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&|v|^{d-1}
+  \int_{(\R^{d-1})^{d+1}}
+  \prod_{j=1}^{d+1}\widehat H_j(\eta_j)\,
+  \widetilde\mu_v\left(
+    \mathcal R_\omega^{(d-1)}
+    (\eta_1,\ldots,\eta_{d+1})
+  \right)\\
+  &\quad\times
+  \delta_0\left(\sum_{j=1}^{d+1}\eta_j\right)
+  \prod_{j=1}^{d+1}\dd\eta_j.
+\end{aligned}
+\eqnum \label{eq:modified-affine-multiplier-form}
+\]
+Thus
+\[
+\begin{array}{c|c}
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  &\widetilde{\mathcal A}_{\omega,v}^{(d-1)}\\ \hline
+  \mathcal D_\omega^{(d-1)}(\xi)
+  &\mathcal R_\omega^{(d-1)}(\eta)\\
+  \sum_j\omega_j\xi_j=0
+  &\sum_j\eta_j=0\\
+  \mu_v(s)=\widehat K(v/s)
+  &\widetilde\mu_v(s)=\widehat K(v^d/s)\\
+  1&|v|^{d-1}
+\end{array}
+\]
+in the determinant, constraint, one-variable multiplier, and exterior
+Jacobian, respectively.  The two determinants are related by
+\[
+  \mathcal R_\omega^{(d-1)}(\eta_1,\ldots,\eta_{d+1})
+  =\mathcal D_\omega^{(d-1)}
+  (\eta_1/\omega_1,\ldots,\eta_{d+1}/\omega_{d+1}),
+\]
+This identity is understood away from the measure-zero set on which some
+\(\omega_j=0\).  The essential gain of this normalization is that its
+constraint is the ordinary zero-sum constraint, uniformly in \(\omega\).
+
+On the space side, the original expression is
+\[
+\begin{aligned}
+  \mathcal S_{\omega,K_r}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&\int_{(\R^{d-1})^{d+1}}
+  \prod_{j=1}^{d+1}H_j(x_j)\,
+  K\left(
+    r\mathcal D_\omega^{(d-1)}
+    (x_1,\ldots,x_{d+1})
+  \right)\\
+  &\quad\times
+  \delta_0\left(\sum_{j=1}^{d+1}x_j\right)
+  \prod_{j=1}^{d+1}\dd x_j,
+\end{aligned}
+\eqnum \label{eq:original-affine-space-form}
+\]
+while the modified fiber operator is
+\[
+\begin{aligned}
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  (H_1,\ldots,H_{d+1})
+  ={}&r^{d(d-1)}
+  \prod_{j=1}^{d+1}|\omega_j|^{d-1}
+  \int_{(\R^{d-1})^{d+1}}\prod_{j=1}^{d+1}H_j(y_j)\\
+  &\quad\times
+  K\left(
+    r^d\mathcal P_\omega^{(d-1)}
+    (y_1,\ldots,y_{d+1})
+  \right)
+  \delta_0\left(\sum_{j=1}^{d+1}\omega_jy_j\right)
+  \prod_{j=1}^{d+1}\dd y_j.
+\end{aligned}
+\eqnum \label{eq:modified-affine-space-form}
+\]
+Here the zero-sum plane becomes the \(\omega\)-weighted plane, the
+determinant becomes \(\mathcal P_\omega^{(d-1)}\), the kernel scale changes
+from \(r\) to \(r^d\), and the change of variables contributes the
+displayed Jacobian.
+
+The original and modified operators are therefore \emph{not equal as
+multilinear forms evaluated on the same functions}.  Their exact relation
+is instead
+\[
+\begin{aligned}
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}(H_1,\ldots,H_{d+1})
+  &=
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  \bigl(H_1(\cdot/(\omega_1v)),\ldots,
+        H_{d+1}(\cdot/(\omega_{d+1}v))\bigr),\\
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}(H_1,\ldots,H_{d+1})
+  &=
+  \mathcal S_{\omega,K_r}^{(d-1)}
+  \bigl(H_1(\cdot/(r\omega_1)),\ldots,
+        H_{d+1}(\cdot/(r\omega_{d+1}))\bigr).
+\end{aligned}
+\]
+For fixed \(v\ne0\), \(r>0\), and \(\omega_j\ne0\), these input dilations
+are invertible.  Hence the original and modified operators contain the
+same analytic information, with the corresponding \(L^{p_j}\)-scaling
+factors, but only the modified operators act directly on the fibers.
+
+\subsection{Concentration in the last variable.}
+
+We now test both models on functions concentrated near prescribed last
+coordinates.  Let \(B_\varepsilon(\zeta)=(\zeta-\varepsilon,
+\zeta+\varepsilon)\), let \(h_j\in\Sch(\R^{d-1})\), and put
+\[
+  g_j^{(\varepsilon)}(x,t)
+  \eqd
+  \varepsilon^{-1/p_j}h_j(x)
+  \1_{B_\varepsilon(\zeta_j)}(t).
+  \eqnum \label{eq:concentrated-test-functions}
+\]
+Then
+\[
+  \|g_j^{(\varepsilon)}\|_{L^{p_j}(\R^d)}
+  =2^{1/p_j}\|h_j\|_{L^{p_j}(\R^{d-1})},
+\]
+so these norms are independent of \(\varepsilon\).  The harmless factor
+\(2^{1/p_j}\) disappears if \((2\varepsilon)^{-1/p_j}\) is used in
+\eqref{eq:concentrated-test-functions}.  Write
+\[
+  \alpha\eqd\sum_{j=1}^{d+1}\frac1{p_j},
+  \qquad
+  \zeta=(\zeta_1,\ldots,\zeta_{d+1}).
+\]
+
+On the space side, the zero-sum constraint forces
+\(\sum_jt_j=0\).  Consequently, if \(\sum_j\zeta_j\ne0\), then
+\[
+  \Lambda_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})=0
+\]
+for all sufficiently small \(\varepsilon\).  Suppose instead that
+\(\zeta\in\vec1^\perp\).  The symmetric slicing formula gives the exact
+identity
+\[
+\begin{aligned}
+  &\Lambda_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})\\
+  &\qquad=
+  \varepsilon^{-\alpha}
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}
+  \1_{B_\varepsilon(\zeta_j)}(t_j)\,
+  \mathcal S_{t,K}^{(d-1)}(h_1,\ldots,h_{d+1})
+  \dd\mc L^d(t)\\
+  &\qquad=
+  \varepsilon^{d-\alpha}
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}\1_{(-1,1)}(s_j)\,
+  \mathcal S_{\zeta+\varepsilon s,K}^{(d-1)}
+  (h_1,\ldots,h_{d+1})
+  \dd\mc L^d(s).
+\end{aligned}
+\eqnum \label{eq:space-concentration-identity}
+\]
+The power \(\varepsilon^d\) is the volume of the intersection of the
+\((d+1)\)-dimensional box with the \(d\)-dimensional constraint plane.
+For a regularized kernel, continuity of the sliced form therefore gives
+\[
+  \Lambda_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})
+  =
+  c_d\varepsilon^{d-\alpha}
+  \mathcal S_{\zeta,K}^{(d-1)}(h_1,\ldots,h_{d+1})
+  +o(\varepsilon^{d-\alpha}),
+  \eqnum \label{eq:space-concentration-asymptotic}
+\]
+where
+\[
+  c_d\eqd
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}\1_{(-1,1)}(s_j)\dd\mc L^d(s).
+\]
+As usual, the statement for a distributional \(K\) is read after
+regularization.
+
+The corresponding normalized fiber is
+\[
+  G_{j,t}^{(\varepsilon)}(x)
+  =
+  \varepsilon^{-1/p_j}
+  h_j(tx)\1_{B_\varepsilon(\zeta_j)}(t).
+\]
+If \(t_j=r\omega_j\ne0\) for every \(j\), then the modified space-side
+operator acts on these fibers without any further change of input:
+\[
+  \widetilde{\mathcal S}_{\omega,r}^{(d-1)}
+  \bigl(
+    G_{1,t_1}^{(\varepsilon)},\ldots,
+    G_{d+1,t_{d+1}}^{(\varepsilon)}
+  \bigr)
+  =
+  \varepsilon^{-\alpha}
+  \prod_{j=1}^{d+1}\1_{B_\varepsilon(\zeta_j)}(t_j)\,
+  \mathcal S_{\omega,K_r}^{(d-1)}
+  (h_1,\ldots,h_{d+1}).
+\]
+Indeed,
+\(G_{j,t_j}^{(\varepsilon)}(x/t_j)
+=\varepsilon^{-1/p_j}h_j(x)
+\1_{B_\varepsilon(\zeta_j)}(t_j)\).
+
+On the multiplier side, the same concentration forces
+\(\omega_jv\in B_\varepsilon(\zeta_j)\) for every \(j\).  Hence it again
+vanishes for all sufficiently small \(\varepsilon\) unless
+\(\zeta\in\vec1^\perp\).  Assume that
+\(\zeta\in\vec1^\perp\setminus\{0\}\).  Substitution in the spherical
+coarea formula gives
+\[
+\begin{aligned}
+  &\mc M_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})\\
+  &\quad=
+  \frac{\varepsilon^{-\alpha}}2
+  \int_\R\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \prod_{j=1}^{d+1}
+  \1_{B_\varepsilon(\zeta_j)}(\omega_jv)\,
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  (h_1,\ldots,h_{d+1})
+  \dd\sigma_\perp(\omega)\dd v.
+\end{aligned}
+\eqnum \label{eq:multiplier-concentration-identity}
+\]
+The pairs \((v,\omega)\) and \((-v,-\omega)\) describe the same point
+\(t=v\omega\in\vec1^\perp\), and
+\[
+  \mathcal A_{-\omega,\mu_{-v}}^{(d-1)}
+  =\mathcal A_{\omega,\mu_v}^{(d-1)}.
+\]
+Since
+\(\dd\mc L^d(t)=|v|^{d-1}\dd v\dd\sigma_\perp(\omega)\), the factor
+\(1/2\) removes this double covering and \eqref{eq:multiplier-concentration-identity}
+becomes
+\[
+\begin{aligned}
+  &\mc M_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})\\
+  &\quad=
+  \varepsilon^{d-\alpha}
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}\1_{(-1,1)}(s_j)\,
+  |\zeta+\varepsilon s|^{-(d-1)}\\
+  &\qquad\qquad\times
+  \mathcal A_{
+    (\zeta+\varepsilon s)/|\zeta+\varepsilon s|,
+    \mu_{|\zeta+\varepsilon s|}
+  }^{(d-1)}
+  (h_1,\ldots,h_{d+1})
+  \dd\mc L^d(s).
+\end{aligned}
+\eqnum \label{eq:multiplier-concentration-polar-identity}
+\]
+Thus, for a regularized kernel,
+\[
+\begin{aligned}
+  &\mc M_K^{(d)}
+  (g_1^{(\varepsilon)},\ldots,g_{d+1}^{(\varepsilon)})\\
+  &\qquad=
+  c_d\varepsilon^{d-\alpha}|\zeta|^{-(d-1)}
+  \mathcal A_{\zeta/|\zeta|,\mu_{|\zeta|}}^{(d-1)}
+  (h_1,\ldots,h_{d+1})
+  +o(\varepsilon^{d-\alpha}).
+\end{aligned}
+\eqnum \label{eq:multiplier-concentration-asymptotic}
+\]
+The additional factor \(|\zeta|^{-(d-1)}\), absent from
+\eqref{eq:space-concentration-asymptotic}, is precisely the polar-coordinate
+Jacobian in the multiplier-side coarea formula.
+
+In terms of the modified multiplier operator, if
+\(t_j=\omega_jv\ne0\) for every \(j\), then
+\[
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  \bigl(
+    G_{1,t_1}^{(\varepsilon)},\ldots,
+    G_{d+1,t_{d+1}}^{(\varepsilon)}
+  \bigr)
+  =
+  \varepsilon^{-\alpha}
+  \prod_{j=1}^{d+1}\1_{B_\varepsilon(\zeta_j)}(t_j)\,
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  (h_1,\ldots,h_{d+1}).
+\]
+Thus in both models the modified operator acts directly on the concentrated
+fibers; its built-in inverse dilation cancels the \(t_jx\) appearing in
+\(G_{j,t_j}^{(\varepsilon)}\).
+The excluded parameter set on which some
+\(t_j=0\) has measure zero and may be handled by a limiting convention.
+
+In the scale-invariant case
+\(\alpha=1\), both forms are of size \(\varepsilon^{d-1}\) for this test.
+Maintaining the individual \(L^{p_j}\)-norms therefore does not produce a
+nonzero limiting form when \(d\ge2\); to extract the indicated slice one
+must additionally divide the form by \(\varepsilon^{d-1}\).
+
+\paragraph{Scale-invariant diagonal packet series.}
+The preceding construction can be repeated at many separated scales.
+For every sequence index \(n\), choose
+\[
+  \zeta^{(n)}
+  =(\zeta_{1,n},\ldots,\zeta_{d+1,n})\in\vec1^\perp
+  \qquad\text{and}\qquad r_n>0.
+\]
+We impose the no-mixed-resonance condition
+\[
+  \left|\sum_{j=1}^{d+1}\zeta_{j,n_j}\right|
+  >
+  \sum_{j=1}^{d+1}r_{n_j}
+  \quad\text{whenever the indices \(n_1,\ldots,n_{d+1}\)
+  are not all equal.}
+  \eqnum \label{eq:no-mixed-resonance-condition}
+\]
+It follows that
+\[
+  \vec1^\perp\cap
+  \prod_{j=1}^{d+1}B_{r_{n_j}}(\zeta_{j,n_j})
+  =\varnothing
+\]
+unless \(n_1=\cdots=n_{d+1}\).  Thus every mixed term in the expansion of
+the full form vanishes exactly.
+
+There is a natural scale-invariant way to arrange \((\mathsf D)\).  Choose
+\(\zeta^\circ\in\vec1^\perp\) such that no proper nonempty subsum of its
+coordinates vanishes, take a sufficiently lacunary sequence
+\(\lambda_n=L^n\), and set
+\[
+  \zeta^{(n)}=\lambda_n\zeta^\circ,
+  \qquad
+  r_n=\delta\lambda_n.
+  \eqnum \label{eq:lacunary-scale-choice}
+\]
+If \(L\) is sufficiently large and then \(\delta>0\) is sufficiently
+small, both \((\mathsf D)\) and the pairwise disjointness of the intervals
+\(B_{r_n}(\zeta_{j,n})\), for each fixed \(j\), hold.  Indeed, in any
+off-diagonal sum the terms at the largest scale contribute a proper
+subsum of \(\zeta^\circ\); lacunarity makes all lower scales too small to
+cancel it.
+
+First prescribe the packets in the original functions:
+\[
+  g_j(x,t)
+  \eqd
+  \sum_n r_n^{-1/p_j}h_{j,n}(x)
+  \1_{B_{r_n}(\zeta_{j,n})}(t).
+  \eqnum \label{eq:original-packet-series}
+\]
+Disjointness gives
+\[
+  \|g_j\|_{L^{p_j}(\R^d)}^{p_j}
+  =2\sum_n\|h_{j,n}\|_{L^{p_j}(\R^{d-1})}^{p_j}.
+  \eqnum \label{eq:original-packet-series-norms}
+\]
+For \(p_j=\infty\), the right-hand side is replaced by the corresponding
+supremum.  Define the diagonal block operator
+\[
+\begin{aligned}
+  \mathfrak B_n(h_{1,n},\ldots,h_{d+1,n})
+  \eqd{}&
+  \frac{r_n^{-\alpha}}2
+  \int_\R\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \prod_{j=1}^{d+1}
+  \1_{B_{r_n}(\zeta_{j,n})}(\omega_jv)\\
+  &\qquad\times
+  \mathcal A_{\omega,\mu_v}^{(d-1)}
+  (h_{1,n},\ldots,h_{d+1,n})
+  \dd\sigma_\perp(\omega)\dd v.
+\end{aligned}
+\eqnum \label{eq:diagonal-block-operator}
+\]
+Condition \((\mathsf D)\) gives the exact diagonalization
+\[
+  \mc M_K^{(d)}(g_1,\ldots,g_{d+1})
+  =\sum_n
+  \mathfrak B_n(h_{1,n},\ldots,h_{d+1,n}).
+  \eqnum \label{eq:diagonalization-of-full-form}
+\]
+Consequently, an estimate
+\[
+  |\mc M_K^{(d)}(g_1,\ldots,g_{d+1})|
+  \le C_{\vec p}\prod_{j=1}^{d+1}
+  \|g_j\|_{L^{p_j}(\R^d)}
+  \eqnum \label{eq:full-form-bound}
+\]
+implies the diagonal vector-valued inequality
+\[
+  \left|
+  \sum_n\mathfrak B_n
+  (h_{1,n},\ldots,h_{d+1,n})
+  \right|
+  \le
+  2^\alpha C_{\vec p}
+  \prod_{j=1}^{d+1}
+  \left(
+    \sum_n
+    \|h_{j,n}\|_{L^{p_j}(\R^{d-1})}^{p_j}
+  \right)^{1/p_j}.
+  \eqnum \label{eq:diagonal-vector-valued-bound}
+\]
+This is the basic family of translation-invariant, \(A\)-type bounds
+forced by the full estimate.
+
+The geometry and scale of each block are transparent after setting
+\(t=\zeta^{(n)}+r_ns\):
+\[
+\begin{aligned}[t]
+  \mathfrak B_n(h_{1,n},\ldots,h_{d+1,n})
+  =&r_n^{d-\alpha}
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}\1_{(-1,1)}(s_j)\,
+  |\zeta^{(n)}+r_ns|^{-(d-1)}\\
+  &\quad\times
+  \mathcal A_{
+    (\zeta^{(n)}+r_ns)/|\zeta^{(n)}+r_ns|,
+    \mu_{|\zeta^{(n)}+r_ns|}
+  }^{(d-1)}
+  (h_{1,n},\ldots,h_{d+1,n})
+  \dd\mc L^d(s).
+\end{aligned}
+\eqnum \label{eq:diagonal-block-polar-form}
+\]
+Under the scale-invariant choice \((\mathsf L)\), this becomes
+\[
+  \mathfrak B_n
+  =\delta^{d-\alpha}\lambda_n^{1-\alpha}
+  \mathfrak T_{\delta,\lambda_n},
+  \eqnum \label{eq:diagonal-block-scaling}
+\]
+where
+\[
+\begin{aligned}
+  \mathfrak T_{\delta,\lambda}(h_1,\ldots,h_{d+1})
+  \eqd{}&
+  \int_{\vec1^\perp}
+  \prod_{j=1}^{d+1}\1_{(-1,1)}(s_j)\,
+  |\zeta^\circ+\delta s|^{-(d-1)}\\
+  &\quad\times
+  \mathcal A_{
+    (\zeta^\circ+\delta s)/|\zeta^\circ+\delta s|,
+    \mu_{\lambda|\zeta^\circ+\delta s|}
+  }^{(d-1)}
+  (h_1,\ldots,h_{d+1})
+  \dd\mc L^d(s).
+\end{aligned}
+\]
+In the critical case \(\alpha=1\), the scale factor
+\(\lambda_n^{1-\alpha}\) disappears.  Thus \eqref{eq:diagonal-vector-valued-bound} implies
+\[
+  \left|
+  \sum_n\mathfrak T_{\delta,\lambda_n}
+  (h_{1,n},\ldots,h_{d+1,n})
+  \right|
+  \lesssim_{\vec p}
+  C_{\vec p}\delta^{-(d-1)}
+  \prod_{j=1}^{d+1}
+  \left(
+    \sum_n\|h_{j,n}\|_{p_j}^{p_j}
+  \right)^{1/p_j}.
+  \eqnum \label{eq:translation-vector-valued-bound}
+\]
+Moreover, for a regularized kernel,
+\[
+  \mathfrak T_{\delta,\lambda}
+  \longrightarrow
+  c_d|\zeta^\circ|^{-(d-1)}
+  \mathcal A_{
+    \zeta^\circ/|\zeta^\circ|,
+    \mu_{\lambda|\zeta^\circ|}
+  }^{(d-1)}
+  \quad\text{as }\delta\to0.
+  \eqnum \label{eq:block-operator-pointwise-limit}
+\]
+
+One may instead prescribe the series directly in the normalized fibers.
+For an interval not meeting zero, put
+\[
+  I_{j,n}
+  \eqd
+  \int_{B_{r_n}(\zeta_{j,n})}
+  |t|^{d-1}\dd t,
+  \qquad
+  a_{j,n}\eqd I_{j,n}^{-1/p_j},
+\]
+and define
+\[
+  G_{j,t}(x)
+  \eqd
+  \sum_n a_{j,n}H_{j,n}(x)
+  \1_{B_{r_n}(\zeta_{j,n})}(t).
+  \eqnum \label{eq:normalized-fiber-series}
+\]
+The weighted fiber identity \eqref{eq:projective-weighted-norm} gives exactly
+\[
+  \|g_j\|_{L^{p_j}(\R^d)}^{p_j}
+  =
+  \sum_n\|H_{j,n}\|_{L^{p_j}(\R^{d-1})}^{p_j},
+  \qquad
+  g_j(x,t)=G_{j,t}(x/t).
+  \eqnum \label{eq:normalized-fiber-series-norms}
+\]
+In this parametrization define
+\[
+\begin{aligned}
+  \widetilde{\mathfrak B}_n
+  (H_{1,n},\ldots,H_{d+1,n})
+  \eqd{}&
+  \frac12\left(\prod_{j=1}^{d+1}a_{j,n}\right)
+  \int_\R\int_{\mathbb S^{d-1}\cap\vec1^\perp}
+  \prod_{j=1}^{d+1}
+  \1_{B_{r_n}(\zeta_{j,n})}(\omega_jv)\\
+  &\qquad\times
+  \widetilde{\mathcal A}_{\omega,v}^{(d-1)}
+  (H_{1,n},\ldots,H_{d+1,n})
+  \dd\sigma_\perp(\omega)\dd v.
+\end{aligned}
+\eqnum \label{eq:normalized-diagonal-block-operator}
+\]
+Now the full form again diagonalizes exactly:
+\[
+  \mc M_K^{(d)}(g_1,\ldots,g_{d+1})
+  =
+  \sum_n\widetilde{\mathfrak B}_n
+  (H_{1,n},\ldots,H_{d+1,n}),
+\]
+and \((\mathsf M_{\vec p})\) implies
+\[
+  \left|
+  \sum_n\widetilde{\mathfrak B}_n
+  (H_{1,n},\ldots,H_{d+1,n})
+  \right|
+  \le C_{\vec p}
+  \prod_{j=1}^{d+1}
+  \left(
+    \sum_n\|H_{j,n}\|_{p_j}^{p_j}
+  \right)^{1/p_j}.
+  \eqnum \label{eq:normalized-diagonal-vector-valued-bound}
+\]
+This is the cleanest formulation if one wants operators acting only on
+fibers.  By Corollary~\ref{cor:frozen-modified-operator-bounds}, every
+constituent, and hence every block average, has the same ordinary diagonal
+translation invariance.
+
+The conclusion has an important limitation.  The full bound
+\eqref{eq:full-form-bound} gives the uniform diagonal estimate
+\eqref{eq:diagonal-vector-valued-bound}, or equivalently
+\eqref{eq:normalized-diagonal-vector-valued-bound}, for the block-averaged operators.  It does
+not, by this argument alone, give a uniform pointwise estimate for
+\(\mathcal A_{\omega,\mu_v}^{(d-1)}\).  Indeed, in the critical case the
+block has transverse volume \(\delta^{d-1}\), and normalizing it to converge
+to the pointwise operator produces the loss
+\(\delta^{-(d-1)}\) in \eqref{eq:translation-vector-valued-bound}.  Adding more diagonal scales does
+not remove this loss: when \(\alpha=1\), both sides of the diagonal
+inequality grow linearly under repetition.  What the full estimate forces
+without further input is therefore an \(\ell^{p_j}\)-valued bound for
+scale-separated averages of translation-invariant \(A\)-type operators,
+not a \(\delta\)-uniform bound for an individual slice.
+
+\begin{corollary}[The multiplier form in dimension two]
+\label{cor:multiplier-affine-trick-plane}
+Let $d=2$, let $K(t)=\pv(1/t)$, and let
+$p_1,p_2,p_3\in(2,\infty)$ satisfy
+\(1/p_1+1/p_2+1/p_3=1\).  Then
+\[
+  \bigl|\mc M_K^{(2)}(g_1,g_2,g_3)\bigr|
+  \lesssim_{\vec p}
+  \prod_{j=1}^3\|g_j\|_{L^{p_j}(\R^2)}.
+\]
+\end{corollary}
+
+\begin{proof}
+The uniform bilinear Hilbert transform estimate
+of Theorem~\ref{thm:uniform-bht}, after the affine changes of frequency
+variables determined by $\omega$, gives
+\[
+  \bigl|\mathcal A_{\omega,\sgn}^{(1)}(h_1,h_2,h_3)\bigr|
+  \lesssim_{\vec p}
+  \prod_{j=1}^3\|h_j\|_{L^{p_j}(\R)}
+\]
+uniformly in $\omega\in\mathbb S^1\cap\vec1^\perp$.  Since
+$\mu_v=-i\pi\sgn(v)\sgn$, this is the uniform bound required by
+Corollary~\ref{cor:uniform-multiplier-sliced-bound} with $q=\infty$.
+Finally,
+\[
+  \int_{\mathbb S^1\cap\vec1^\perp}
+  \prod_{j=1}^3|\omega_j|^{-1/p_j}\,
+  \dd\sigma_\perp(\omega)<\infty
+\]
+because $p_j>2$.  The conclusion follows.
+\end{proof}

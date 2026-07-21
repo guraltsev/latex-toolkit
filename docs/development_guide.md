@@ -27,15 +27,17 @@ The current intentional shared library modules are:
 - `latex_parser`: tokenization and document-region primitives used by command
   transforms.
 - `logging_config`: command execution wrappers and logging setup.
+- `dependencies`: runtime module and executable dependency loading shared by
+  commands that need optional external tools.
 
 The `src/latex_toolkit/lib/snapper-fmt/` directory is not shared toolkit
 source. It is the ignored repository-local install prefix for the external
 `snapper-fmt` command used by `snapper_format`, and only its `README.md` and
 `.gitignore` should be tracked.
 
-Command-family transforms live under `src/latex_toolkit/commands/` with the
-command packages that own them. Public command-level text transforms are
-exposed through each command package's transformation module when a direct
+Command-family transforms live directly under `src/latex_toolkit/<command_name>/`.
+Do not add a `commands/` nesting layer. Public command-level text transforms
+are exposed through each command package's transformation module when a direct
 Python entrypoint is useful.
 
 ## Package Public APIs
@@ -43,10 +45,9 @@ Python entrypoint is useful.
 Package `__init__.py` files should re-export only intentionally public APIs,
 normally the text transformation entrypoint and any public transformation
 objects such as `DocumentTransformer`. File-processing, clipboard, parser,
-dependency, and other command-internal helpers should not be re-exported from
-the package unless they are deliberately documented as public APIs. A name
-should reflect its visibility: use a leading underscore for helpers and
-classes that are intended to remain private.
+dependency, and other command-internal helpers should be private and must not
+be re-exported from the package. A name should reflect its visibility: use a
+leading underscore for helpers and classes that are intended to remain private.
 
 ## Command Package Names
 

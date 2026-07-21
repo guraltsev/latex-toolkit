@@ -7,7 +7,7 @@ from pathlib import Path
 
 from latex_toolkit.dollar_math_to_latex_delimiters.dollar_math_to_latex_delimiters import (
     _run_command,
-    process_file as _process_file,
+    _process_file,
     transform_text as _transform_text,
 )
 
@@ -39,7 +39,7 @@ def transform_text(source: str) -> str:
     return _transform_text(source, reverse=True)
 
 
-def process_file(input_path: Path, output_path: Path) -> Path:
+def _process_file(input_path: Path, output_path: Path) -> Path:
     """Transform one UTF-8 LaTeX file and write a separate UTF-8 result.
 
     Parameters

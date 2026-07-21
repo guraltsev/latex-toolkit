@@ -11,7 +11,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from latex_toolkit.sentence_per_line_transformer import process_file, transform_text
+from latex_toolkit.sentence_per_line_transformer import transform_text
 from latex_toolkit.sentence_per_line_transformer import (
     sentence_per_line_transformer as command,
 )
@@ -228,7 +228,7 @@ def test_proof_fixture_formats_around_display_math_without_losing_wrappers() -> 
     assert transform_text(transformed) == transformed
 
 
-def test_process_failure_leaves_existing_destination_unchanged(
+def test_cli_failure_leaves_existing_destination_unchanged(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -249,7 +249,7 @@ def test_process_failure_leaves_existing_destination_unchanged(
     )
 
     with pytest.raises(RuntimeError, match="formatter error"):
-        process_file(source_path, output_path)
+        command.main([str(source_path), "--output", str(output_path)])
     assert output_path.read_text(encoding="utf-8") == "existing destination"
 
 
