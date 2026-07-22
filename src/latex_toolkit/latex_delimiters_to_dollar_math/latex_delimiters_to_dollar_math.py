@@ -63,7 +63,7 @@ def _process_file(input_path: Path, output_path: Path) -> Path:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run command-style delimiter conversion in file or clipboard mode.
+    """Run conversion in file, clipboard, or standard-stream mode.
 
     Parameters
     ----------

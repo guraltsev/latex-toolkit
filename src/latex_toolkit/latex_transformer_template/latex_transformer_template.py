@@ -1,13 +1,15 @@
 r"""Transform LaTeX document bodies through a small syntax-tree visitor.
 
-Call ``transform_text(...)`` from Python, or use ``main(...)`` for file and
-clipboard workflows. The included example changes ``\emph`` to ``\textbf``
-inside the ``document`` environment while leaving the preamble unchanged.
+Call ``transform_text(...)`` from Python, or use ``main(...)`` for file,
+clipboard, and standard-stream workflows. The included example changes
+``\emph`` to ``\textbf`` inside the ``document`` environment while leaving the
+preamble unchanged.
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -126,7 +128,7 @@ def transform_text(source: str) -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the transformer in file or clipboard mode.
+    """Run the transformer in file, clipboard, or standard-stream mode.
 
     With no arguments, the command transforms the system clipboard.
 
@@ -144,33 +146,35 @@ def main(argv: Sequence[str] | None = None) -> int:
     Raises
     ------
     SystemExit
-        Arguments select both input modes, or combine clipboard mode with an
-        output path.
+        Arguments select multiple input modes or combine a non-file mode with
+        an output path.
     """
     parser = _build_parser()
     args = parser.parse_args(argv)
 
     # Default to clipboard mode when the caller does not provide an input file
     # or an explicit mode flag.
-    if args.input_file is None and not args.clipboard:
+    if args.input_file is None and not args.clipboard and not args.stdin:
         args.clipboard = True
 
     # Reject ambiguous input modes before performing any transformation.
-    if bool(args.input_file) == args.clipboard:
-        parser.error("provide an input file or --clipboard, but not both")
-    if args.clipboard and args.output_file is not None:
-        parser.error("--output cannot be used with --clipboard")
+    selected_inputs = sum((args.input_file is not None, args.clipboard, args.stdin))
+    if selected_inputs != 1:
+        parser.error("provide an input file, --clipboard, or --stdin")
+    if (args.clipboard or args.stdin) and args.output_file is not None:
+        parser.error("--output cannot be used with --clipboard or --stdin")
 
-    # Handle the two validated input modes as explicit cases before returning
+    # Handle the validated input modes as explicit cases before returning
     # one shared success status.
-    match args.clipboard:
-        case True:
-            _process_clipboard()
-        case False:
-            input_path = args.input_file
-            output_path = args.output_file or _default_output_path(input_path)
-            _process_file(input_path, output_path)
-            print(f"Transformed file written to: {output_path}")
+    if args.clipboard:
+        _process_clipboard()
+    elif args.stdin:
+        sys.stdout.write(transform_text(sys.stdin.read()))
+    else:
+        input_path = args.input_file
+        output_path = args.output_file or _default_output_path(input_path)
+        _process_file(input_path, output_path)
+        print(f"Transformed file written to: {output_path}")
 
     return 0
 
@@ -210,6 +214,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--clipboard",
         action="store_true",
         help="transform the system clipboard instead of a file",
+    )
+    parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="read UTF-8 LaTeX from stdin and write the result to stdout",
     )
     return parser
 

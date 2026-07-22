@@ -8,6 +8,7 @@ For complete documents, only document bodies are transformed.
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -107,7 +108,7 @@ def _process_file(input_path: Path, output_path: Path, *, reverse: bool = False)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run dollar-math conversion in file or clipboard mode.
+    """Run conversion in file, clipboard, or standard-stream mode.
 
     With no arguments, the command transforms the system clipboard.
 
@@ -210,15 +211,19 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
     """Run either direction with command-specific labels and behavior."""
     parser = _build_parser(reverse)
     args = parser.parse_args(argv)
-    if args.input_file is None and not args.clipboard:
+    if args.input_file is None and not args.clipboard and not args.stdin:
         args.clipboard = True
-    if bool(args.input_file) == args.clipboard:
-        parser.error("provide an input file or --clipboard, but not both")
-    if args.clipboard and args.output_file is not None:
-        parser.error("--output cannot be used with --clipboard")
+    selected_inputs = sum((args.input_file is not None, args.clipboard, args.stdin))
+    if selected_inputs != 1:
+        parser.error("provide an input file, --clipboard, or --stdin")
+    if (args.clipboard or args.stdin) and args.output_file is not None:
+        parser.error("--output cannot be used with --clipboard or --stdin")
 
     if args.clipboard:
         _transform_clipboard(reverse)
+        return 0
+    if args.stdin:
+        sys.stdout.write(transform_text(sys.stdin.read(), reverse=reverse))
         return 0
 
     output_path = args.output_file or _default_output_path(args.input_file, reverse)
@@ -248,6 +253,11 @@ def _build_parser(reverse: bool) -> argparse.ArgumentParser:
         "--clipboard",
         action="store_true",
         help="transform the system clipboard instead of a file",
+    )
+    parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="read UTF-8 LaTeX from stdin and write the result to stdout",
     )
     return parser
 

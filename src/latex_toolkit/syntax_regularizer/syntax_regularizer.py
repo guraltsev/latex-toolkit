@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
@@ -98,7 +99,7 @@ def _process_file(input_path: Path, output_path: Path) -> Path:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run syntax regularization in file or clipboard mode.
+    """Run syntax regularization in file, clipboard, or standard-stream mode.
 
     With no arguments, the command transforms the system clipboard.
 
@@ -119,15 +120,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     """
     parser = _build_parser()
     args = parser.parse_args(argv)
-    if args.input_file is None and not args.clipboard:
+    if args.input_file is None and not args.clipboard and not args.stdin:
         args.clipboard = True
-    if bool(args.input_file) == args.clipboard:
-        parser.error("provide an input file or --clipboard, but not both")
-    if args.clipboard and args.output_file is not None:
-        parser.error("--output cannot be used with --clipboard")
+    selected_inputs = sum((args.input_file is not None, args.clipboard, args.stdin))
+    if selected_inputs != 1:
+        parser.error("provide an input file, --clipboard, or --stdin")
+    if (args.clipboard or args.stdin) and args.output_file is not None:
+        parser.error("--output cannot be used with --clipboard or --stdin")
 
     if args.clipboard:
         _transform_clipboard()
+        return 0
+    if args.stdin:
+        sys.stdout.write(transform_text(sys.stdin.read()))
         return 0
 
     output_path = args.output_file or _default_output_path(args.input_file)
@@ -543,7 +548,7 @@ RUNTIME_DEPENDENCIES = DependencyManager(
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    """Build the command-line interface for file and clipboard workflows."""
+    """Build the interface for file, clipboard, and standard-stream workflows."""
     parser = argparse.ArgumentParser(description="Regularize LaTeX source layout.")
     parser.add_argument("input_file", nargs="?", type=Path, help="UTF-8 LaTeX file")
     parser.add_argument(
@@ -558,6 +563,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--clipboard",
         action="store_true",
         help="transform the system clipboard instead of a file",
+    )
+    parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="read UTF-8 LaTeX from stdin and write the result to stdout",
     )
     return parser
 

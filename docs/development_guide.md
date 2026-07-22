@@ -83,6 +83,10 @@ Clipboard mode is also part of the user-facing command contract. Commands with
 to the system clipboard, and reject simultaneous input or output paths with a
 parser error.
 
+Standard-stream mode is selected with `--stdin`. It reads the complete source
+from standard input and writes only the transformed source to standard output.
+It cannot be combined with an input path, output path, or clipboard mode.
+
 Permanent tests should protect those user-visible effects by invoking the CLI
 or a public command entrypoint and mocking only real boundaries such as the
 system clipboard. Do not add permanent tests for helper imports, package
