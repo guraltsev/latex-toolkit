@@ -18,6 +18,7 @@ dependencies = [
 dollar-math-to-latex-delimiters = "latex_toolkit.dollar_math_to_latex_delimiters.dollar_math_to_latex_delimiters:main"
 latex-delimiters-to-dollar-math = "latex_toolkit.latex_delimiters_to_dollar_math.latex_delimiters_to_dollar_math:main"
 latex-transformer-template = "latex_toolkit.latex_transformer_template.latex_transformer_template:main"
+latex-argument-bracer = "latex_toolkit.latex_argument_bracer.latex_argument_bracer:main"
 sentence-per-line-transformer = "latex_toolkit.sentence_per_line_transformer.sentence_per_line_transformer:main"
 syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
 full-normalize = "latex_toolkit.full_normalize.full_normalize:main"

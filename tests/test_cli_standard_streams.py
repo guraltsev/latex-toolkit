@@ -18,6 +18,7 @@ from latex_toolkit.full_normalize import full_normalize
 from latex_toolkit.latex_delimiters_to_dollar_math import (
     latex_delimiters_to_dollar_math,
 )
+from latex_toolkit.latex_argument_bracer import latex_argument_bracer
 from latex_toolkit.latex_transformer_template import latex_transformer_template
 from latex_toolkit.sentence_per_line_transformer import sentence_per_line_transformer
 from latex_toolkit.syntax_regularizer import syntax_regularizer
@@ -61,6 +62,12 @@ from latex_toolkit.syntax_regularizer import syntax_regularizer
             r"\begin{document}\emph{sample}\end{document}",
             r"\begin{document}\textbf{sample}\end{document}",
             id="latex-transformer-template",
+        ),
+        pytest.param(
+            latex_argument_bracer.main,
+            r"$\frac12 + x_1$",
+            r"$\frac{1}{2} + x_{1}$",
+            id="latex-argument-bracer",
         ),
     ],
 )
