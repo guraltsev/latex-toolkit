@@ -19,6 +19,8 @@ from latex_toolkit.math_latex2dollar import (
     math_latex2dollar,
 )
 from latex_toolkit.brace_args import brace_args
+from latex_toolkit.greek_latex2unicode import greek_latex2unicode
+from latex_toolkit.greek_unicode2latex import greek_unicode2latex
 from latex_toolkit.template import template
 from latex_toolkit.sentence_per_line import sentence_per_line
 from latex_toolkit.syntax_regularizer import syntax_regularizer
@@ -68,6 +70,18 @@ from latex_toolkit.syntax_regularizer import syntax_regularizer
             r"$\frac12 + x_1$",
             r"$\frac{1}{2} + x_{1}$",
             id="brace-args",
+        ),
+        pytest.param(
+            greek_unicode2latex.main,
+            "Text α; $α + Ω$.",
+            r"Text α; $\alpha + \Omega$.",
+            id="unicode-greek-to-latex",
+        ),
+        pytest.param(
+            greek_latex2unicode.main,
+            r"Text \alpha; $\alpha + \Omega$.",
+            "Text \\alpha; $α + Ω$.",
+            id="latex-greek-to-unicode",
         ),
     ],
 )
