@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.dependencies import DependencyManager
 
 
@@ -49,6 +50,7 @@ class ArgumentBracer:
         self._source = source
         self._insertions: list[tuple[int, int, str]] = []
         self._macro_ends: dict[int, int] = {}
+        self._removed_positions: set[int] = set()
 
     def transform(self, nodes: Iterable[Any]) -> str:
         """Return source with braces around parsed arguments and math scripts.
@@ -95,6 +97,16 @@ class ArgumentBracer:
                 if specification != "{":
                     continue
                 if argument is not None and self._needs_braces(argument):
+                    argument_start = argument.pos
+                    macro_end = self._control_sequence_end(
+                        node.pos, argument.pos_end
+                    )
+                    while (
+                        argument_start > macro_end
+                        and self._source[argument_start - 1].isspace()
+                    ):
+                        argument_start -= 1
+                        self._removed_positions.add(argument_start)
                     self._insertions.extend(
                         (
                             (argument.pos, 1, "{"),
@@ -194,7 +206,8 @@ class ArgumentBracer:
         pieces: list[str] = []
         for index, character in enumerate(self._source):
             pieces.extend(text for _, text in sorted(by_position[index]))
-            pieces.append(character)
+            if index not in self._removed_positions:
+                pieces.append(character)
         pieces.extend(text for _, text in sorted(by_position[len(self._source)]))
         return "".join(pieces)
 
@@ -296,7 +309,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     elif args.stdin:
         sys.stdout.write(transform_text(sys.stdin.read()))
     else:
-        output_path = args.output_file or _default_output_path(args.input_file)
+        if args.output_file is None and not args.no_backup:
+            backup_file(args.input_file)
+        output_path = args.output_file or args.input_file
         _process_file(args.input_file, output_path)
         print(f"Transformed file written to: {output_path}")
     return 0
@@ -316,7 +331,13 @@ def _build_parser() -> argparse.ArgumentParser:
         description="Brace parsed LaTeX macro arguments and math scripts."
     )
     parser.add_argument("input_file", nargs="?", type=Path, help="UTF-8 LaTeX file")
-    parser.add_argument("-o", "--output", "--output-file", dest="output_file", type=Path)
+    parser.add_argument(
+        "-o", "--output", "--output-file", dest="output_file", type=Path,
+        help="destination path; preserves INPUT and skips its backup",
+    )
+    parser.add_argument(
+        "-B", "--no-backup", action="store_true", help="overwrite INPUT without a backup"
+    )
     parser.add_argument("--clipboard", action="store_true")
     parser.add_argument("--stdin", action="store_true")
     return parser

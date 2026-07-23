@@ -11,9 +11,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from latex_toolkit.sentence_per_line_transformer import transform_text
-from latex_toolkit.sentence_per_line_transformer import (
-    sentence_per_line_transformer as command,
+from latex_toolkit.sentence_per_line import transform_text
+from latex_toolkit.sentence_per_line import (
+    sentence_per_line as command,
 )
 
 

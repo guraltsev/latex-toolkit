@@ -11,16 +11,16 @@ from io import StringIO
 
 import pytest
 
-from latex_toolkit.dollar_math_to_latex_delimiters import (
-    dollar_math_to_latex_delimiters,
+from latex_toolkit.math_dollar2latex import (
+    math_dollar2latex,
 )
 from latex_toolkit.full_normalize import full_normalize
-from latex_toolkit.latex_delimiters_to_dollar_math import (
-    latex_delimiters_to_dollar_math,
+from latex_toolkit.math_latex2dollar import (
+    math_latex2dollar,
 )
-from latex_toolkit.latex_argument_bracer import latex_argument_bracer
-from latex_toolkit.latex_transformer_template import latex_transformer_template
-from latex_toolkit.sentence_per_line_transformer import sentence_per_line_transformer
+from latex_toolkit.brace_args import brace_args
+from latex_toolkit.template import template
+from latex_toolkit.sentence_per_line import sentence_per_line
 from latex_toolkit.syntax_regularizer import syntax_regularizer
 
 
@@ -28,13 +28,13 @@ from latex_toolkit.syntax_regularizer import syntax_regularizer
     ("main", "source", "expected"),
     [
         pytest.param(
-            dollar_math_to_latex_delimiters.main,
+            math_dollar2latex.main,
             "Inline $x$.",
             r"Inline \(x\).",
             id="dollar-math-to-latex-delimiters",
         ),
         pytest.param(
-            latex_delimiters_to_dollar_math.main,
+            math_latex2dollar.main,
             r"Inline \(x\).",
             "Inline $x$.",
             id="latex-delimiters-to-dollar-math",
@@ -46,7 +46,7 @@ from latex_toolkit.syntax_regularizer import syntax_regularizer
             id="syntax-regularizer",
         ),
         pytest.param(
-            sentence_per_line_transformer.main,
+            sentence_per_line.main,
             "First sentence. Second sentence.",
             "First sentence.\nSecond sentence.",
             id="sentence-per-line-transformer",
@@ -58,16 +58,16 @@ from latex_toolkit.syntax_regularizer import syntax_regularizer
             id="full-normalize",
         ),
         pytest.param(
-            latex_transformer_template.main,
+            template.main,
             r"\begin{document}\emph{sample}\end{document}",
             r"\begin{document}\textbf{sample}\end{document}",
             id="latex-transformer-template",
         ),
         pytest.param(
-            latex_argument_bracer.main,
+            brace_args.main,
             r"$\frac12 + x_1$",
             r"$\frac{1}{2} + x_{1}$",
-            id="latex-argument-bracer",
+            id="brace-args",
         ),
     ],
 )

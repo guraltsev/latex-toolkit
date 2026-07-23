@@ -7,10 +7,10 @@ scope.
 
 import pytest
 
-from latex_toolkit.dollar_math_to_latex_delimiters import (
+from latex_toolkit.math_dollar2latex import (
     transform_text as to_latex_delimiters,
 )
-from latex_toolkit.latex_delimiters_to_dollar_math import (
+from latex_toolkit.math_latex2dollar import (
     transform_text as to_dollar_math,
 )
 

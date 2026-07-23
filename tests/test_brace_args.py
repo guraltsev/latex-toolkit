@@ -5,7 +5,7 @@ CLI file and clipboard boundaries, parser internals, and custom macros beyond
 the bundled mathematical shorthand are outside this module's scope.
 """
 
-from latex_toolkit.latex_argument_bracer import transform_text
+from latex_toolkit.brace_args import transform_text
 
 
 def test_macro_arguments_and_math_scripts_receive_braces() -> None:

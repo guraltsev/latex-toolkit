@@ -16,6 +16,7 @@ from typing import Any
 from typing import TYPE_CHECKING
 
 from latex_toolkit.lib.dependencies import DependencyManager
+from latex_toolkit.lib.backup import backup_file
 
 if TYPE_CHECKING:
     from pylatexenc.latexnodes.nodes import LatexMacroNode
@@ -172,7 +173,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         sys.stdout.write(transform_text(sys.stdin.read()))
     else:
         input_path = args.input_file
-        output_path = args.output_file or _default_output_path(input_path)
+        if args.output_file is None and not args.no_backup:
+            backup_file(input_path)
+        output_path = args.output_file or input_path
         _process_file(input_path, output_path)
         print(f"Transformed file written to: {output_path}")
 
@@ -208,7 +211,10 @@ def _build_parser() -> argparse.ArgumentParser:
         "--output-file",
         dest="output_file",
         type=Path,
-        help="destination path (default: INPUT_modified.tex)",
+        help="destination path; preserves INPUT and skips its backup",
+    )
+    parser.add_argument(
+        "-B", "--no-backup", action="store_true", help="overwrite INPUT without a backup"
     )
     parser.add_argument(
         "--clipboard",

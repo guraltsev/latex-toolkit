@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from pathlib import Path
 
-from latex_toolkit.dollar_math_to_latex_delimiters.dollar_math_to_latex_delimiters import (
+from latex_toolkit.math_dollar2latex.math_dollar2latex import (
     _run_command,
     _process_file,
     transform_text as _transform_text,

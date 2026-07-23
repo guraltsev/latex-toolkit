@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from latex_toolkit.lib.dependencies import DependencyManager
+from latex_toolkit.lib.backup import backup_file
 
 
 def transform_text(source: str, *, reverse: bool = False) -> str:
@@ -226,7 +227,9 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
         sys.stdout.write(transform_text(sys.stdin.read(), reverse=reverse))
         return 0
 
-    output_path = args.output_file or _default_output_path(args.input_file, reverse)
+    if args.output_file is None and not args.no_backup:
+        backup_file(args.input_file)
+    output_path = args.output_file or args.input_file
     _process_file(args.input_file, output_path, reverse=reverse)
     print(f"Transformed file written to: {output_path}")
     return 0
@@ -247,7 +250,10 @@ def _build_parser(reverse: bool) -> argparse.ArgumentParser:
         "--output-file",
         dest="output_file",
         type=Path,
-        help="destination path (default: a converted sibling file)",
+        help="destination path; preserves INPUT and skips its backup",
+    )
+    parser.add_argument(
+        "-B", "--no-backup", action="store_true", help="overwrite INPUT without a backup"
     )
     parser.add_argument(
         "--clipboard",

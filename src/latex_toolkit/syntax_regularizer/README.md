@@ -1,7 +1,16 @@
 # syntax_regularizer
 
-Regularize LaTeX source layout while preserving protected math, table, and
-verbatim-like content.
+Regularize physical-line layout without changing LaTeX content. It removes
+leading indentation from ordinary prose, unwraps uncommented inline math, and
+places display-math delimiters, environment openers, and sectioning commands
+on their intended lines. Sectioning commands receive one following blank line;
+display delimiters are isolated without adding blank lines.
+
+Math containing a real comment is preserved byte-for-byte. The internal layout
+of display math, table-like environments, and verbatim-like environments is
+also preserved. In complete documents, regularization is limited to top-level
+`document` bodies; a fragment is regularized in full. Source that cannot be
+parsed safely is returned unchanged.
 
 ## Usage
 
