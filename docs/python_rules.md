@@ -1,7 +1,7 @@
 # Python Programming Style
 
-These rules control Python programming style. Use `docs/docstring_schema.md`
-for docstrings and public documentation.
+These are rules for Python programming style. 
+Use `docs/docstring_schema.md`for docstrings and public documentation.
 
 Write code as an explained calculation: the reader should understand the role
 of each small block before reading every line inside it.
@@ -11,10 +11,8 @@ of each small block before reading every line inside it.
 Organize files by narrative importance.
 
 1. Put general imports first.
-2. Put local, optional, heavy, platform-specific, or one-off imports near the
-   code that first needs them.
-3. Put the public entrypoint, command handler, or central workflow before
-   low-level implementation details.
+2. Put local, optional, heavy, platform-specific, or one-off imports near the code that first needs them.
+3. Put the public entrypoint, command handler, or central workflow before low-level implementation details.
 4. Put supporting helpers later, grouped by purpose.
 5. Use short section comments when a file has distinct groups of helpers.
 
