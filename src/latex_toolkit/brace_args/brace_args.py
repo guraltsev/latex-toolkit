@@ -1,9 +1,9 @@
-r"""Make parsed LaTeX arguments and math scripts explicitly braced.
+r"""This module makes parsed LaTeX arguments and math scripts explicitly braced.
 
-Call ``transform_text(...)`` from Python, or use ``main(...)`` for file,
-clipboard, and standard-stream workflows. Complete documents are transformed
-only inside their top-level ``document`` environments; input without one is
-treated as a fragment.
+Python callers can use ``transform_text(...)`` and command-line callers can
+use ``main(...)`` for file, clipboard, and standard-stream workflows. Complete
+documents are transformed only inside their top-level ``document`` environments;
+input without one is treated as a fragment.
 """
 
 from __future__ import annotations
@@ -293,6 +293,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     -------
     int
         Zero after a completed transformation.
+
+    Raises
+    ------
+    SystemExit
+        Arguments select incompatible input or output modes.
     """
     parser = _build_parser()
     args = parser.parse_args(argv)
@@ -317,6 +322,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
+# Keep parser and clipboard installation at the command boundary so text-only
+# callers do not import optional runtime modules eagerly.
 RUNTIME_DEPENDENCIES = DependencyManager(
     {
         "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",

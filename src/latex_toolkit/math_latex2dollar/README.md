@@ -10,6 +10,11 @@ the preamble remains untouched. Input without a `document` environment is
 treated as a fragment. This is the exact reverse of `math_dollar2latex` for
 supported math delimiters.
 
+## Use Cases
+
+- Convert command-style math delimiters to dollar syntax for a downstream tool.
+- Reverse a `math_dollar2latex` conversion.
+
 ## Usage
 
 ```powershell
@@ -27,3 +32,26 @@ combined with a file or output path.
 ## Python API
 
 `transform_text(source)` converts document bodies or LaTeX fragments.
+
+## Options
+
+| Option | Meaning |
+| --- | --- |
+| `input` | UTF-8 LaTeX file to convert. |
+| `-o`, `--output`, `--output-file` | Write a separate result and preserve the input. |
+| `--clipboard` | Transform nonempty clipboard text. |
+| `--stdin` | Read stdin and write only converted source to stdout. |
+| `-B`, `--no-backup` | Skip the backup when overwriting the input. |
+
+## Examples
+
+`\(x\)` becomes `$x$` and `\[y\]` becomes `$$y$$`; their contents are unchanged.
+
+## Behavior Notes
+
+Only parsed command-style math delimiters in document bodies or fragments are
+changed. Unmatched or unrelated source is preserved.
+
+## Related Commands
+
+`math_dollar2latex` performs the reverse conversion.

@@ -1,4 +1,4 @@
-r"""Expose the complete LaTeX normalization transformation pipeline."""
+r"""This package exposes the complete LaTeX normalization transformation pipeline."""
 
 from .full_normalize import transform_text
 

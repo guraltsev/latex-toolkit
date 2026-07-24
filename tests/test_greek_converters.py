@@ -25,6 +25,12 @@ def test_greek_macros_become_unicode_without_changing_prose_or_comments() -> Non
     assert macros_to_unicode(source) == r"\alpha prose; $α + ϑ$ % \beta" + "\n" + r"\[Ω + \alphabeta\]"
 
 
+def test_epsilon_variants_round_trip_with_distinct_latex_macros() -> None:
+    """Each Unicode epsilon variant retains its distinct spelling through conversion."""
+    assert unicode_to_macros("$ε + ϵ$") == r"$\epsilon + \varepsilon$"
+    assert macros_to_unicode(r"$\epsilon + \varepsilon$") == "$ε + ϵ$"
+
+
 def test_complete_documents_preserve_the_preamble() -> None:
     """Only a complete document's body receives Greek notation conversion."""
     source = r"\newcommand{\foo}{$α$}" + "\n" + r"\begin{document}$α$\end{document}"

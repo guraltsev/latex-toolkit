@@ -12,6 +12,11 @@ without a `document` environment is treated as a fragment. The command
 requires `snapper-fmt` and returns incomplete LaTeX input unchanged rather
 than attempting a partial rewrite.
 
+## Use Cases
+
+- Keep prose source readable in reviews by placing one sentence on each line.
+- Normalize wrapped prose while preserving TeX-sensitive regions.
+
 ## Usage
 
 ```powershell
@@ -29,3 +34,28 @@ combined with a file or output path.
 ## Python API
 
 `transform_text(source)` formats complete document bodies or fragments.
+
+## Options
+
+| Option | Meaning |
+| --- | --- |
+| `input` | UTF-8 LaTeX file to format. |
+| `-o`, `--output`, `--output-file` | Write a separate result and preserve the input. |
+| `--clipboard` | Transform nonempty clipboard text. |
+| `--stdin` | Read stdin and write only formatted source to stdout. |
+| `-B`, `--no-backup` | Skip the backup when overwriting the input. |
+
+## Examples
+
+`First sentence. Second sentence.` becomes two physical source lines without
+changing the sentence text.
+
+## Behavior Notes
+
+The command requires `snapper-fmt`. Incomplete input is returned unchanged;
+comments, math, paragraph breaks, and protected environments retain their
+source spelling.
+
+## Related Commands
+
+`full_normalize` composes this formatter with `syntax_regularizer`.

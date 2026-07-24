@@ -19,9 +19,10 @@ Organize files by narrative importance.
 Do not start with a long catalog of constants, helpers, classes, types, and
 configuration unless the reader needs those names immediately.
 
-Module docstrings describe public purpose and observable behavior. They should
-not explain where to start reading the source file; use comments for local
-source narration.
+Module docstrings describe public purpose, observable behavior, and, for
+substantive modules, the high-level implementation approach. They should not
+explain where to start reading the source file or narrate local control flow;
+use comments for local source narration.
 
 ## Narrated code blocks
 

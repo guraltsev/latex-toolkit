@@ -1,2 +1,1 @@
-"""Provide shared runtime boundaries for LaTeX Toolkit commands."""
-
+"""This package provides shared runtime boundaries for LaTeX Toolkit commands."""

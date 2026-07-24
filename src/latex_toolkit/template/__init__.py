@@ -1,4 +1,4 @@
-r"""Provide the template's public LaTeX text transformation."""
+r"""This package provides the template's public LaTeX text transformation."""
 
 from .template import DocumentTransformer, transform_text
 

@@ -1,4 +1,4 @@
-r"""Convert command-style LaTeX math delimiters to dollar delimiters."""
+r"""This module converts command-style LaTeX math delimiters to dollar delimiters."""
 
 from __future__ import annotations
 

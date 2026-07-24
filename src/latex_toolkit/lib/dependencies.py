@@ -1,4 +1,4 @@
-"""Load configured Python modules and executables for command runtimes."""
+"""This module loads configured Python modules and executables for command runtimes."""
 
 from __future__ import annotations
 
@@ -30,7 +30,25 @@ class DependencyManager:
         self._distributions = dict(distributions)
 
     def require(self, import_name: str) -> ModuleType:
-        """Import a configured module, installing its distribution if absent."""
+        """Import a configured module, installing its distribution if absent.
+
+        Parameters
+        ----------
+        import_name : str
+            Configured import name whose module should be loaded.
+
+        Returns
+        -------
+        types.ModuleType
+            The imported module.
+
+        Raises
+        ------
+        KeyError
+            The import name has no configured distribution.
+        ModuleNotFoundError
+            The configured distribution remains unavailable after installation.
+        """
         requirement = self._distributions[import_name]
         try:
             return importlib.import_module(import_name)
@@ -50,7 +68,25 @@ class DependencyManager:
         return importlib.import_module(import_name)
 
     def require_executable(self, executable_name: str) -> Path:
-        """Locate a configured executable, installing its distribution if absent."""
+        """Locate a configured executable, installing its distribution if absent.
+
+        Parameters
+        ----------
+        executable_name : str
+            Configured executable name to locate on ``PATH`` or beside Python.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to the available executable.
+
+        Raises
+        ------
+        KeyError
+            The executable name has no configured distribution.
+        RuntimeError
+            The executable is unavailable after its distribution is installed.
+        """
         requirement = self._distributions[executable_name]
         located = self._find_executable(executable_name)
         if located is None:

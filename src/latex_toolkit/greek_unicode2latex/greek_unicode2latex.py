@@ -1,7 +1,7 @@
-r"""Convert Unicode Greek letters in LaTeX math to LaTeX macros.
+r"""This module converts Unicode Greek letters in LaTeX math to LaTeX macros.
 
-Call ``transform_text(...)`` for fragments or complete documents, or use
-``main(...)`` for file, clipboard, and standard-stream workflows. Only parsed
+The ``transform_text(...)`` API accepts fragments or complete documents, and
+``main(...)`` supports file, clipboard, and standard-stream workflows. Only parsed
 math delimiters and common math environments are changed.
 """
 
@@ -17,63 +17,18 @@ from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.dependencies import DependencyManager
 
 
-# These Unicode letters have conventional built-in LaTeX control-word forms.
-UNICODE_TO_LATEX = {
-    "α": r"\alpha",
-    "β": r"\beta",
-    "γ": r"\gamma",
-    "δ": r"\delta",
-    "ε": r"\epsilon",
-    "ζ": r"\zeta",
-    "η": r"\eta",
-    "θ": r"\theta",
-    "ι": r"\iota",
-    "κ": r"\kappa",
-    "λ": r"\lambda",
-    "μ": r"\mu",
-    "ν": r"\nu",
-    "ξ": r"\xi",
-    "π": r"\pi",
-    "ρ": r"\rho",
-    "σ": r"\sigma",
-    "τ": r"\tau",
-    "υ": r"\upsilon",
-    "φ": r"\phi",
-    "χ": r"\chi",
-    "ψ": r"\psi",
-    "ω": r"\omega",
-    "ϵ": r"\epsilon",
-    "ϑ": r"\vartheta",
-    "ϖ": r"\varpi",
-    "ϱ": r"\varrho",
-    "ς": r"\varsigma",
-    "ϕ": r"\varphi",
-    "ϰ": r"\varkappa",
-    "Γ": r"\Gamma",
-    "Δ": r"\Delta",
-    "Θ": r"\Theta",
-    "Λ": r"\Lambda",
-    "Ξ": r"\Xi",
-    "Π": r"\Pi",
-    "Σ": r"\Sigma",
-    "Υ": r"\Upsilon",
-    "Φ": r"\Phi",
-    "Ψ": r"\Psi",
-    "Ω": r"\Omega",
-}
-
-# Keep the ordinary alphabet letters as the reverse defaults where a macro has
-# both an ordinary and a variant Unicode spelling.
-LATEX_TO_UNICODE = {
-    "alpha": "α", "beta": "β", "gamma": "γ", "delta": "δ",
-    "epsilon": "ε", "zeta": "ζ", "eta": "η", "theta": "θ",
-    "iota": "ι", "kappa": "κ", "lambda": "λ", "mu": "μ", "nu": "ν",
-    "xi": "ξ", "pi": "π", "rho": "ρ", "sigma": "σ", "tau": "τ",
-    "upsilon": "υ", "phi": "φ", "chi": "χ", "psi": "ψ", "omega": "ω",
-    "vartheta": "ϑ", "varpi": "ϖ", "varrho": "ϱ", "varsigma": "ς",
-    "varphi": "ϕ", "varkappa": "ϰ", "Gamma": "Γ", "Delta": "Δ",
-    "Theta": "Θ", "Lambda": "Λ", "Xi": "Ξ", "Pi": "Π", "Sigma": "Σ",
-    "Upsilon": "Υ", "Phi": "Φ", "Psi": "Ψ", "Omega": "Ω",
+# This bijection is the shared source of truth for both conversion directions.
+# The two epsilon glyphs need distinct LaTeX macros to preserve their spelling.
+GREEK_UNICODE_TO_LATEX = {
+    "α": r"\alpha", "β": r"\beta", "γ": r"\gamma", "δ": r"\delta",
+    "ε": r"\epsilon", "ζ": r"\zeta", "η": r"\eta", "θ": r"\theta",
+    "ι": r"\iota", "κ": r"\kappa", "λ": r"\lambda", "μ": r"\mu", "ν": r"\nu",
+    "ξ": r"\xi", "π": r"\pi", "ρ": r"\rho", "σ": r"\sigma", "τ": r"\tau",
+    "υ": r"\upsilon", "φ": r"\phi", "χ": r"\chi", "ψ": r"\psi", "ω": r"\omega",
+    "ϵ": r"\varepsilon", "ϑ": r"\vartheta", "ϖ": r"\varpi", "ϱ": r"\varrho",
+    "ς": r"\varsigma", "ϕ": r"\varphi", "ϰ": r"\varkappa", "Γ": r"\Gamma",
+    "Δ": r"\Delta", "Θ": r"\Theta", "Λ": r"\Lambda", "Ξ": r"\Xi", "Π": r"\Pi",
+    "Σ": r"\Sigma", "Υ": r"\Upsilon", "Φ": r"\Phi", "Ψ": r"\Psi", "Ω": r"\Omega",
 }
 
 # Environments whose contents LaTeX typesets in math mode.
@@ -168,6 +123,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     -------
     int
         Zero after a completed transformation.
+
+    Raises
+    ------
+    SystemExit
+        Arguments select incompatible input or output modes.
     """
     return _run_command(argv, reverse=False)
 
@@ -206,7 +166,7 @@ def _collect_math_edits(
         # positions safe places to replace Unicode characters directly.
         if node_in_math and node_type == "LatexCharsNode" and not reverse:
             original = source[node.pos : node.pos_end]
-            converted = original.translate(str.maketrans(UNICODE_TO_LATEX))
+            converted = original.translate(str.maketrans(GREEK_UNICODE_TO_LATEX))
             if converted != original:
                 edits.append((node.pos, node.pos_end, converted))
 
@@ -214,9 +174,17 @@ def _collect_math_edits(
         # words such as ``\alphabeta`` cannot be mistaken for ``\alpha``.
         if node_in_math and node_type == "LatexMacroNode" and reverse:
             macro_name = getattr(node, "macroname", "")
-            if macro_name in LATEX_TO_UNICODE:
+            unicode_letter = next(
+                (
+                    letter
+                    for letter, latex_macro in GREEK_UNICODE_TO_LATEX.items()
+                    if latex_macro == f"\\{macro_name}"
+                ),
+                None,
+            )
+            if unicode_letter is not None:
                 end = node.pos + len(macro_name) + 1
-                edits.append((node.pos, end, LATEX_TO_UNICODE[macro_name]))
+                edits.append((node.pos, end, unicode_letter))
 
         children = getattr(node, "nodelist", ()) or ()
         _collect_math_edits(
@@ -241,6 +209,8 @@ def _apply_edits(source: str, edits: list[tuple[int, int, str]]) -> str:
     return source
 
 
+# Keep parser and clipboard installation at the command boundary so text-only
+# callers do not import optional runtime modules eagerly.
 RUNTIME_DEPENDENCIES = DependencyManager(
     {
         "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",

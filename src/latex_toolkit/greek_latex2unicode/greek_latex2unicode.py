@@ -1,4 +1,10 @@
-r"""Convert LaTeX Greek macros in math to Unicode Greek letters."""
+r"""This module converts LaTeX Greek macros in math to Unicode Greek letters.
+
+The ``transform_text(...)`` API supports in-memory conversion and ``main(...)``
+supports file, clipboard, and standard-stream workflows. Only recognized macros in
+parsed math regions are changed; prose, comments, and document preambles are
+preserved.
+"""
 
 from __future__ import annotations
 
@@ -36,5 +42,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     -------
     int
         Zero after a completed transformation.
+
+    Raises
+    ------
+    SystemExit
+        Arguments select incompatible input or output modes.
     """
     return _run_command(argv, reverse=True)

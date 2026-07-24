@@ -12,6 +12,11 @@ In a complete document, only top-level `document` bodies are changed; the
 preamble is retained verbatim. Input without a `document` environment is
 treated as a LaTeX fragment.
 
+## Use Cases
+
+- Normalize implicit macro arguments and math scripts before downstream tooling.
+- Keep complete-document preambles unchanged while formatting document bodies.
+
 ## Usage
 
 ```powershell
@@ -27,3 +32,28 @@ transformed in full. File mode writes `paper_braced.tex` by default.
 ## Python API
 
 `transform_text(source)` returns braced LaTeX source.
+
+## Options
+
+| Option | Meaning |
+| --- | --- |
+| `input` | UTF-8 LaTeX file to transform in place. |
+| `-o`, `--output`, `--output-file` | Write a separate result and preserve the input. |
+| `--clipboard` | Transform nonempty clipboard text. |
+| `--stdin` | Read all source from stdin and write only transformed source to stdout. |
+| `-B`, `--no-backup` | Skip the timestamped backup when overwriting the input. |
+
+## Examples
+
+`\mathcal A + x_1` becomes `\mathcal{A} + x_{1}`; already grouped arguments,
+optional arguments, and star arguments remain unchanged.
+
+## Behavior Notes
+
+Complete documents keep their preambles unchanged. Invalid input-mode
+combinations are rejected before transformation.
+
+## Related Commands
+
+`syntax_regularizer` is a neighboring source-layout transform; `template`
+provides a customizable parser-based transformation skeleton.

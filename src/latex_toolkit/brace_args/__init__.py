@@ -1,4 +1,4 @@
-r"""Provide LaTeX argument and math-script bracing."""
+r"""This package provides LaTeX argument and math-script bracing."""
 
 from .brace_args import ArgumentBracer, main, transform_text
 

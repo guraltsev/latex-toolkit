@@ -1,6 +1,6 @@
-r"""Transform LaTeX document bodies through a small syntax-tree visitor.
+r"""This module transforms LaTeX document bodies through a small syntax-tree visitor.
 
-Call ``transform_text(...)`` from Python, or use ``main(...)`` for file,
+The ``transform_text(...)`` API supports Python callers, and ``main(...)`` supports
 clipboard, and standard-stream workflows. The included example changes
 ``\emph`` to ``\textbf`` inside the ``document`` environment while leaving the
 preamble unchanged.
@@ -189,8 +189,6 @@ RUNTIME_DEPENDENCIES = DependencyManager(
         "pyperclip": "pyperclip>=1.9",
     }
 )
-
-
 
 def _build_parser() -> argparse.ArgumentParser:
     """Build the command-line interface shared by direct and module execution."""

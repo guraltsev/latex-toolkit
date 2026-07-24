@@ -1,4 +1,4 @@
-"""Create timestamped backups before commands overwrite source files.
+"""This module creates timestamped backups before commands overwrite source files.
 
 Mutating commands call ``backup_file(...)`` immediately before replacing an
 input path. Backups are stored in a ``.backup`` directory beside the source.

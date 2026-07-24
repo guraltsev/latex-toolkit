@@ -1,6 +1,6 @@
-r"""Fully normalize LaTeX syntax and prose sentence layout.
+r"""This module fully normalizes LaTeX syntax and prose sentence layout.
 
-Call ``transform_text(...)`` to regularize syntax, format prose one sentence
+The ``transform_text(...)`` API regularizes syntax, formats prose one sentence
 per line, then regularize syntax again. The command-line interface provides
 file, clipboard, and standard-stream workflows.
 """

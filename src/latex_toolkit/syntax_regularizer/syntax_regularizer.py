@@ -1,6 +1,6 @@
-r"""Regularize source layout without changing protected LaTeX regions.
+r"""This module regularizes source layout without changing protected LaTeX regions.
 
-Call ``transform_text(...)`` for fragments or complete documents. Inline math
+The ``transform_text(...)`` API accepts fragments or complete documents. Inline math
 is unwrapped unless it contains a comment, display delimiters are isolated on
 source lines, and ordinary text indentation is removed while math, verbatim,
 and table-like environments retain their layout.
@@ -215,6 +215,7 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
     # Collect source spans once, keeping opaque environments out of recursive
     # discovery because their contents are not actionable LaTeX.
     def visit(node: Any) -> None:
+        """Collect sectioning-command boundaries from one parser node."""
         node_type = type(node).__name__
         start, end = node.pos, node.pos_end
         if node_type == "LatexEnvironmentNode":
@@ -392,6 +393,7 @@ def _sectioning_ends(nodes: Iterable[Any], source: str) -> tuple[int, ...]:
     positions: list[int] = []
 
     def visit(node: Any) -> None:
+        """Collect protected source ranges from one parser node."""
         node_type = type(node).__name__
         if node_type == "LatexMathNode":
             return
@@ -504,6 +506,7 @@ def _protected_ranges(nodes: Iterable[Any]) -> tuple[tuple[int, int], ...]:
     ranges: list[tuple[int, int]] = []
 
     def visit(node: Any) -> None:
+        """Collect protected source ranges from one parser node."""
         node_type = type(node).__name__
         if node_type == "LatexMathNode":
             # Delimiters are boundaries rather than math contents. Protecting

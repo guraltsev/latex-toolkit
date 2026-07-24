@@ -1,6 +1,6 @@
-r"""Format LaTeX prose with one sentence on each physical source line.
+r"""This module formats LaTeX prose with one sentence on each physical source line.
 
-Call ``transform_text(...)`` for fragments or complete documents. Comments,
+The ``transform_text(...)`` API accepts fragments or complete documents. Comments,
 paragraph breaks, math, verbatim-like content, structural environments, and
 text outside document environments retain their original source spelling.
 """
@@ -42,6 +42,8 @@ class _Replacement:
     kind: str
 
 
+# Keep parser, clipboard, and formatter installation at the command boundary
+# so importing the text API does not perform external setup.
 RUNTIME_DEPENDENCIES = DependencyManager(
     {
         "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
@@ -56,6 +58,7 @@ RUNTIME_DEPENDENCIES = DependencyManager(
 _VERBATIM_ENVIRONMENTS = frozenset(
     {"verbatim", "verbatim*", "Verbatim", "lstlisting", "minted", "comment"}
 )
+# These environments use display-math layout that prose formatting must retain.
 _DISPLAY_ENVIRONMENTS = frozenset(
     {
         "displaymath",
@@ -74,6 +77,7 @@ _DISPLAY_ENVIRONMENTS = frozenset(
         "split",
     }
 )
+# These environments contain structure whose line layout is user-controlled.
 _STRUCTURAL_ENVIRONMENTS = frozenset(
     {
         "tabular",
@@ -305,6 +309,7 @@ def _find_text_macros(nodes: Iterable[Any], source: str) -> tuple[_TextMacro, ..
     visited: set[int] = set()
 
     def visit(node: Any) -> None:
+        """Collect text-bearing macro ranges from one parser node."""
         if id(node) in visited:
             return
         visited.add(id(node))
@@ -451,6 +456,7 @@ def _boundary_ranges(source: str) -> tuple[tuple[int, int], ...]:
         return ((0, len(source)),)
 
     def visit(node: Any) -> None:
+        """Collect protected source ranges from one parser node."""
         node_type = type(node).__name__
         if (
             node_type == "LatexMathNode"
@@ -498,6 +504,7 @@ def _inline_ranges(source: str) -> tuple[tuple[int, int, str], ...]:
         return ((0, len(source), "opaque"),)
 
     def visit(node: Any) -> None:
+        """Collect inline ranges from one parser node."""
         node_type = type(node).__name__
         if node_type == "LatexCommentNode":
             ranges.append((node.pos, node.pos_end, "opaque"))

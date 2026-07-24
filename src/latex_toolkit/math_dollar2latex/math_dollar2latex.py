@@ -1,6 +1,6 @@
-r"""Convert dollar-delimited LaTeX math to command-style delimiters.
+r"""This module converts dollar-delimited LaTeX math to command-style delimiters.
 
-Call ``transform_text(...)`` for fragments or complete documents. Inline
+The ``transform_text(...)`` API accepts fragments or complete documents. Inline
 ``$...$`` becomes ``\(...\)``, and display ``$$...$$`` becomes ``\[...\]``.
 For complete documents, only document bodies are transformed.
 """

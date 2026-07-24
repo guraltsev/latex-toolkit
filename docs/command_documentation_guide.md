@@ -1,6 +1,6 @@
 # Command Documentation Guide
 
-Each public command package under `src/` must have  a local
+Each public command package under `src/` must have a local
 `README.md` that explains:
 - what the command does
 - how to run the command
@@ -25,9 +25,9 @@ syntax. Mention the historical help label if it differs from the package name.
 ## Usage
 
 ```powershell
-python -m latex_toolkit.commands.<package_name> .\paper.tex
-python -m latex_toolkit.commands.<package_name> .\paper.tex -o .\paper.out.tex
-python -m latex_toolkit.commands.<package_name> --clipboard
+python -m latex_toolkit.<package_name> .\paper.tex
+python -m latex_toolkit.<package_name> .\paper.tex -o .\paper.out.tex
+python -m latex_toolkit.<package_name> --clipboard
 ```
 
 ## Options
