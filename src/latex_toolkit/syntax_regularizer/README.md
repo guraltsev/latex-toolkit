@@ -57,4 +57,5 @@ environments retain their protected layout. Unsafe incomplete input is unchanged
 
 ## Related Commands
 
-`full_normalize` applies this command before and after `sentence_per_line`.
+`full_normalize` applies this command around `brace_args` and
+`sentence_per_line`, after `math_dollar2latex` standardizes math delimiters.

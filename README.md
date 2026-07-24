@@ -8,7 +8,7 @@ Preservation-focused command-line transformations for LaTeX source.
 - `math_latex2dollar`: reverse delimiter conversion.
 - `syntax_regularizer`: regularize LaTeX source layout.
 - `sentence_per_line`: place each prose sentence on its own line.
-- `full_normalize`: compose syntax and sentence formatting.
+- `full_normalize`: compose math-delimiter, syntax, macro-bracing, and sentence formatting.
 - `template`: customize a syntax-tree transformation.
 - `brace_args`: brace parsed macro arguments and math scripts.
 - `greek_unicode2latex`: convert Unicode Greek symbols in math to LaTeX macros.

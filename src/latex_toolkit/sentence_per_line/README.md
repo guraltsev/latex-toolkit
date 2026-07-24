@@ -58,4 +58,5 @@ source spelling.
 
 ## Related Commands
 
-`full_normalize` composes this formatter with `syntax_regularizer`.
+`full_normalize` composes this formatter with `math_dollar2latex`,
+`syntax_regularizer`, and `brace_args`.

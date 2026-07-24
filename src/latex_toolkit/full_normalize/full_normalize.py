@@ -1,8 +1,9 @@
 r"""This module fully normalizes LaTeX syntax and prose sentence layout.
 
-The ``transform_text(...)`` API regularizes syntax, formats prose one sentence
-per line, then regularize syntax again. The command-line interface provides
-file, clipboard, and standard-stream workflows.
+The ``transform_text(...)`` API converts dollar-delimited math, regularizes
+syntax, braces parsed macro arguments and math scripts, formats prose one
+sentence per line, then regularizes syntax again. The command-line interface
+provides file, clipboard, and standard-stream workflows.
 """
 
 from __future__ import annotations
@@ -15,6 +16,8 @@ from pathlib import Path
 from ..sentence_per_line import (
     transform_text as transform_sentences,
 )
+from ..brace_args import transform_text as brace_arguments
+from ..math_dollar2latex import transform_text as convert_math_delimiters
 from ..syntax_regularizer import transform_text as regularize_syntax
 from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
@@ -31,8 +34,9 @@ def transform_text(source: str) -> str:
     Returns
     -------
     str
-        Source after syntax regularization, sentence-per-line formatting, and
-        final syntax regularization.
+        Source after dollar-to-command math conversion, syntax regularization,
+        macro-argument and math-script bracing, sentence-per-line formatting,
+        and final syntax regularization.
 
     Raises
     ------
@@ -44,12 +48,20 @@ def transform_text(source: str) -> str:
     Basic usage:
 
     >>> transform_text("  First with $1+\\n1=2$. Second.")
-    'First with $1+1=2$.\nSecond.'
+    'First with \\(1+1=2\\).\nSecond.'
     """
-    # Normalize the source before splitting prose, then reapply syntax rules
-    # to the sentence-formatted layout.
-    regularized = regularize_syntax(source)
-    sentences = transform_sentences(regularized)
+    # Standardize math delimiters before layout processing so display formulas
+    # and inline formulas both follow the command-style source convention.
+    command_delimited = convert_math_delimiters(source)
+
+    # Establish a regular source layout and explicit parsed argument boundaries
+    # before the prose formatter reads the document structure.
+    regularized = regularize_syntax(command_delimited)
+    braced = brace_arguments(regularized)
+    sentences = transform_sentences(braced)
+
+    # Reapply source-layout rules after the sentence formatter has rewritten
+    # prose line boundaries.
     return regularize_syntax(sentences)
 
 
@@ -132,8 +144,9 @@ def _build_parser() -> argparse.ArgumentParser:
     """Build the command-line interface for complete normalization."""
     parser = argparse.ArgumentParser(
         description=(
-            "Regularize LaTeX syntax, put each prose sentence on its own line, "
-            "then regularize syntax again."
+            "Convert dollar-delimited math, regularize LaTeX syntax, brace "
+            "parsed macro arguments and math scripts, put each prose sentence "
+            "on its own line, then regularize syntax again."
         )
     )
     parser.add_argument("input_file", nargs="?", type=Path, help="UTF-8 LaTeX file")

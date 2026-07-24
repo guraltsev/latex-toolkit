@@ -1,6 +1,6 @@
 r"""Protect the complete LaTeX normalization behavior.
 
-The tests run the real three-stage pipeline, including pylatexenc and the
+The tests run the real complete pipeline, including pylatexenc and the
 pinned Snapper formatter. CLI boundary behavior and internal call structure
 are outside this module's scope.
 """
@@ -13,7 +13,7 @@ def test_full_normalize_regularizes_syntax_around_sentence_formatting() -> None:
     source = "  First sentence with $1+\n  1=2$. Second sentence."
 
     assert transform_text(source) == (
-        "First sentence with $1+1=2$.\nSecond sentence."
+        "First sentence with \\(1+1=2\\).\nSecond sentence."
     )
 
 
@@ -23,6 +23,15 @@ def test_full_normalize_combines_heading_and_sentence_layout() -> None:
 
     assert transform_text(source) == (
         "\\section{Title}\n\nFirst sentence.\nSecond sentence."
+    )
+
+
+def test_full_normalize_braces_parsed_arguments_and_math_scripts() -> None:
+    """Macro arguments and math scripts are explicit in normalized output."""
+    source = "  First with $\\mathcal A + x_1$. Second sentence."
+
+    assert transform_text(source) == (
+        "First with \\(\\mathcal{A} + x_{1}\\).\nSecond sentence."
     )
 
 

@@ -1,11 +1,14 @@
 # full_normalize
 
-Apply the toolkit's complete layout-normalization pipeline: syntax
-regularization, prose sentence-per-line formatting, then syntax regularization
-again. The first and last stages remove ordinary indentation, unwrap eligible
-inline math, and normalize structural line breaks; the middle stage joins
-wrapped prose and starts each sentence on its own line. The final pass ensures
-the sentence formatter's output follows the same syntax-layout rules.
+Apply the toolkit's complete normalization pipeline: dollar-to-command math
+delimiter conversion, syntax regularization, parsed macro-argument and
+math-script bracing, prose sentence-per-line formatting, then syntax
+regularization again. The first stage converts `$...$` to `\(...\)` and
+`$$...$$` to `\[...\]`; the syntax stages remove ordinary indentation, unwrap
+eligible inline math, and normalize structural line breaks; the bracing stage
+makes parsed mandatory arguments and math scripts explicit; the prose stage
+joins wrapped prose and starts each sentence on its own line. The final pass
+ensures the sentence formatter's output follows the same syntax-layout rules.
 
 The pipeline preserves protected math, table-like, verbatim-like, and
 structural source regions according to its component commands. In complete
@@ -47,16 +50,17 @@ combined with a file or output path.
 
 ## Examples
 
-Wrapped prose is joined within a sentence, while sentence boundaries become
-physical line breaks and syntax regularization is applied before and after.
+Wrapped prose is joined within a sentence, sentence boundaries become physical
+line breaks, dollar-delimited math becomes command-delimited math, and parsed
+macro arguments and math scripts receive explicit braces.
 
 ## Behavior Notes
 
 The pipeline requires `snapper-fmt`; failures leave the destination unopened.
-Protected regions follow the contracts of `syntax_regularizer` and
-`sentence_per_line`.
+Protected regions follow the contracts of `math_dollar2latex`,
+`syntax_regularizer`, `brace_args`, and `sentence_per_line`.
 
 ## Related Commands
 
-`syntax_regularizer` and `sentence_per_line` are the component commands used by
-this pipeline.
+`math_dollar2latex`, `syntax_regularizer`, `brace_args`, and
+`sentence_per_line` are the component commands used by this pipeline.
