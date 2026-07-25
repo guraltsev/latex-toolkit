@@ -104,8 +104,29 @@ def test_stdin_mode_writes_only_transformed_text_to_stdout(
     assert captured.err == ""
 
 
-def test_greek_latex2unicode_stdin_uses_utf8_despite_windows_code_page() -> None:
-    """The Greek reverse CLI emits UTF-8 when the inherited encoding is CP-1252."""
+@pytest.mark.parametrize(
+    ("module_name", "source", "expected"),
+    [
+        pytest.param(
+            "latex_toolkit.greek_latex2unicode",
+            b"$\\alpha$",
+            b"$\xce\xb1$",
+            id="greek-latex2unicode",
+        ),
+        pytest.param(
+            "latex_toolkit.template",
+            b"\\begin{document}\\emph{\xce\xb1}\\end{document}",
+            b"\\begin{document}\\textbf{\xce\xb1}\\end{document}",
+            id="template",
+        ),
+    ],
+)
+def test_stdin_mode_uses_utf8_despite_windows_code_page(
+    module_name: str,
+    source: bytes,
+    expected: bytes,
+) -> None:
+    """CLI standard-stream transformations preserve UTF-8 under CP-1252."""
     source_root = Path(__file__).parents[1] / "src"
     environment = os.environ | {
         "PYTHONIOENCODING": "cp1252",
@@ -118,15 +139,15 @@ def test_greek_latex2unicode_stdin_uses_utf8_despite_windows_code_page() -> None
             "-X",
             "utf8=0",
             "-m",
-            "latex_toolkit.greek_latex2unicode",
+            module_name,
             "--stdin",
         ],
-        input=b"$\\alpha$",
+        input=source,
         capture_output=True,
         check=False,
         env=environment,
     )
 
     assert completed.returncode == 0, completed.stderr.decode("ascii")
-    assert completed.stdout == "$\u03b1$".encode("utf-8")
+    assert completed.stdout == expected
     assert completed.stderr == b""

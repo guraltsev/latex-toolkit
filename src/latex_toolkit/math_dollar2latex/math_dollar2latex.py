@@ -15,6 +15,7 @@ from typing import Any
 
 from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
+from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
 def transform_text(source: str, *, reverse: bool = False) -> str:
@@ -224,6 +225,7 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
         _transform_clipboard(reverse)
         return 0
     if args.stdin:
+        configure_utf8_standard_streams()
         sys.stdout.write(transform_text(sys.stdin.read(), reverse=reverse))
         return 0
 

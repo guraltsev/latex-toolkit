@@ -18,6 +18,7 @@ from typing import Any
 
 from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
+from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
 @dataclass(frozen=True)
@@ -238,6 +239,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         _transform_clipboard()
         return 0
     if args.stdin:
+        configure_utf8_standard_streams()
         sys.stdout.write(transform_text(sys.stdin.read()))
         return 0
 

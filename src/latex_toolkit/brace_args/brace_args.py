@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from latex_toolkit.lib.backup import backup_file
+from latex_toolkit.lib.streams import configure_utf8_standard_streams
 from latex_toolkit.lib.dependencies import DependencyManager
 
 
@@ -312,6 +313,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.clipboard:
         _process_clipboard()
     elif args.stdin:
+        configure_utf8_standard_streams()
         sys.stdout.write(transform_text(sys.stdin.read()))
     else:
         if args.output_file is None and not args.no_backup:

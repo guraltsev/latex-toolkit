@@ -15,6 +15,7 @@ from typing import Any
 
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.dependencies import DependencyManager
+from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
 # This bijection is the shared source of truth for both conversion directions.
@@ -234,12 +235,7 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
     if args.clipboard:
         _transform_clipboard(reverse)
     elif args.stdin:
-        # Standard streams inherit the active Windows code page unless the
-        # process configures them.  This command's stream contract is UTF-8.
-        for stream in (sys.stdin, sys.stdout):
-            reconfigure = getattr(stream, "reconfigure", None)
-            if reconfigure is not None:
-                reconfigure(encoding="utf-8")
+        configure_utf8_standard_streams()
         sys.stdout.write(transform_text(sys.stdin.read(), reverse=reverse))
     else:
         if args.output_file is None and not args.no_backup:

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 
 from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
+from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 if TYPE_CHECKING:
     from pylatexenc.latexnodes.nodes import LatexMacroNode
@@ -170,6 +171,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.clipboard:
         _process_clipboard()
     elif args.stdin:
+        configure_utf8_standard_streams()
         sys.stdout.write(transform_text(sys.stdin.read()))
     else:
         input_path = args.input_file
