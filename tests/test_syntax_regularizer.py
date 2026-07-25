@@ -192,21 +192,21 @@ def test_section_blank_line_uses_the_source_crlf_convention() -> None:
     [
         (
             r"Before \begin{theorem}Body.\end{theorem}",
-            "Before\n\\begin{theorem}\nBody.\\end{theorem}",
+            "Before\n\\begin{theorem}\nBody.\n\\end{theorem}",
         ),
         (
             r"\begin{theorem}[Optional title]Body.\end{theorem}",
-            "\\begin{theorem}[Optional title]\nBody.\\end{theorem}",
+            "\\begin{theorem}[Optional title]\nBody.\n\\end{theorem}",
         ),
         (
             r"\begin{itemize}\item One.\end{itemize}",
-            "\\begin{itemize}\n\\item One.\\end{itemize}",
+            "\\begin{itemize}\n\\item One.\n\\end{itemize}",
         ),
         (
             r"\begin{table}\begin{tabular}{c}Cell\end{tabular}\end{table}",
             (
                 "\\begin{table}\n\\begin{tabular}{c}\n"
-                "Cell\\end{tabular}\\end{table}"
+                "Cell\n\\end{tabular}\n\\end{table}"
             ),
         ),
     ],
@@ -217,18 +217,32 @@ def test_section_blank_line_uses_the_source_crlf_convention() -> None:
         "nested-table-environment",
     ],
 )
-def test_every_environment_opener_is_on_its_own_line(
+def test_environment_delimiters_are_on_their_own_lines(
     source: str, expected: str
 ) -> None:
-    """A begin command and its optional title occupy an isolated source line."""
+    """Environment delimiters and optional opener titles occupy isolated lines."""
     assert transform_text(source) == expected
+
+
+def test_list_items_and_environment_closers_are_on_their_own_lines() -> None:
+    """List entries and list-environment delimiters each occupy a source line."""
+    source = r"Before \begin{enumerate}\item First.\item[Label] Second.\end{enumerate} After"
+
+    assert transform_text(source) == (
+        "Before\n"
+        "\\begin{enumerate}\n"
+        "\\item First.\n"
+        "\\item[Label] Second.\n"
+        "\\end{enumerate}\n"
+        "After"
+    )
 
 
 def test_proof_opener_keeps_its_optional_heading_on_the_same_line() -> None:
     """A proof heading stays with its opener while proof content moves below."""
     source = r"Before \begin{proof}[Sketch]Body.\end{proof}"
 
-    assert transform_text(source) == "Before\n\\begin{proof}[Sketch]\nBody.\\end{proof}"
+    assert transform_text(source) == "Before\n\\begin{proof}[Sketch]\nBody.\n\\end{proof}"
 
 
 def test_environment_label_moves_to_the_following_line() -> None:
@@ -240,7 +254,7 @@ def test_environment_label_moves_to_the_following_line() -> None:
 
     assert transform_text(source) == (
         "\\begin{theorem}[Optional title]\n"
-        "\\label{thm:sample}\nBody.\\end{theorem}"
+        "\\label{thm:sample}\nBody.\n\\end{theorem}"
     )
 
 

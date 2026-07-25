@@ -1,9 +1,9 @@
 r"""This module regularizes source layout without changing protected LaTeX regions.
 
 The ``transform_text(...)`` API accepts fragments or complete documents. Inline math
-is unwrapped unless it contains a comment, display delimiters are isolated on
-source lines, and ordinary text indentation is removed while math, verbatim,
-and table-like environments retain their layout.
+is unwrapped unless it contains a comment, structural environment delimiters
+and list items are isolated on source lines, and ordinary text indentation is
+removed while math, verbatim, and table-like environments retain their layout.
 """
 
 from __future__ import annotations
@@ -36,7 +36,8 @@ def transform_text(source: str) -> str:
     Returns
     -------
     str
-        Source with regularized physical-line layout.
+        Source with regularized physical-line layout, including standalone
+        environment delimiters and list items.
 
     Examples
     --------
@@ -212,7 +213,8 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
     newline = "\r\n" if "\r\n" in source else "\n"
     inline_ranges: list[tuple[int, int]] = []
     protected_ranges: list[tuple[int, int]] = []
-    display_delimiters: list[tuple[int, int]] = []
+    structural_delimiters: list[tuple[int, int]] = []
+    item_starts: list[int] = []
 
     # Collect source spans once, keeping opaque environments out of recursive
     # discovery because their contents are not actionable LaTeX.
@@ -233,7 +235,7 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
             opening = re.match(opening_pattern, environment_source)
             if opening:
                 opening_end = start + opening.end()
-                display_delimiters.append((start, opening_end))
+                structural_delimiters.append((start, opening_end))
 
                 # A conventional label immediately after an environment
                 # opener starts on the following line with no leading indent.
@@ -243,9 +245,17 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
                 )
                 if label:
                     label_start = opening_end + label.start(1)
-                    display_delimiters.append(
+                    structural_delimiters.append(
                         (label_start, opening_end + label.end(1))
                     )
+            closing = re.search(
+                r"(\\end\s*\{" + re.escape(environment) + r"\})[ \t]*$",
+                environment_source,
+            )
+            if closing:
+                structural_delimiters.append(
+                    (start + closing.start(1), start + closing.end(1))
+                )
             if environment in _VERBATIM_ENVIRONMENTS:
                 protected_ranges.append((start, end))
                 return
@@ -253,14 +263,6 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
                 protected_ranges.append((start, end))
             if environment in _DISPLAY_ENVIRONMENTS:
                 protected_ranges.append((start, end))
-                closing = re.search(
-                    r"(\\end\s*\{" + re.escape(environment) + r"\})[ \t]*$",
-                    environment_source,
-                )
-                if closing:
-                    display_delimiters.append(
-                        (start + closing.start(1), start + closing.end(1))
-                    )
         elif node_type == "LatexMathNode":
             protected_ranges.append((start, end))
             if getattr(node, "displaytype", None) == "inline":
@@ -268,7 +270,9 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
             else:
                 delimiters = _math_delimiters(source, start, end)
                 if delimiters is not None:
-                    display_delimiters.extend(delimiters)
+                    structural_delimiters.extend(delimiters)
+        elif node_type == "LatexMacroNode" and node.macroname == "item":
+            item_starts.append(start)
 
         for child in getattr(node, "nodelist", ()) or ():
             visit(child)
@@ -280,16 +284,21 @@ def _regularize_scope(source: str, nodes: Iterable[Any]) -> str:
     for node in nodes:
         visit(node)
 
-    # Express display isolation and uncommented inline joins as non-overlapping
-    # edits against parser positions, then apply them from right to left.
+    # Express structural isolation and uncommented inline joins as
+    # non-overlapping edits against parser positions, then apply them from
+    # right to left.
     edits: set[tuple[int, int, str]] = set()
-    for start, end in display_delimiters:
+    for start, end in structural_delimiters:
         before = _break_before(source, start, newline)
         after = _break_after(source, end, newline)
         if before is not None:
             edits.add(before)
         if after is not None:
             edits.add(after)
+    for start in item_starts:
+        before = _break_before(source, start, newline)
+        if before is not None:
+            edits.add(before)
     for start, end in inline_ranges:
         math_source = source[start:end]
         if not _contains_comment(math_source):

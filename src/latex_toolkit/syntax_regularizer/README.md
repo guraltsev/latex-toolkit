@@ -2,9 +2,10 @@
 
 Regularize physical-line layout without changing LaTeX content. It removes
 leading indentation from ordinary prose, unwraps uncommented inline math, and
-places display-math delimiters, environment openers, and sectioning commands
-on their intended lines. Sectioning commands receive one following blank line;
-display delimiters are isolated without adding blank lines.
+places display-math delimiters, environment delimiters, list items, and
+sectioning commands on their intended lines. Sectioning commands receive one
+following blank line; structural delimiters are isolated without adding blank
+lines.
 
 Math containing a real comment is preserved byte-for-byte. The internal layout
 of display math, table-like environments, and verbatim-like environments is
