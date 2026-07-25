@@ -234,6 +234,12 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
     if args.clipboard:
         _transform_clipboard(reverse)
     elif args.stdin:
+        # Standard streams inherit the active Windows code page unless the
+        # process configures them.  This command's stream contract is UTF-8.
+        for stream in (sys.stdin, sys.stdout):
+            reconfigure = getattr(stream, "reconfigure", None)
+            if reconfigure is not None:
+                reconfigure(encoding="utf-8")
         sys.stdout.write(transform_text(sys.stdin.read(), reverse=reverse))
     else:
         if args.output_file is None and not args.no_backup:

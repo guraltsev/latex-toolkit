@@ -5,9 +5,12 @@ streams. Files and the system clipboard remain outside the selected mode, and
 the transformation dependencies are real.
 """
 
+import os
+import subprocess
 import sys
 from collections.abc import Callable
 from io import StringIO
+from pathlib import Path
 
 import pytest
 
@@ -99,3 +102,31 @@ def test_stdin_mode_writes_only_transformed_text_to_stdout(
     captured = capsys.readouterr()
     assert captured.out == expected
     assert captured.err == ""
+
+
+def test_greek_latex2unicode_stdin_uses_utf8_despite_windows_code_page() -> None:
+    """The Greek reverse CLI emits UTF-8 when the inherited encoding is CP-1252."""
+    source_root = Path(__file__).parents[1] / "src"
+    environment = os.environ | {
+        "PYTHONIOENCODING": "cp1252",
+        "PYTHONPATH": str(source_root),
+    }
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8=0",
+            "-m",
+            "latex_toolkit.greek_latex2unicode",
+            "--stdin",
+        ],
+        input=b"$\\alpha$",
+        capture_output=True,
+        check=False,
+        env=environment,
+    )
+
+    assert completed.returncode == 0, completed.stderr.decode("ascii")
+    assert completed.stdout == "$\u03b1$".encode("utf-8")
+    assert completed.stderr == b""
