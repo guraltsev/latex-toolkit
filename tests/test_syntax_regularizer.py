@@ -165,6 +165,13 @@ def test_sectioning_commands_are_followed_by_a_blank_line(command: str) -> None:
     assert transform_text(f"  {command}\n  Body.") == f"{command}\n\nBody."
 
 
+def test_section_label_stays_attached_before_the_blank_line() -> None:
+    """A heading label precedes the blank line that separates following prose."""
+    source = "\\section{Title}\n\n\\label{sec:title}\nBody."
+
+    assert transform_text(source) == "\\section{Title}\n\\label{sec:title}\n\nBody."
+
+
 def test_section_comment_stays_attached_before_the_blank_line() -> None:
     """A heading's trailing comment remains on its line before the blank line."""
     source = "\\section{Title} % heading note\nBody."

@@ -480,6 +480,22 @@ def _blank_line_after(
     source: str, position: int, newline: str
 ) -> tuple[int, int, str] | None:
     """Return the edit needed for a blank line after one sectioning macro."""
+    # A label directly associated with a heading stays in the heading block.
+    # Normalize its separation from the title, then establish paragraph
+    # spacing after the label rather than between the two commands.
+    label = re.match(r"[ \t\r\n]*(\\label\s*\{[^{}\r\n]*\})", source[position:])
+    if label:
+        label_end = position + label.end(1)
+        following = _blank_line_after(source, label_end, newline)
+        if following is None:
+            return position, label_end, newline + label.group(1)
+        following_start, following_end, replacement = following
+        return (
+            position,
+            following_end,
+            newline + label.group(1) + source[label_end:following_start] + replacement,
+        )
+
     cursor = position
     while cursor < len(source) and source[cursor] in " \t":
         cursor += 1

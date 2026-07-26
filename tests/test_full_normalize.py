@@ -26,6 +26,15 @@ def test_full_normalize_combines_heading_and_sentence_layout() -> None:
     )
 
 
+def test_full_normalize_attaches_section_labels_before_paragraph_spacing() -> None:
+    """A section label stays beside its heading while prose remains separated."""
+    source = "\\section{Title}\n\\label{sec:title}\nFirst sentence."
+
+    assert transform_text(source) == (
+        "\\section{Title}\n\\label{sec:title}\n\nFirst sentence."
+    )
+
+
 def test_full_normalize_braces_parsed_arguments_and_math_scripts() -> None:
     """Macro arguments and math scripts are explicit in normalized output."""
     source = "  First with $\\mathcal A + x_1$. Second sentence."
