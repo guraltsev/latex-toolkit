@@ -3,7 +3,7 @@
 Apply the toolkit's complete normalization pipeline: dollar-to-command math
 delimiter conversion, syntax regularization, parsed macro-argument and
 math-script bracing, prose sentence-per-line formatting, then syntax
-regularization again. The first stage converts `$...$` to `\(...\)` and
+regularization again, then equation-number label normalization. The first stage converts `$...$` to `\(...\)` and
 `$$...$$` to `\[...\]`; the syntax stages remove ordinary indentation, unwrap
 eligible inline math, and normalize structural line breaks; the bracing stage
 makes parsed mandatory arguments and math scripts explicit; the prose stage
@@ -62,5 +62,5 @@ Protected regions follow the contracts of `math_dollar2latex`,
 
 ## Related Commands
 
-`math_dollar2latex`, `syntax_regularizer`, `brace_args`, and
-`sentence_per_line` are the component commands used by this pipeline.
+`math_dollar2latex`, `syntax_regularizer`, `brace_args`, `sentence_per_line`,
+and `eqnum_label` are the component commands used by this pipeline.

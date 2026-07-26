@@ -19,6 +19,7 @@ from ..sentence_per_line import (
 from ..brace_args import transform_text as brace_arguments
 from ..math_dollar2latex import transform_text as convert_math_delimiters
 from ..syntax_regularizer import transform_text as regularize_syntax
+from ..eqnum_label import transform_text as normalize_eqnum_labels
 from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
@@ -37,7 +38,7 @@ def transform_text(source: str) -> str:
     str
         Source after dollar-to-command math conversion, syntax regularization,
         macro-argument and math-script bracing, sentence-per-line formatting,
-        and final syntax regularization.
+        final syntax regularization, and equation-number label normalization.
 
     Raises
     ------
@@ -62,8 +63,8 @@ def transform_text(source: str) -> str:
     sentences = transform_sentences(braced)
 
     # Reapply source-layout rules after the sentence formatter has rewritten
-    # prose line boundaries.
-    return regularize_syntax(sentences)
+    # prose line boundaries, then place unambiguous equation labels first.
+    return normalize_eqnum_labels(regularize_syntax(sentences))
 
 
 def _process_file(input_path: Path, output_path: Path) -> Path:

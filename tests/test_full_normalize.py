@@ -35,6 +35,13 @@ def test_full_normalize_braces_parsed_arguments_and_math_scripts() -> None:
     )
 
 
+def test_full_normalize_places_a_trailing_equation_label_first() -> None:
+    """The composed workflow moves an eligible equation-number label after its opener."""
+    source = "\\[\n  x=1\n  \\eqnum\\label{eq:x}\n\\]"
+
+    assert transform_text(source) == "\\[\n\\eqnum \\label{eq:x}\n  x=1\n\\]"
+
+
 def test_full_normalize_is_idempotent() -> None:
     """A second full-normalization pass produces byte-identical source."""
     once = transform_text("  First sentence. Second sentence.")
