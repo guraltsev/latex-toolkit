@@ -7,7 +7,7 @@ Preservation-focused command-line transformations for LaTeX source.
 - `math_dollar2latex`: convert `$...$` math to `\(...\)`.
 - `math_latex2dollar`: reverse delimiter conversion.
 - `syntax_regularizer`: regularize LaTeX source layout.
-- `eqnum_label`: normalize `\eqnum \label{...}` placement in display math.
+- `eqnum_label`: normalize display-math label placement with or without `\eqnum`.
 - `sentence_per_line`: place each prose sentence on its own line.
 - `full_normalize`: compose math-delimiter, syntax, macro-bracing, and sentence formatting.
 - `template`: customize a syntax-tree transformation.
@@ -16,5 +16,6 @@ Preservation-focused command-line transformations for LaTeX source.
 - `greek_latex2unicode`: convert LaTeX Greek macros in math to Unicode symbols.
 
 Install the package with `python -m pip install --editable .`, then run a
-command with `python -m latex_toolkit.<command_name>`. Each command package
-has a local README with its usage, behavior, and Python API.
+command with `python -m latex_toolkit.<command_name>` or the matching
+underscore-named console command, such as `full_normalize`. Each command
+package has a local README with its usage, behavior, and Python API.

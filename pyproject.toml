@@ -15,16 +15,16 @@ dependencies = [
 ]
 
 [project.scripts]
-math-dollar2latex = "latex_toolkit.math_dollar2latex.math_dollar2latex:main"
-math-latex2dollar = "latex_toolkit.math_latex2dollar.math_latex2dollar:main"
+math_dollar2latex = "latex_toolkit.math_dollar2latex.math_dollar2latex:main"
+math_latex2dollar = "latex_toolkit.math_latex2dollar.math_latex2dollar:main"
 template = "latex_toolkit.template.template:main"
-brace-args = "latex_toolkit.brace_args.brace_args:main"
-sentence-per-line = "latex_toolkit.sentence_per_line.sentence_per_line:main"
-syntax-regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
-eqnum-label = "latex_toolkit.eqnum_label.eqnum_label:main"
-full-normalize = "latex_toolkit.full_normalize.full_normalize:main"
-greek-unicode2latex = "latex_toolkit.greek_unicode2latex.greek_unicode2latex:main"
-greek-latex2unicode = "latex_toolkit.greek_latex2unicode.greek_latex2unicode:main"
+brace_args = "latex_toolkit.brace_args.brace_args:main"
+sentence_per_line = "latex_toolkit.sentence_per_line.sentence_per_line:main"
+syntax_regularizer = "latex_toolkit.syntax_regularizer.syntax_regularizer:main"
+eqnum_label = "latex_toolkit.eqnum_label.eqnum_label:main"
+full_normalize = "latex_toolkit.full_normalize.full_normalize:main"
+greek_unicode2latex = "latex_toolkit.greek_unicode2latex.greek_unicode2latex:main"
+greek_latex2unicode = "latex_toolkit.greek_latex2unicode.greek_latex2unicode:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

@@ -1,9 +1,10 @@
-r"""Normalize ``\eqnum \label{...}`` placement in single-equation displays.
+r"""Normalize equation-label placement in display math.
 
 The ``transform_text(...)`` API makes adjacent equation-number and label macros
-space-separated in parsed display math. A standalone pair in a ``\[...\]`` or
-``equation`` display moves immediately after the opening delimiter, while
-multi-row environments and non-standalone pairs retain their position.
+space-separated in parsed display math. In a ``\[...\]`` or ``equation``
+display, one label moves immediately after the opening delimiter. In an
+align-family environment, a row label moves to its own line after that row's
+terminating ``\\``.
 
 Usage and API
 -------------
@@ -13,9 +14,8 @@ clipboard, and standard-stream workflows.
 Implementation Approach
 -----------------------
 The module uses parsed display spans to limit edits to math and rewrites each
-selected body independently. It moves only one standalone pair per
-single-equation display, preserving label semantics in environments whose rows
-can be labeled independently.
+selected body independently. It treats an adjacent ``\eqnum \label`` pair as
+one label unit, so the same placement rules apply when ``\eqnum`` is absent.
 """
 
 from __future__ import annotations
@@ -32,8 +32,8 @@ from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
-# These display environments can contain equation-number label pairs. Only
-# ``equation`` variants are safe to relocate because the others can label rows.
+# These display environments can contain labels. Equation variants have one
+# equation number, while align variants assign labels to individual rows.
 _DISPLAY_ENVIRONMENTS = frozenset(
     {
         "displaymath", "equation", "equation*", "align", "align*", "alignat",
@@ -41,15 +41,18 @@ _DISPLAY_ENVIRONMENTS = frozenset(
         "multline*", "split",
     }
 )
+_ALIGN_ENVIRONMENTS = frozenset(
+    {"align", "align*", "alignat", "alignat*", "flalign", "flalign*"}
+)
 
 
 def transform_text(source: str) -> str:
     r"""Normalize adjacent ``\eqnum`` and ``\label`` macros in display math.
 
-    A single standalone pair moves to the first line of a parsed ``\[...\]``,
-    ``equation``, or ``equation*`` display. Pairs in other math environments
-    are only space-normalized, so row-specific labels remain attached to their
-    original rows.
+    A single label moves to the first line of a parsed ``\[...\]``,
+    ``equation``, or ``equation*`` display. In align-family environments, a
+    label written before a row terminator moves to its own following line. An
+    adjacent ``\eqnum`` remains attached to its label when present.
 
     Parameters
     ----------
@@ -65,8 +68,8 @@ def transform_text(source: str) -> str:
     --------
     Basic usage:
 
-    >>> transform_text("\\[ x=1\\n\\eqnum\\label{eq:x}\\n\\]")
-    '\\[\\n\\eqnum \\label{eq:x}\\nx=1\\n\\]'
+    >>> transform_text("\\begin{equation}\\nx=1 \\label{eq:x}\\n\\end{equation}")
+    '\\begin{equation}\\n\\label{eq:x}\\nx=1\\n\\end{equation}'
     """
     if not source:
         return source
@@ -83,31 +86,37 @@ def transform_text(source: str) -> str:
     scopes = document_bodies or [nodes]
 
     # Collect non-overlapping display bodies before applying source-offset edits.
-    ranges: list[tuple[int, int, bool]] = []
+    ranges: list[tuple[int, int, str]] = []
     for scope in scopes:
         _collect_display_ranges(scope, source, ranges)
     return _apply_ranges(source, ranges)
 
 
 def _collect_display_ranges(
-    nodes: Iterable[Any], source: str, ranges: list[tuple[int, int, bool]]
+    nodes: Iterable[Any], source: str, ranges: list[tuple[int, int, str]]
 ) -> None:
-    """Collect display-body spans, marking the forms safe for relocation."""
+    """Collect display-body spans, marking their label-placement policy."""
     for node in nodes:
         node_type = type(node).__name__
         if node_type == "LatexEnvironmentNode":
             environment = node.environmentname
             content = getattr(node, "nodelist", None)
             if environment in _DISPLAY_ENVIRONMENTS and content is not None:
+                if environment in {"equation", "equation*"}:
+                    placement = "top"
+                elif environment in _ALIGN_ENVIRONMENTS:
+                    placement = "align"
+                else:
+                    placement = "preserve"
                 ranges.append(
-                    (content.pos, content.pos_end, environment in {"equation", "equation*"})
+                    (content.pos, content.pos_end, placement)
                 )
                 continue
         elif node_type == "LatexMathNode":
             content = getattr(node, "nodelist", None)
             text = source[node.pos : node.pos_end]
             if content is not None and text.startswith(r"\[") and text.endswith(r"\]"):
-                ranges.append((content.pos, content.pos_end, True))
+                ranges.append((content.pos, content.pos_end, "top"))
                 continue
 
         _collect_display_ranges(getattr(node, "nodelist", ()) or (), source, ranges)
@@ -116,14 +125,16 @@ def _collect_display_ranges(
                 _collect_display_ranges((argument,), source, ranges)
 
 
-def _apply_ranges(source: str, ranges: Iterable[tuple[int, int, bool]]) -> str:
+def _apply_ranges(source: str, ranges: Iterable[tuple[int, int, str]]) -> str:
     """Apply independently rendered display-body edits from right to left."""
     transformed = source
-    for start, end, may_move in sorted(ranges, reverse=True):
+    for start, end, placement in sorted(ranges, reverse=True):
         body = source[start:end]
         normalized = _normalize_pairs(body)
-        if may_move:
-            normalized = _move_standalone_pair(normalized, _newline(source))
+        if placement == "top":
+            normalized = _move_single_label_to_top(normalized, _newline(source))
+        elif placement == "align":
+            normalized = _place_align_labels(normalized, _newline(source))
         transformed = transformed[:start] + normalized + transformed[end:]
     return transformed
 
@@ -139,21 +150,53 @@ def _normalize_pairs(body: str) -> str:
     return _apply_edits(body, edits)
 
 
-def _move_standalone_pair(body: str, newline: str) -> str:
-    """Move one standalone canonical pair to the start of a display body."""
-    pattern = re.compile(
-        r"(?m)^[ \t]*(\\eqnum \\label\{[^{}\r\n]*\})[ \t]*(?:\r?\n|$)"
-    )
+def _move_single_label_to_top(body: str, newline: str) -> str:
+    """Move one real label unit to the first line of a single-equation body."""
+    pattern = re.compile(r"(?:\\eqnum )?\\label\{[^{}\r\n]*\}")
     matches = [
-        match for match in pattern.finditer(body) if not _is_in_comment(body, match.start(1))
+        match for match in pattern.finditer(body) if not _is_in_comment(body, match.start())
     ]
     if len(matches) != 1:
         return body
 
     match = matches[0]
-    pair = match.group(1)
-    without_pair = body[: match.start()] + body[match.end() :]
-    return newline + pair + without_pair
+    label = match.group()
+
+    # Remove a dedicated label line as a unit so it cannot leave a blank line.
+    line_start = body.rfind("\n", 0, match.start()) + 1
+    line_end = body.find("\n", match.end())
+    if line_end == -1:
+        line_end = len(body)
+    if body[line_start:match.start()].strip() or body[match.end():line_end].strip():
+        # Drop padding that only separated an inline label from its formula.
+        inline_start = match.start()
+        while inline_start > line_start and body[inline_start - 1] in " \t":
+            inline_start -= 1
+        without_label = body[:inline_start] + body[match.end() :]
+    else:
+        after_line = line_end + 1 if line_end < len(body) else line_end
+        without_label = body[:line_start] + body[after_line:]
+    return newline + label + without_label
+
+
+def _place_align_labels(body: str, newline: str) -> str:
+    """Put labels before align row terminators onto their own following lines."""
+    label = r"(?:\\eqnum )?\\label\{[^{}\r\n]*\}"
+    before_terminator = re.compile(
+        rf"(?m)^(?P<row>[^\r\n%]*?)(?P<gap>[ \t]*)(?P<label>{label})"
+        r"[ \t]*(?P<terminator>\\\\(?:\[[^\r\n]*\])?)[ \t]*(?=\r?$)"
+    )
+
+    # A label at the end of a row belongs after its terminator, not in its math.
+    def move_after_terminator(match: re.Match[str]) -> str:
+        if _is_in_comment(body, match.start("label")):
+            return match.group()
+        return (
+            f"{match.group('row')}{match.group('gap')}{match.group('terminator')}"
+            f"{newline}{match.group('label')}"
+        )
+
+    return before_terminator.sub(move_after_terminator, body)
 
 
 def _is_in_comment(source: str, position: int) -> bool:

@@ -23,12 +23,39 @@ def test_equation_environment_pair_moves_to_the_start() -> None:
     )
 
 
-def test_multirow_display_keeps_pair_position_but_normalizes_its_spacing() -> None:
-    """An align label remains with its row while adjacent macro spacing is canonicalized."""
+def test_equation_environment_label_without_eqnum_moves_to_the_start() -> None:
+    """A lone equation label becomes the first content line."""
+    source = "\\begin{equation}\n  x=1\n  \\label{eq:x}\n\\end{equation}"
+
+    assert transform_text(source) == (
+        "\\begin{equation}\n\\label{eq:x}\n  x=1\n\\end{equation}"
+    )
+
+
+def test_inline_equation_label_without_eqnum_moves_to_the_start() -> None:
+    """A label beside an equation formula moves to the first content line."""
+    source = "\\begin{equation}\n  x=1 \\label{eq:x}\n\\end{equation}"
+
+    assert transform_text(source) == (
+        "\\begin{equation}\n\\label{eq:x}\n  x=1\n\\end{equation}"
+    )
+
+
+def test_align_label_moves_to_a_line_after_its_row_terminator() -> None:
+    """An align label is separate from its row and follows that row's terminator."""
     source = "\\begin{align}\n  a&=b \\eqnum\\label{eq:a}\\\\\n  c&=d\n\\end{align}"
 
     assert transform_text(source) == (
-        "\\begin{align}\n  a&=b \\eqnum \\label{eq:a}\\\\\n  c&=d\n\\end{align}"
+        "\\begin{align}\n  a&=b \\\\\n\\eqnum \\label{eq:a}\n  c&=d\n\\end{align}"
+    )
+
+
+def test_align_label_without_eqnum_moves_to_a_line_after_its_row_terminator() -> None:
+    """A bare align label follows its row terminator on a line of its own."""
+    source = "\\begin{align}\n  a&=b \\label{eq:a}\\\\\n  c&=d\n\\end{align}"
+
+    assert transform_text(source) == (
+        "\\begin{align}\n  a&=b \\\\\n\\label{eq:a}\n  c&=d\n\\end{align}"
     )
 
 

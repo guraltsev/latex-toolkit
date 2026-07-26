@@ -1,10 +1,10 @@
 # eqnum_label
 
-Normalize adjacent `\eqnum\label{...}` pairs in display math. The command
-always writes one space between the macros. In `\[...\]`, `equation`, and
-`equation*` displays, a single pair that occupies its own source line is moved
-to the first content line. Pairs in multi-row environments remain in place,
-because their position can select a particular equation row.
+Normalize display-math label placement, with or without `\eqnum`. The command
+always writes one space in an adjacent `\eqnum\label{...}` pair. In `\[...]`,
+`equation`, and `equation*` displays, one label moves to the first content
+line. In `align`, `alignat`, and `flalign` variants, a label before a row
+terminator moves to its own line immediately after that `\\`.
 
 ## Usage
 
