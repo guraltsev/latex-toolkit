@@ -27,6 +27,20 @@ def test_scripted_macro_contains_its_complete_argument_expression() -> None:
     assert transform_text(r"$x^\frac12$") == r"$x^{\frac{1}{2}}$"
 
 
+def test_nameless_numeric_section_heading_stays_unbraced() -> None:
+    """A section number without a title remains outside an artificial group."""
+    source = "\\section 1\nBody."
+
+    assert transform_text(source) == source
+
+
+def test_empty_section_heading_receives_an_empty_group() -> None:
+    """A section command without a title is rendered with explicit empty braces."""
+    source = "\\section\nBody."
+
+    assert transform_text(source) == "\\section{}\nBody."
+
+
 def test_complete_document_preserves_preamble() -> None:
     """Only a complete document's body receives argument and script braces."""
     source = (

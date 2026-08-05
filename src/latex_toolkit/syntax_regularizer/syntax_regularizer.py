@@ -431,6 +431,11 @@ def _sectioning_end(source: str, start: int, macroname: str) -> int:
     """Return the end of a section macro's star, optional title, and title."""
     cursor = start + len(macroname) + 1
 
+    # A heading that ends at its line break has no title. Keep the line break
+    # adjacent to the control sequence so later bracing can render ``{}``.
+    if re.match(r"[ \t]*(?=(?:%[^\r\n]*)?(?:\r?\n|$))", source[cursor:]):
+        return cursor
+
     # Resolve the conventional syntax independently of parser macro specs;
     # pylatexenc does not declare title arguments for every sectioning level.
     while cursor < len(source) and source[cursor].isspace():
@@ -439,6 +444,8 @@ def _sectioning_end(source: str, start: int, macroname: str) -> int:
         cursor += 1
         while cursor < len(source) and source[cursor].isspace():
             cursor += 1
+        if re.match(r"(?=(?:%[^\r\n]*)?(?:\r?\n|$))", source[cursor:]):
+            return cursor
     if cursor < len(source) and source[cursor] == "[":
         optional_end = _balanced_group_end(source, cursor, "[", "]")
         if optional_end is None:
@@ -450,6 +457,13 @@ def _sectioning_end(source: str, start: int, macroname: str) -> int:
         title_end = _balanced_group_end(source, cursor, "{", "}")
         if title_end is not None:
             return title_end
+
+    # Some source uses a section number without a title. Keep that number in
+    # the heading block so later paragraph spacing follows it rather than the
+    # bare control sequence.
+    number = re.match(r"\d+", source[cursor:])
+    if number:
+        return cursor + number.end()
     return cursor
 
 

@@ -35,6 +35,20 @@ def test_full_normalize_attaches_section_labels_before_paragraph_spacing() -> No
     )
 
 
+def test_full_normalize_preserves_nameless_numeric_section_headings() -> None:
+    """A section number without a title does not become a braced empty heading."""
+    source = "\\subsection 2\nFirst sentence."
+
+    assert transform_text(source) == "\\subsection 2\n\nFirst sentence."
+
+
+def test_full_normalize_renders_empty_section_headings_with_empty_braces() -> None:
+    """A section command without a title receives an explicit empty title group."""
+    source = "\\section\nFirst sentence."
+
+    assert transform_text(source) == "\\section{}\n\nFirst sentence."
+
+
 def test_full_normalize_braces_parsed_arguments_and_math_scripts() -> None:
     """Macro arguments and math scripts are explicit in normalized output."""
     source = "  First with $\\mathcal A + x_1$. Second sentence."

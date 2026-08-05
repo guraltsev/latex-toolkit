@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,19 @@ CUSTOM_MACRO_ARGUMENT_SPECS = {
     "mf": "{",
     "ms": "{",
 }
+# A bare number after a sectioning command is a document-numbering convention,
+# not a title that this formatter should rewrite as a grouped argument.
+_SECTIONING_MACROS = frozenset(
+    {
+        "part",
+        "chapter",
+        "section",
+        "subsection",
+        "subsubsection",
+        "paragraph",
+        "subparagraph",
+    }
+)
 
 
 class ArgumentBracer:
@@ -92,12 +106,26 @@ class ArgumentBracer:
             parsed_arguments = getattr(node, "nodeargd", None)
             arguments = getattr(parsed_arguments, "argnlist", ()) or ()
             argument_specification = getattr(parsed_arguments, "argspec", "") or ""
+
+            # A section command on an otherwise empty line has no title.
+            # Add its explicit empty group without letting the tolerant parser
+            # mistake the following paragraph for that title.
+            empty_section_heading = self._is_empty_section_heading(node)
+            if empty_section_heading:
+                macro_end = self._control_sequence_end(node.pos, node.pos_end)
+                if self._source[macro_end : macro_end + 1] == "*":
+                    macro_end += 1
+                self._insertions.append((macro_end, 0, "{}"))
             for specification, argument in zip(argument_specification, arguments):
                 # Optional and star arguments have distinct TeX syntax and are
                 # intentionally preserved rather than converted to groups.
                 if specification != "{":
                     continue
+                if empty_section_heading:
+                    continue
                 if argument is not None and self._needs_braces(argument):
+                    if self._is_bare_section_number(node, argument):
+                        continue
                     argument_start = argument.pos
                     macro_end = self._control_sequence_end(
                         node.pos, argument.pos_end
@@ -197,6 +225,24 @@ class ArgumentBracer:
         if argument.pos is None or argument.pos_end is None:
             return False
         return self._source[argument.pos : argument.pos + 1] not in {"{", "["}
+
+    def _is_bare_section_number(self, node: Any, argument: Any) -> bool:
+        """Return whether an ungrouped sectioning argument consists only of a number."""
+        if getattr(node, "macroname", None) not in _SECTIONING_MACROS:
+            return False
+        macro_end = self._control_sequence_end(node.pos, argument.pos_end)
+        following_source = self._source[macro_end:]
+        pattern = r"[ \t\r\n]*\d+(?=[ \t]*(?:%[^\r\n]*)?(?:\r?\n|$))"
+        return re.match(pattern, following_source) is not None
+
+    def _is_empty_section_heading(self, node: Any) -> bool:
+        """Return whether a section command has no title before its line ends."""
+        if getattr(node, "macroname", None) not in _SECTIONING_MACROS:
+            return False
+        macro_end = self._control_sequence_end(node.pos, node.pos_end)
+        following_source = self._source[macro_end:]
+        pattern = r"(?:\*)?[ \t]*(?=(?:%[^\r\n]*)?(?:\r?\n|$))"
+        return re.match(pattern, following_source) is not None
 
     def _apply_insertions(self) -> str:
         """Render collected insertions without changing any original source span."""
