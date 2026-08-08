@@ -9,6 +9,7 @@ description = "Preservation-focused command-line transformations for LaTeX sourc
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "myst-parser>=4.0",
     "pylatexenc>=3.0a33",
     "pyperclip>=1.9",
     "snapper-fmt==0.7.9",
@@ -25,6 +26,14 @@ eqnum_label = "latex_toolkit.eqnum_label.eqnum_label:main"
 full_normalize = "latex_toolkit.full_normalize.full_normalize:main"
 greek_unicode2latex = "latex_toolkit.greek_unicode2latex.greek_unicode2latex:main"
 greek_latex2unicode = "latex_toolkit.greek_latex2unicode.greek_latex2unicode:main"
+mdt_full_normalize = "latex_toolkit.mdt_full_normalize.mdt_full_normalize:main"
+mdt_sentence_per_line = "latex_toolkit.mdt_sentence_per_line.mdt_sentence_per_line:main"
+mdt_syntax_regularizer = "latex_toolkit.mdt_syntax_regularizer.mdt_syntax_regularizer:main"
+mdt_math_latex2dollar = "latex_toolkit.mdt_math_latex2dollar.mdt_math_latex2dollar:main"
+mdt_math_dollar2latex = "latex_toolkit.mdt_math_dollar2latex.mdt_math_dollar2latex:main"
+mdt_brace_args = "latex_toolkit.mdt_brace_args.mdt_brace_args:main"
+mdt_greek_unicode2latex = "latex_toolkit.mdt_greek_unicode2latex.mdt_greek_unicode2latex:main"
+mdt_greek_latex2unicode = "latex_toolkit.mdt_greek_latex2unicode.mdt_greek_latex2unicode:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
