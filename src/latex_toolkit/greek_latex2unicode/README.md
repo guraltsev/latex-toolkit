@@ -1,12 +1,16 @@
 # greek_latex2unicode
 
-Convert conventional LaTeX Greek macros to Unicode symbols only in parsed math
-mode. This is the reverse of `greek_unicode2latex` and preserves prose,
-comments, and complete-document preambles.
+Convert conventional LaTeX Greek macros and selected common math macros to
+Unicode symbols only in parsed math mode. This is the reverse of
+`greek_unicode2latex` and preserves prose, comments, and complete-document
+preambles.
 
 ## Use Cases
 
 - Convert recognized Greek control words for Unicode-aware editing or analysis.
+- Convert canonical and alias spellings such as `\emptyset`/`\varnothing`,
+  `\setminus`/`\smallsetminus`, `\leq`/`\le`, `\wedge`/`\land`, and
+  `\to`/`\rightarrow`.
 - Reverse a `greek_unicode2latex` conversion.
 
 ## Usage

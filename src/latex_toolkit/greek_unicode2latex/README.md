@@ -1,12 +1,15 @@
 # greek_unicode2latex
 
-Convert Unicode Greek symbols to conventional LaTeX macros only in parsed math
-mode. Inline/display delimiters and common math environments are supported;
-prose, comments, and complete-document preambles are preserved.
+Convert Unicode Greek and selected common math symbols to conventional LaTeX
+macros only in parsed math mode. Inline/display delimiters and common math
+environments are supported; prose, comments, and complete-document preambles
+are preserved.
 
 ## Use Cases
 
 - Convert Unicode Greek symbols into conventional LaTeX math notation.
+- Canonicalize `∅`, `∖`, `≤`, `∧`, and `→` as `\emptyset`, `\setminus`,
+  `\leq`, `\wedge`, and `\to`.
 - Prepare formulas for workflows that expect LaTeX control words.
 
 ## Usage

@@ -1,4 +1,4 @@
-r"""This module converts Unicode Greek letters in LaTeX math to LaTeX macros.
+r"""Convert recognized Unicode math symbols in LaTeX math to LaTeX macros.
 
 The ``transform_text(...)`` API accepts fragments or complete documents, and
 ``main(...)`` supports file, clipboard, and standard-stream workflows. Only parsed
@@ -18,9 +18,9 @@ from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
-# This bijection is the shared source of truth for both conversion directions.
-# The two epsilon glyphs need distinct LaTeX macros to preserve their spelling.
-GREEK_UNICODE_TO_LATEX = {
+# Unicode input uses one canonical LaTeX spelling for each recognized symbol.
+# The two epsilon glyphs retain distinct macros to preserve their appearance.
+UNICODE_TO_LATEX = {
     "α": r"\alpha", "β": r"\beta", "γ": r"\gamma", "δ": r"\delta",
     "ε": r"\epsilon", "ζ": r"\zeta", "η": r"\eta", "θ": r"\theta",
     "ι": r"\iota", "κ": r"\kappa", "λ": r"\lambda", "μ": r"\mu", "ν": r"\nu",
@@ -30,7 +30,25 @@ GREEK_UNICODE_TO_LATEX = {
     "ς": r"\varsigma", "ϕ": r"\varphi", "ϰ": r"\varkappa", "Γ": r"\Gamma",
     "Δ": r"\Delta", "Θ": r"\Theta", "Λ": r"\Lambda", "Ξ": r"\Xi", "Π": r"\Pi",
     "Σ": r"\Sigma", "Υ": r"\Upsilon", "Φ": r"\Phi", "Ψ": r"\Psi", "Ω": r"\Omega",
+    "∅": r"\emptyset", "∖": r"\setminus", "≤": r"\leq", "∧": r"\wedge",
+    "→": r"\to",
 }
+
+# LaTeX input accepts conventional aliases even though Unicode input emits a
+# single canonical spelling. This direction is intentionally many-to-one.
+LATEX_TO_UNICODE = {
+    latex_macro.removeprefix("\\"): symbol
+    for symbol, latex_macro in UNICODE_TO_LATEX.items()
+}
+LATEX_TO_UNICODE.update(
+    {
+        "varnothing": "∅",
+        "smallsetminus": "∖",
+        "le": "≤",
+        "land": "∧",
+        "rightarrow": "→",
+    }
+)
 
 # Environments whose contents LaTeX typesets in math mode.
 MATH_ENVIRONMENTS = frozenset(
@@ -66,23 +84,23 @@ MATH_ENVIRONMENTS = frozenset(
 
 
 def transform_text(source: str, *, reverse: bool = False) -> str:
-    r"""Convert Greek letters or macros only where LaTeX is in math mode.
+    r"""Convert recognized math symbols only where LaTeX is in math mode.
 
-    Set ``reverse`` to turn recognized Greek control words back into their
-    Unicode symbols. Complete documents retain their preambles verbatim;
-    fragments are transformed throughout.
+    Set ``reverse`` to turn recognized control words, including supported
+    aliases, back into their Unicode symbols. Complete documents retain their
+    preambles verbatim; fragments are transformed throughout.
 
     Parameters
     ----------
     source : str
         LaTeX source in complete-document or fragment form.
     reverse : bool, optional
-        Convert recognized Greek macros to Unicode when true.
+        Convert recognized math macros to Unicode when true.
 
     Returns
     -------
     str
-        Source with recognized Greek notation converted in math mode only.
+        Source with recognized math notation converted in math mode only.
 
     Examples
     --------
@@ -113,7 +131,7 @@ def transform_text(source: str, *, reverse: bool = False) -> str:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run Unicode Greek to LaTeX conversion in a selected input mode.
+    """Run Unicode symbol to LaTeX conversion in a selected input mode.
 
     Parameters
     ----------
@@ -151,7 +169,7 @@ def _collect_math_edits(
     in_math: bool,
     edits: list[tuple[int, int, str]],
 ) -> None:
-    """Collect Greek source replacements from parser nodes in math scope."""
+    """Collect recognized symbol replacements from parser nodes in math scope."""
     for node in nodes:
         node_type = type(node).__name__
         node_in_math = (
@@ -167,7 +185,7 @@ def _collect_math_edits(
         # positions safe places to replace Unicode characters directly.
         if node_in_math and node_type == "LatexCharsNode" and not reverse:
             original = source[node.pos : node.pos_end]
-            converted = original.translate(str.maketrans(GREEK_UNICODE_TO_LATEX))
+            converted = original.translate(str.maketrans(UNICODE_TO_LATEX))
             if converted != original:
                 edits.append((node.pos, node.pos_end, converted))
 
@@ -175,17 +193,10 @@ def _collect_math_edits(
         # words such as ``\alphabeta`` cannot be mistaken for ``\alpha``.
         if node_in_math and node_type == "LatexMacroNode" and reverse:
             macro_name = getattr(node, "macroname", "")
-            unicode_letter = next(
-                (
-                    letter
-                    for letter, latex_macro in GREEK_UNICODE_TO_LATEX.items()
-                    if latex_macro == f"\\{macro_name}"
-                ),
-                None,
-            )
-            if unicode_letter is not None:
+            unicode_symbol = LATEX_TO_UNICODE.get(macro_name)
+            if unicode_symbol is not None:
                 end = node.pos + len(macro_name) + 1
-                edits.append((node.pos, end, unicode_letter))
+                edits.append((node.pos, end, unicode_symbol))
 
         children = getattr(node, "nodelist", ()) or ()
         _collect_math_edits(
@@ -249,9 +260,9 @@ def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
 def _build_parser(reverse: bool) -> argparse.ArgumentParser:
     """Build the command-line parser for one conversion direction."""
     direction = (
-        "LaTeX Greek macros to Unicode symbols"
+        "recognized LaTeX math macros to Unicode symbols"
         if reverse
-        else "Unicode Greek symbols to LaTeX macros"
+        else "recognized Unicode math symbols to LaTeX macros"
     )
     parser = argparse.ArgumentParser(description=f"Convert {direction} in math mode.")
     parser.add_argument("input_file", nargs="?", type=Path, help="UTF-8 LaTeX file")

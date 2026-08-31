@@ -1,9 +1,12 @@
-"""Convert Unicode Greek symbols only inside MyST Markdown TeX math."""
+"""Convert recognized Unicode symbols inside MyST Markdown TeX math."""
+
 from collections.abc import Sequence
+
 from latex_toolkit.lib.markdown import greek_unicode_to_latex_text, run_command
 
+
 def transform_text(source: str) -> str:
-    """Convert Unicode Greek symbols only inside Markdown math spans.
+    """Convert recognized Unicode symbols only inside Markdown math spans.
 
     Parameters
     ----------
@@ -17,6 +20,11 @@ def transform_text(source: str) -> str:
     """
     return greek_unicode_to_latex_text(source)
 
+
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run Markdown Unicode Greek conversion in a selected input mode."""
-    return run_command(argv, transform=transform_text, description="Convert Unicode Greek symbols inside Markdown math.")
+    """Run Markdown Unicode symbol conversion in a selected input mode."""
+    return run_command(
+        argv,
+        transform=transform_text,
+        description="Convert recognized Unicode math symbols inside Markdown math.",
+    )

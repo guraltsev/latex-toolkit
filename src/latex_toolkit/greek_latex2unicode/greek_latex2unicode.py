@@ -1,4 +1,4 @@
-r"""This module converts LaTeX Greek macros in math to Unicode Greek letters.
+r"""Convert recognized LaTeX math macros in math to Unicode symbols.
 
 The ``transform_text(...)`` API supports in-memory conversion and ``main(...)``
 supports file, clipboard, and standard-stream workflows. Only recognized macros in
@@ -15,7 +15,7 @@ from latex_toolkit.greek_unicode2latex.greek_unicode2latex import transform_text
 
 
 def transform_text(source: str) -> str:
-    r"""Convert recognized LaTeX Greek macros to Unicode in math mode.
+    r"""Convert recognized LaTeX math macros to Unicode in math mode.
 
     Parameters
     ----------
@@ -25,13 +25,13 @@ def transform_text(source: str) -> str:
     Returns
     -------
     str
-        Source with recognized Greek macros replaced in math mode only.
+        Source with recognized math macros replaced in math mode only.
     """
     return _transform_text(source, reverse=True)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run LaTeX Greek to Unicode conversion in a selected input mode.
+    """Run LaTeX math macro to Unicode conversion in a selected input mode.
 
     Parameters
     ----------

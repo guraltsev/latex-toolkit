@@ -1,4 +1,4 @@
-"""This package converts LaTeX Greek macros in math to Unicode Greek letters."""
+"""Convert recognized LaTeX math macros to Unicode symbols."""
 
 from .greek_latex2unicode import main, transform_text
 

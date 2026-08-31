@@ -1,4 +1,4 @@
-r"""Protect Greek notation conversion within parsed LaTeX math.
+r"""Protect recognized notation conversion within parsed LaTeX math.
 
 The tests exercise both public text APIs and real LaTeX parsing. File,
 clipboard, and standard-stream command boundaries are covered elsewhere.
@@ -29,6 +29,17 @@ def test_epsilon_variants_round_trip_with_distinct_latex_macros() -> None:
     """Each Unicode epsilon variant retains its distinct spelling through conversion."""
     assert unicode_to_macros("$ε + ϵ$") == r"$\epsilon + \varepsilon$"
     assert macros_to_unicode(r"$\epsilon + \varepsilon$") == "$ε + ϵ$"
+
+
+def test_common_math_symbols_emit_canonical_macros_and_accept_aliases() -> None:
+    """Common math symbols use canonical macros while their aliases also decode."""
+    assert unicode_to_macros("$∅ ∖ ≤ ∧ →$") == (
+        r"$\emptyset \setminus \leq \wedge \to$"
+    )
+    assert macros_to_unicode(
+        r"$\emptyset \varnothing \setminus \smallsetminus "
+        r"\leq \le \wedge \land \to \rightarrow$"
+    ) == "$∅ ∅ ∖ ∖ ≤ ≤ ∧ ∧ → →$"
 
 
 def test_complete_documents_preserve_the_preamble() -> None:

@@ -144,12 +144,12 @@ def brace_math_text(source: str) -> str:
 
 
 def greek_unicode_to_latex_text(source: str) -> str:
-    """Convert Unicode Greek letters to LaTeX only inside Markdown math spans."""
+    """Convert recognized Unicode symbols only inside Markdown math spans."""
     return _transform_math(source, "greek_to_latex")
 
 
 def greek_latex_to_unicode_text(source: str) -> str:
-    """Convert recognized Greek LaTeX macros only inside Markdown math spans."""
+    """Convert recognized LaTeX math macros only inside Markdown math spans."""
     return _transform_math(source, "greek_to_unicode")
 
 
