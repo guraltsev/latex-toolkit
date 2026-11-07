@@ -19,7 +19,11 @@ Run `setup.cmd` to create `.venv` from the `python` on `PATH` and
 install the package and its dependencies into it (with `uv` when available,
 otherwise with `venv` and `pip`). Commands never install dependencies at
 runtime. The `src\lt_*.cmd` and `src\mdt_*.cmd` wrappers run with
-`.venv\Scripts\python.exe` when it exists. Inside the activated
+`.venv\Scripts\python.exe` when it exists. The `src\lt_*.py` and `src\mdt_*.py`
+scripts run a command with whichever Python starts them, for example
+`python src\lt_full_normalize.py main.tex`: the toolkit loads from `src`, so that
+Python needs only the dependencies, not the toolkit installed, and paths stay
+relative to the current folder. Inside the activated
 environment, run a command with `python -m latex_toolkit.<command_name>` or
 the matching underscore-named console command, such as `full_normalize`. Each command
 package has a local README with its usage, behavior, and Python API.
