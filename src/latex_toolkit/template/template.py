@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any
 from typing import TYPE_CHECKING
 
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
@@ -106,7 +105,6 @@ def transform_text(source: str) -> str:
     '\\begin{document}\\textbf{Important}\\end{document}'
     """
 
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes import LatexNodesLatexRecomposer
     from pylatexenc.latexnodes.nodes import LatexEnvironmentNode
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
@@ -184,14 +182,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-# Keep only the template's dependency declarations at its command boundary.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-
 def _build_parser() -> argparse.ArgumentParser:
     """Build the command-line interface shared by direct and module execution."""
     parser = argparse.ArgumentParser(
@@ -268,7 +258,7 @@ def _process_clipboard() -> None:
     """Transform nonempty clipboard text and copy the result back."""
     # Delay clipboard installation and import until the user selects that
     # boundary; ordinary text and file transformations do not need it.
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
 
     source = pyperclip.paste()
     if not source.strip():

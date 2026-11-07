@@ -20,7 +20,6 @@ from ..brace_args import transform_text as brace_arguments
 from ..math_dollar2latex import transform_text as convert_math_delimiters
 from ..syntax_regularizer import transform_text as regularize_syntax
 from ..eqnum_label import transform_text as normalize_eqnum_labels
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
@@ -177,10 +176,6 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# Keep only this command's dependency declarations at its external boundary.
-RUNTIME_DEPENDENCIES = DependencyManager({"pyperclip": "pyperclip>=1.9"})
-
-
 def _default_output_path(input_path: Path) -> Path:
     """Return a sibling path marked as fully normalized."""
     suffix = input_path.suffix or ".tex"
@@ -190,7 +185,7 @@ def _default_output_path(input_path: Path) -> Path:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
 
     source = pyperclip.paste()
     if not source.strip():

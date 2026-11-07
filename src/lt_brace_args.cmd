@@ -1,4 +1,7 @@
 @echo off
+setlocal
+set "PYTHON=%~dp0..\.venv\Scripts\python.exe"
+if not exist "%PYTHON%" set "PYTHON=python"
 set "PYTHONPATH=%~dp0;%PYTHONPATH%"
-python -m latex_toolkit.brace_args %*
+"%PYTHON%" -m latex_toolkit.brace_args %*
 exit /b %errorlevel%

@@ -13,7 +13,6 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
@@ -137,7 +136,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when node spans are incomplete."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
@@ -198,15 +196,6 @@ def _collect_delimiter_edits(
 
 
 # Dependency and command boundaries
-
-
-# Keep only this command's dependency declarations near its command boundary.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
 
 
 def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
@@ -280,7 +269,7 @@ def _default_output_path(input_path: Path, reverse: bool) -> Path:
 
 def _transform_clipboard(reverse: bool) -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
     source = pyperclip.paste()
     if not source.strip():
         print("Clipboard is empty; nothing was changed.")

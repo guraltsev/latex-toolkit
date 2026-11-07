@@ -1,4 +1,7 @@
 @echo off
+setlocal
+set "PYTHON=%~dp0..\.venv\Scripts\python.exe"
+if not exist "%PYTHON%" set "PYTHON=python"
 set "PYTHONPATH=%~dp0;%PYTHONPATH%"
-python -m latex_toolkit.greek_unicode2latex %*
+"%PYTHON%" -m latex_toolkit.greek_unicode2latex %*
 exit /b %errorlevel%

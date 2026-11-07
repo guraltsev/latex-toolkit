@@ -15,7 +15,6 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
 
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
@@ -177,7 +176,6 @@ _ENVIRONMENT_REQUIRED_ARGUMENTS = {
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when it has unsafe incomplete nodes."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
@@ -585,15 +583,6 @@ def _protected_ranges(nodes: Iterable[Any]) -> tuple[tuple[int, int], ...]:
 # Dependency and command boundaries
 
 
-# Keep only this command's dependency declarations at its external boundary.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-
-
 def _build_parser() -> argparse.ArgumentParser:
     """Build the interface for file, clipboard, and standard-stream workflows."""
     parser = argparse.ArgumentParser(description="Regularize LaTeX source layout.")
@@ -631,7 +620,7 @@ def _default_output_path(input_path: Path) -> Path:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
     source = pyperclip.paste()
     if not source.strip():
         print("Clipboard is empty; nothing was changed.")

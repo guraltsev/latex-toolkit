@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
 import subprocess
 import sys
 from collections.abc import Iterable, Sequence
@@ -16,7 +17,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
@@ -41,17 +41,6 @@ class _Replacement:
     end: int
     text: str
     kind: str
-
-
-# Keep parser, clipboard, and formatter installation at the command boundary
-# so importing the text API does not perform external setup.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-        "snapper": "snapper-fmt==0.7.9",
-    }
-)
 
 
 # These environments own source layout or non-prose structure in the initial
@@ -256,7 +245,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when pylatexenc reports incomplete input."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker, get_default_latex_context_db
     from pylatexenc.macrospec import MacroSpec
@@ -724,7 +712,23 @@ def _run_snapper(source: str) -> str:
 
 def _find_snapper() -> Path:
     """Locate the executable installed by the pinned snapper-fmt distribution."""
-    return RUNTIME_DEPENDENCIES.require_executable("snapper")
+    # Prefer the interpreter's own scripts directory so an unactivated
+    # environment still finds the snapper installed alongside this package.
+    scripts = Path(sys.executable).parent
+    candidates = (
+        scripts / "snapper.exe",
+        scripts / "snapper",
+        scripts / "Scripts" / "snapper.exe",
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    located = shutil.which("snapper")
+    if located is None:
+        raise RuntimeError(
+            "snapper is unavailable; install the toolkit environment with setup.cmd"
+        )
+    return Path(located)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -766,7 +770,7 @@ def _default_output_path(input_path: Path) -> Path:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
 
     source = pyperclip.paste()
     if not source.strip():

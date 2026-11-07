@@ -29,15 +29,7 @@ from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
 
 from latex_toolkit.lib.backup import backup_file
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
-
-
-# MyST is the syntax authority for all Markdown commands.  The source scanner
-# below deliberately has a narrower edit policy than the parser's full dialect.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {"myst_parser": "myst-parser>=4.0", "pyperclip": "pyperclip>=1.9"}
-)
 
 
 def regularize_text(source: str) -> str:
@@ -183,7 +175,7 @@ def run_command(
         sys.stdout.write(transform(sys.stdin.read()))
         return 0
     if args.clipboard:
-        pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+        import pyperclip
         source = pyperclip.paste()
         if not source.strip():
             print("Clipboard is empty; nothing was changed.")
@@ -310,7 +302,6 @@ def _replace_outside_inline(source: str, transform: Callable[[str], str]) -> str
 
 def _parse_myst(source: str) -> None:
     """Validate source through the configured MyST parser before editing it."""
-    RUNTIME_DEPENDENCIES.require("myst_parser")
     # Configure only the extensions this command family declares: TeX math
     # plus GFM strikethrough and task lists.  The source renderer keeps tables
     # opaque, so their syntax is never reconstructed from parser tokens.

@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from latex_toolkit.lib.backup import backup_file
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
@@ -153,7 +152,6 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _parse(source: str) -> Any:
     """Parse source into nodes whose spans define safe edits."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
@@ -221,16 +219,6 @@ def _apply_edits(source: str, edits: list[tuple[int, int, str]]) -> str:
     return source
 
 
-# Keep parser and clipboard installation at the command boundary so text-only
-# callers do not import optional runtime modules eagerly.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-
-
 def _run_command(argv: Sequence[str] | None, *, reverse: bool) -> int:
     """Run one conversion direction in file, clipboard, or stream mode."""
     parser = _build_parser(reverse)
@@ -282,7 +270,7 @@ def _process_file(input_path: Path, output_path: Path, *, reverse: bool) -> Path
 
 def _transform_clipboard(reverse: bool) -> None:
     """Transform nonempty clipboard source and return it to the clipboard."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
     source = pyperclip.paste()
     if not source.strip():
         print("Clipboard is empty; nothing was changed.")

@@ -28,7 +28,6 @@ from pathlib import Path
 from typing import Any
 
 from latex_toolkit.lib.backup import backup_file
-from latex_toolkit.lib.dependencies import DependencyManager
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
 
 
@@ -230,7 +229,6 @@ def _newline(source: str) -> str:
 
 def _parse(source: str) -> Any | None:
     """Parse source, returning ``None`` when parser spans are unsafe."""
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker
 
@@ -275,14 +273,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-
-
 def _build_parser() -> argparse.ArgumentParser:
     """Build the interface for file, clipboard, and standard-stream workflows."""
     parser = argparse.ArgumentParser(description="Normalize \\eqnum equation labels.")
@@ -301,7 +291,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _transform_clipboard() -> None:
     """Transform nonempty clipboard text and copy it back only on success."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
     source = pyperclip.paste()
     if not source.strip():
         print("Clipboard is empty; nothing was changed.")

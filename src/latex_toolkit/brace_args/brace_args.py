@@ -18,7 +18,6 @@ from typing import Any
 
 from latex_toolkit.lib.backup import backup_file
 from latex_toolkit.lib.streams import configure_utf8_standard_streams
-from latex_toolkit.lib.dependencies import DependencyManager
 
 
 # Project shorthand commands that take one mandatory LaTeX argument. Keeping
@@ -287,7 +286,6 @@ def transform_text(source: str) -> str:
     if not source:
         return source
 
-    RUNTIME_DEPENDENCIES.require("pylatexenc.latexnodes.parsers")
     from pylatexenc.latexnodes.parsers import LatexGeneralNodesParser
     from pylatexenc.latexwalker import LatexWalker, get_default_latex_context_db
     from pylatexenc.macrospec import MacroSpec
@@ -370,16 +368,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
-# Keep parser and clipboard installation at the command boundary so text-only
-# callers do not import optional runtime modules eagerly.
-RUNTIME_DEPENDENCIES = DependencyManager(
-    {
-        "pylatexenc.latexnodes.parsers": "pylatexenc>=3.0a33",
-        "pyperclip": "pyperclip>=1.9",
-    }
-)
-
-
 def _build_parser() -> argparse.ArgumentParser:
     """Build the argument-bracing command-line interface."""
     parser = argparse.ArgumentParser(
@@ -414,7 +402,7 @@ def _process_file(input_path: Path, output_path: Path) -> Path:
 
 def _process_clipboard() -> None:
     """Transform nonempty clipboard text and copy the result back."""
-    pyperclip = RUNTIME_DEPENDENCIES.require("pyperclip")
+    import pyperclip
     source = pyperclip.paste()
     if not source.strip():
         print("Clipboard is empty; nothing was changed.")

@@ -27,8 +27,6 @@ The current intentional shared library modules are:
 - `latex_parser`: tokenization and document-region primitives used by command
   transforms.
 - `logging_config`: command execution wrappers and logging setup.
-- `dependencies`: runtime module and executable dependency loading shared by
-  commands that need optional external tools.
 
 The `src/latex_toolkit/lib/snapper-fmt/` directory is not shared toolkit
 source. It is the ignored repository-local install prefix for the external
